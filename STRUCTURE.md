@@ -76,6 +76,7 @@ app/src/main/java/com/example/
 │   ├── VariableResolverHelper.kt # Motor de interpolación de variables del sistema en tiempo real
 │   └── handlers/                 # Manejadores de acciones modulares individuales
 │       ├── ActionHandler.kt              # Interfaz base con contrato de ejecución y release
+│       ├── HttpRequestActionHandler.kt   # Peticiones HTTP y Webhooks (GET, POST, PUT, DELETE) con variables dinámicas
 │       ├── AppLauncherActionHandler.kt   # Lanzador directo de juegos y aplicaciones instaladas
 │       ├── CameraActionHandler.kt        # Lanzador nativo de cámara (Foto trasera, Selfie frontal, Vídeo)
 │       ├── BrightnessActionHandler.kt    # Control y ajuste de brillo de pantalla del sistema (WRITE_SETTINGS)
@@ -101,6 +102,7 @@ app/src/main/java/com/example/
     │   │
     │   ├── actioninputs/         # Submódulos de parametrización por tipo de acción
     │   │   ├── AppLauncherInputSection.kt # Selector y visualizador de juego/app configurado
+    │   │   ├── HttpRequestInputSection.kt # Peticiones Web / Webhooks (GET, POST, Body y variables)
     │   │   ├── CameraInputSection.kt      # Selector de modo de cámara (Foto, Selfie, Vídeo) y transparencia
     │   │   ├── BrightnessInputSection.kt  # Controles de brillo (+20%, -20%, presets y slider porcentual)
     │   │   ├── VolumeInputSection.kt      # Controles de volumen para multimedia, llamadas y alertas

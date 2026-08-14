@@ -56,7 +56,7 @@ fun AddActionBottomSheet(
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Todas") }
 
-    val categories = listOf("Todas", "Aplicaciones y Juegos", "Dispositivo", "Sistema y Audio", "Comunicación", "Navegación", "Productividad", "Utilidades", "Scripting", "Alertas")
+    val categories = listOf("Todas", "Internet y Web", "Aplicaciones y Juegos", "Dispositivo", "Sistema y Audio", "Comunicación", "Navegación", "Productividad", "Utilidades", "Scripting", "Alertas")
 
     val allActions = remember { ActionType.values().toList() }
 

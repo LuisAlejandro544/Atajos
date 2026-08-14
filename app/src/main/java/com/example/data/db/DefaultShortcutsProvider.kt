@@ -175,6 +175,58 @@ object DefaultShortcutsProvider {
     fun getGalleryTemplates(): List<ShortcutEntity> {
         return listOf(
             ShortcutEntity(
+                title = "🌐 Consultar API Web y Pronunciar",
+                description = "Obtiene datos en vivo de una API pública o URL y lee el resultado con Text-To-Speech",
+                colorHex = "#0EA5E9",
+                iconKey = "http",
+                category = "Internet y Web",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.HTTP_REQUEST,
+                            title = "Obtener Frase Zen (API GitHub)",
+                            param1 = "https://api.github.com/zen",
+                            param2 = "GET"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SPEAK_TEXT,
+                            title = "Leer Respuesta Web",
+                            param1 = "Frase del día: {RESPUESTA_WEB}"
+                        )
+                    )
+                )
+            ),
+            ShortcutEntity(
+                title = "🚀 Disparar Webhook con Telemetría",
+                description = "Envía una petición POST con nivel de batería y hora actual hacia un webhook",
+                colorHex = "#6366F1",
+                iconKey = "http",
+                category = "Internet y Web",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.HTTP_REQUEST,
+                            title = "Enviar Webhook POST",
+                            param1 = "https://httpbin.org/post",
+                            param2 = "POST",
+                            param3 = "{\"evento\": \"inicio_jornada\", \"bateria\": \"{BATERIA}\", \"hora\": \"{HORA}\"}"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.VIBRATE,
+                            title = "Confirmación Háptica",
+                            param1 = "100",
+                            param2 = "click"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SHOW_NOTIFICATION,
+                            title = "Webhook Enviado",
+                            param1 = "Petición Web Completada",
+                            param2 = "Estado: HTTP {HTTP_STATUS}"
+                        )
+                    )
+                )
+            ),
+            ShortcutEntity(
                 title = "📢 Notificar y Leer en Voz Alta",
                 description = "Muestra una notificación personalizada y el sintetizador de voz la lee de inmediato",
                 colorHex = "#4F46E5",

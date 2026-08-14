@@ -13,6 +13,7 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
   - **Lectura Inteligente de Notificaciones**: Enlace directo entre notificaciones previas y síntesis de voz mediante `{ULTIMA_NOTIFICACION}` y `{NOTIFICACION_TITULO}`.
   - **Ajuste de Brillo de Pantalla**: Control de luminosidad (`WRITE_SETTINGS`) con presets (+20%, -20%, 10%, 50%, 100%) y slider porcentual continuo.
   - **Gestión Integral de Sonido y Volumen**: Control para canales Multimedia, Notificaciones, Tono de llamada y Alarma (Subir, Bajar, Silenciar o nivel exacto).
+  - **Solicitudes Web y Webhooks ("Obtener contenido de URL")**: Peticiones HTTP (`GET`, `POST`, `PUT`, `DELETE`) inspiradas en iOS Shortcuts con variables dinámicas en URL/Body y persistencia de resultados en `{RESPUESTA_WEB}` y `{HTTP_STATUS}`.
   - **Apertura Directa de Cámara**: Acciones dedicadas para Foto estándar (trasera), Selfie (frontal) y Grabación de vídeo.
   - **Claridad y Transparencia en Permisos**: Información explícita en banners y UI sobre el uso local de la cámara y notificaciones sin subida de datos externos.
   - **Variables Dinámicas del Sistema**: Interpolación en vivo de `{HORA}`, `{FECHA}`, `{DIA_SEMANA}`, `{BATERIA}`, `{ESTADO_BATERIA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}`, `{ULTIMA_NOTIFICACION}`, `{NOTIFICACION_TITULO}` en Texto a Voz, Notificaciones, SMS, WhatsApp y Compartir.

@@ -26,6 +26,7 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 3. **`ActionType`** (`data/model/ActionType.kt`):
    - Tipos soportados:
      - `LAUNCH_APP`: Iniciar juego o aplicación instalada. `param1`: `packageName`, `param2`: `appName`.
+     - `HTTP_REQUEST`: Peticiones HTTP y Webhooks (GET, POST, PUT, DELETE) con variables en URL y Body. `param1`: URL, `param2`: método, `param3`: cuerpo JSON/texto. Almacena la respuesta en `{RESPUESTA_WEB}` y el código en `{HTTP_STATUS}`.
      - `SET_BRIGHTNESS`: Control de brillo de pantalla (`WRITE_SETTINGS`). `param1`: porcentaje "0"-"100" o acción "increase" / "decrease".
      - `SET_VOLUME`: Control de volumen de audio. `param1`: canal ("music", "notification", "ring", "alarm"), `param2`: nivel ("0"-"100", "raise", "lower", "mute", "max").
      - `OPEN_CAMERA`: Apertura directa de la cámara nativa en modo Foto, Selfie o Grabación de Vídeo. `param1`: modo ("photo", "selfie", "video"), `param2`: lente ("back", "front", "video").
@@ -57,6 +58,7 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 2. **`VariableResolverHelper`**: Interpola variables del sistema en tiempo real (`{HORA}`, `{FECHA}`, `{DIA_SEMANA}`, `{BATERIA}`, `{ESTADO_BATERIA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}`) para personalizar textos de voz, notificaciones y mensajería.
 3. **`AppShortcutsHelper`**: Sincroniza dinámicamente los atajos favoritos con el launcher de Android mediante `ShortcutManagerCompat` para ejecución directa desde el icono de la app.
 4. **`ActionHandler`** (`engine/handlers/`):
+   - `HttpRequestActionHandler`: Peticiones HTTP seguras en segundo plano (`Dispatchers.IO`), con resolución de variables en URL y Body, timeouts y caching de respuestas en `{RESPUESTA_WEB}` y `{HTTP_STATUS}`.
    - `AppLauncherActionHandler`: Lanza intents de apps instaladas de forma segura.
    - `BrightnessActionHandler`: Ajuste de brillo con verificación de permisos `WRITE_SETTINGS` y fallback contextual.
    - `VolumeActionHandler`: Ajuste seguro de volumen por canal (AudioManager) con modos subir, bajar, silenciar o porcentaje.

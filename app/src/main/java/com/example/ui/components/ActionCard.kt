@@ -38,6 +38,7 @@ import com.example.ui.components.actioninputs.AppLauncherInputSection
 import com.example.ui.components.actioninputs.BrightnessInputSection
 import com.example.ui.components.actioninputs.CameraInputSection
 import com.example.ui.components.actioninputs.FlashlightInputSection
+import com.example.ui.components.actioninputs.HttpRequestInputSection
 import com.example.ui.components.actioninputs.MessagingInputSection
 import com.example.ui.components.actioninputs.NotificationInputSection
 import com.example.ui.components.actioninputs.TtsInputSection
@@ -216,6 +217,10 @@ fun ActionCard(
 
                 ActionType.OPEN_CAMERA -> {
                     CameraInputSection(action = action, onUpdate = onUpdate)
+                }
+
+                ActionType.HTTP_REQUEST -> {
+                    HttpRequestInputSection(action = action, onUpdate = onUpdate)
                 }
             }
         }

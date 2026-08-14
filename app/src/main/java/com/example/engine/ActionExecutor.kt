@@ -8,6 +8,7 @@ import com.example.engine.handlers.AppLauncherActionHandler
 import com.example.engine.handlers.BrightnessActionHandler
 import com.example.engine.handlers.CameraActionHandler
 import com.example.engine.handlers.FlashlightActionHandler
+import com.example.engine.handlers.HttpRequestActionHandler
 import com.example.engine.handlers.NotificationActionHandler
 import com.example.engine.handlers.SystemIntentsActionHandler
 import com.example.engine.handlers.TtsActionHandler
@@ -53,7 +54,8 @@ class ActionExecutor(context: Context) {
         AppLauncherActionHandler(context),
         BrightnessActionHandler(context),
         VolumeActionHandler(context),
-        CameraActionHandler(context)
+        CameraActionHandler(context),
+        HttpRequestActionHandler(context)
     )
 
     private val handlerMap: Map<ActionType, ActionHandler> = buildMap {

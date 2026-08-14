@@ -107,6 +107,12 @@ enum class ActionType(
         categoryName = "Dispositivo",
         description = "Abre directamente la cámara en modo Foto, Selfie o Grabación de Vídeo",
         iconKey = "camera_alt"
+    ),
+    HTTP_REQUEST(
+        displayName = "Petición Web / Webhook",
+        categoryName = "Internet y Web",
+        description = "Obtener contenido de URL, APIs REST o disparar webhooks (GET / POST)",
+        iconKey = "http"
     )
 }
 

@@ -1,10 +1,8 @@
-feat: lectura de notificaciones por voz, control de brillo y volumen del sistema, y apertura directa de cámara
+feat: solicitudes web y webhooks estilo iOS Shortcuts (GET/POST/APIs) con variables dinámicas
 
-- Implementar acción de apertura directa de cámara (OPEN_CAMERA) con modos para Foto estándar (trasera), Selfie (frontal) y Grabación de Vídeo mediante CameraActionHandler y CameraInputSection.
-- Añadir claridad y transparencia sobre permisos en la interfaz con mensajes claros y tranquilizadores (100% offline y privado).
-- Implementar lectura inteligente de notificaciones previas en Text-To-Speech mediante las nuevas variables dinámicas {ULTIMA_NOTIFICACION} y {NOTIFICACION_TITULO}, con botón de inserción directa y caching de notificaciones en VariableResolverHelper.
-- Añadir acción de control de brillo de pantalla (SET_BRIGHTNESS) con soporte para subir (+20%), bajar (-20%), niveles predefinidos (10%, 50%, 100%) y ajuste porcentual exacto mediante BrightnessActionHandler y BrightnessInputSection.
-- Añadir acción de control de volumen y sonido (SET_VOLUME) con soporte independiente para canales Multimedia, Tono de llamada, Notificaciones y Alarma (subir, bajar, silenciar o porcentaje exacto) mediante VolumeActionHandler y VolumeInputSection.
-- Registrar el permiso WRITE_SETTINGS en AndroidManifest.xml con redirección inteligente y control de excepciones seguro.
-- Añadir nuevas plantillas en DefaultShortcutsProvider para lectura por voz de notificaciones, modo noche con reducción de brillo y volumen, y cámara rápida con linterna / selfie instantánea.
+- Implementar acción HTTP_REQUEST para realizar peticiones HTTP y Webhooks nativos (GET, POST, PUT, DELETE) en segundo plano (Dispatchers.IO) mediante HttpRequestActionHandler y HttpRequestInputSection.
+- Añadir interpolación de variables dinámicas del sistema ({HORA}, {BATERIA}, etc.) en la URL y en el cuerpo JSON de la petición.
+- Implementar persistencia y resolución en tiempo de ejecución de las nuevas variables dinámicas {RESPUESTA_WEB} y {HTTP_STATUS} en VariableResolverHelper para encadenar respuestas con voz, notificaciones o portapapeles.
+- Añadir selector visual con chips de métodos HTTP, variables rápidas y avisos de encadenamiento de respuestas.
+- Añadir nuevas plantillas de galería en DefaultShortcutsProvider para consulta en vivo de APIs REST con Text-To-Speech y disparo de Webhooks con telemetría de batería.
 - Actualizar documentación técnica en README.md, ROADMAP.md, STRUCTURE.md y AI_CONTEXT.md.

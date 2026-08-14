@@ -43,6 +43,8 @@ object IconHelper {
         "sms" to Icons.Default.Sms,
         "search" to Icons.Default.Search,
         "language" to Icons.Default.Language,
+        "http" to Icons.Default.Language,
+        "webhook" to Icons.Default.Language,
         "timer" to Icons.Default.Timer,
         "alarm" to Icons.Default.Alarm,
         "content_copy" to Icons.Default.ContentCopy,

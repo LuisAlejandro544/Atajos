@@ -76,6 +76,18 @@ object VariableResolverHelper {
             previewValue = "Aviso"
         ),
         SystemVariable(
+            tag = "{RESPUESTA_WEB}",
+            label = "Respuesta de petición web / API",
+            iconName = "http",
+            previewValue = "{\"status\": \"ok\"}"
+        ),
+        SystemVariable(
+            tag = "{HTTP_STATUS}",
+            label = "Código de estado HTTP",
+            iconName = "language",
+            previewValue = "200"
+        ),
+        SystemVariable(
             tag = "{DISPOSITIVO}",
             label = "Modelo de teléfono",
             iconName = "smartphone",
@@ -150,7 +162,28 @@ object VariableResolverHelper {
             resolved = resolved.replace("(?i)\\{PORTAPAPELES\\}".toRegex(), clipboardText)
         }
 
-        // 6. Dispositivo ({DISPOSITIVO})
+        // 6. Respuesta Web / Webhook ({RESPUESTA_WEB}, {ULTIMA_RESPUESTA_WEB}, {HTTP_STATUS})
+        if (resolved.contains("{RESPUESTA_WEB}", ignoreCase = true) ||
+            resolved.contains("{ULTIMA_RESPUESTA_WEB}", ignoreCase = true) ||
+            resolved.contains("{RESPUESTA_HTTP}", ignoreCase = true)
+        ) {
+            val webResponse = getCachedWebResponse(context)
+            resolved = resolved
+                .replace("(?i)\\{RESPUESTA_WEB\\}".toRegex(), webResponse)
+                .replace("(?i)\\{ULTIMA_RESPUESTA_WEB\\}".toRegex(), webResponse)
+                .replace("(?i)\\{RESPUESTA_HTTP\\}".toRegex(), webResponse)
+        }
+
+        if (resolved.contains("{HTTP_STATUS}", ignoreCase = true) ||
+            resolved.contains("{ESTADO_HTTP}", ignoreCase = true)
+        ) {
+            val httpStatus = getCachedHttpStatus(context)
+            resolved = resolved
+                .replace("(?i)\\{HTTP_STATUS\\}".toRegex(), httpStatus)
+                .replace("(?i)\\{ESTADO_HTTP\\}".toRegex(), httpStatus)
+        }
+
+        // 7. Dispositivo ({DISPOSITIVO})
         if (resolved.contains("{DISPOSITIVO}", ignoreCase = true)) {
             val deviceName = "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}"
             resolved = resolved.replace("(?i)\\{DISPOSITIVO\\}".toRegex(), deviceName)
@@ -197,6 +230,8 @@ object VariableResolverHelper {
 
     private var cachedLastNotificationBody: String = "Es la hora de jugar"
     private var cachedLastNotificationTitle: String = "Aviso de Atajos"
+    private var cachedLastWebResponse: String = "{\"status\": \"success\"}"
+    private var cachedLastHttpStatus: String = "200"
 
     fun saveLastNotification(title: String, body: String) {
         if (title.isNotBlank()) cachedLastNotificationTitle = title
@@ -206,4 +241,13 @@ object VariableResolverHelper {
     fun getCachedNotification(context: Context): String = cachedLastNotificationBody
 
     fun getCachedNotificationTitle(context: Context): String = cachedLastNotificationTitle
+
+    fun saveLastWebResponse(response: String, status: String = "200") {
+        if (response.isNotBlank()) cachedLastWebResponse = response
+        if (status.isNotBlank()) cachedLastHttpStatus = status
+    }
+
+    fun getCachedWebResponse(context: Context): String = cachedLastWebResponse
+
+    fun getCachedHttpStatus(context: Context): String = cachedLastHttpStatus
 }

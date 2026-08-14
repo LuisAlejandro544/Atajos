@@ -105,6 +105,13 @@ object DefaultActionFactory {
                 param1 = "photo",
                 param2 = "back"
             )
+            ActionType.HTTP_REQUEST -> ShortcutAction(
+                type = type,
+                title = "Petición Web / Webhook",
+                param1 = "https://httpbin.org/get",
+                param2 = "GET",
+                param3 = ""
+            )
         }
     }
 }
