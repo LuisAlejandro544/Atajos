@@ -33,7 +33,42 @@ import Layout from '../../layouts/Layout.astro';
             <code class="text-indigo-400 font-mono text-sm font-semibold">{'{RESPUESTA_WEB}'}</code>
             <p class="text-xs text-slate-400 mt-1">Cuerpo de respuesta de la última petición HTTP.</p>
           </div>
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60">
+            <code class="text-indigo-400 font-mono text-sm font-semibold">{'{HTTP_STATUS}'}</code>
+            <p class="text-xs text-slate-400 mt-1">Código de respuesta HTTP (ej: 200, 404).</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60">
+            <code class="text-indigo-400 font-mono text-sm font-semibold">{'{DIA_SEMANA}'}</code>
+            <p class="text-xs text-slate-400 mt-1">Día de la semana actual (ej: lunes).</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60">
+            <code class="text-indigo-400 font-mono text-sm font-semibold">{'{ESTADO_BATERIA}'}</code>
+            <p class="text-xs text-slate-400 mt-1">Estado de carga (Cargando o Descargando).</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60">
+            <code class="text-indigo-400 font-mono text-sm font-semibold">{'{PORTAPAPELES}'}</code>
+            <p class="text-xs text-slate-400 mt-1">Texto copiado actualmente en el portapapeles.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60">
+            <code class="text-indigo-400 font-mono text-sm font-semibold">{'{DISPOSITIVO}'}</code>
+            <p class="text-xs text-slate-400 mt-1">Fabricante y modelo del dispositivo.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60">
+            <code class="text-indigo-400 font-mono text-sm font-semibold">{'{ULTIMA_NOTIFICACION}'}</code>
+            <p class="text-xs text-slate-400 mt-1">Texto de la última notificación entrante leída.</p>
+          </div>
         </div>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-2xl font-bold text-white">Acciones Soportadas (17+)</h2>
+        <p class="text-slate-400">Puedes combinar y ordenar cualquier cantidad de acciones por atajo:</p>
+        <ul class="list-disc list-inside space-y-1.5 text-sm text-slate-300">
+          <li><strong>Red y Web:</strong> Peticiones HTTP (GET, POST, PUT, DELETE), Abrir URL web, Búsqueda en Google.</li>
+          <li><strong>Hardware y Control:</strong> Ajustar brillo de pantalla, volumen por canales, linterna on/off y patrones de vibración háptica.</li>
+          <li><strong>Multimedia y Voz:</strong> Síntesis de voz (TTS), apertura de cámara directa (foto normal, selfie o grabación de vídeo).</li>
+          <li><strong>Mensajería y Sistema:</strong> Enviar mensaje de WhatsApp, enviar SMS, llamadas directas, abrir apps instaladas, temporizadores y copiar al portapapeles.</li>
+        </ul>
       </section>
 
       <section class="space-y-3">
@@ -42,6 +77,16 @@ import Layout from '../../layouts/Layout.astro';
           Los atajos con disparadores como <code>BATTERY_LOW</code>, <code>BATTERY_FULL</code> o conexión de cargador se ejecutan mediante <code>BroadcastReceivers</code> nativos sin requerir servicios en primer plano persistentes que agoten la batería.
         </p>
       </section>
+
+      <div class="pt-6 border-t border-slate-800 flex items-center justify-between">
+        <a href="https://github.com/LuisAlejandro544/Atajos" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 text-sm font-semibold flex items-center gap-1.5">
+          <span>Ver repositorio completo en GitHub</span>
+          <span>→</span>
+        </a>
+        <a href="/" class="text-slate-400 hover:text-white text-sm">
+          Volver al Inicio
+        </a>
+      </div>
     </div>
   </div>
 </Layout>

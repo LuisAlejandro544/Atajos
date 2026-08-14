@@ -32,7 +32,7 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- Features Grid -->
-    <div class="mt-28 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="p-6 rounded-2xl bg-slate-800/40 border border-slate-700/60 hover:border-slate-600 transition-all">
         <div class="text-3xl mb-3">⚡</div>
         <h3 class="text-lg font-bold text-white mb-2">Motor de Acciones Modular</h3>
@@ -55,6 +55,78 @@ import Layout from '../layouts/Layout.astro';
         <p class="text-sm text-slate-400">
           Mosaico deslizable en la barra de ajustes rápidos de Android para disparar tu atajo favorito desde cualquier app.
         </p>
+      </div>
+    </div>
+
+    <!-- Sección de Descarga -->
+    <div id="descarga" class="mt-28 p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-slate-800/80 to-dark-900 border border-slate-700/80 text-center max-w-4xl mx-auto shadow-2xl">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 mb-4">
+        📦 Distribución Independiente y Segura
+      </div>
+      <h2 class="text-2xl sm:text-4xl font-extrabold text-white mb-4 tracking-tight">Descarga Atajos para Android</h2>
+      <p class="text-slate-300 max-w-2xl mx-auto text-sm sm:text-base mb-8">
+        Instala la app directamente en tu dispositivo sin intermediarios ni recopilación de telemetría. Compatible con Android 8.0 o superior.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="https://github.com/LuisAlejandro544/Atajos/releases" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold shadow-xl shadow-brand-500/20 transition-all flex items-center justify-center gap-2">
+          <span>Descargar última Release (APK)</span>
+          <span>↓</span>
+        </a>
+        <a href="https://github.com/LuisAlejandro544/Atajos" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold border border-slate-700 transition-all flex items-center justify-center gap-2">
+          <span>Ver Código en GitHub</span>
+          <span>↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Sección de Preguntas Frecuentes (FAQ) -->
+    <div class="mt-28 max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">Dudas habituales</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-2">Preguntas Frecuentes (FAQ)</h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-2">Todo lo que necesitas saber sobre Atajos, su funcionamiento y privacidad.</p>
+      </div>
+
+      <div class="space-y-4">
+        <details class="group p-5 sm:p-6 rounded-2xl bg-slate-800/40 border border-slate-700/60 hover:border-slate-600 transition-all [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex items-center justify-between cursor-pointer font-bold text-white text-base sm:text-lg">
+            <span>¿Por qué no está en Google Play Store?</span>
+            <span class="text-indigo-400 transition-transform group-open:rotate-180">↓</span>
+          </summary>
+          <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed">
+            Atajos está diseñado como software independiente y offline-first. Distribuir directamente mediante APK y tiendas alternativas (como Uptodown o F-Droid) nos permite ofrecer automatizaciones potentes y directas sin exigir dependencias obligatorias de Google Play Services ni recopilar analíticas de usuario.
+          </p>
+        </details>
+
+        <details class="group p-5 sm:p-6 rounded-2xl bg-slate-800/40 border border-slate-700/60 hover:border-slate-600 transition-all [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex items-center justify-between cursor-pointer font-bold text-white text-base sm:text-lg">
+            <span>¿Cómo se instalan los archivos APK en Android?</span>
+            <span class="text-indigo-400 transition-transform group-open:rotate-180">↓</span>
+          </summary>
+          <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed">
+            Descarga el archivo <code>.apk</code> desde la sección de Releases de GitHub, abre la notificación de descarga en tu móvil y pulsa en "Instalar". Si es la primera vez, el sistema te pedirá habilitar el permiso de instalación desde fuentes desconocidas para tu navegador o explorador de archivos.
+          </p>
+        </details>
+
+        <details class="group p-5 sm:p-6 rounded-2xl bg-slate-800/40 border border-slate-700/60 hover:border-slate-600 transition-all [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex items-center justify-between cursor-pointer font-bold text-white text-base sm:text-lg">
+            <span>¿Mis datos o configuraciones se suben a algún servidor?</span>
+            <span class="text-indigo-400 transition-transform group-open:rotate-180">↓</span>
+          </summary>
+          <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed">
+            No. Toda tu información, atajos creados, registros de ejecución y variables dinámicas se almacenan única y exclusivamente de forma local en tu dispositivo mediante SQLite cifrado/Room. No tenemos servidores propios que reciban tus datos.
+          </p>
+        </details>
+
+        <details class="group p-5 sm:p-6 rounded-2xl bg-slate-800/40 border border-slate-700/60 hover:border-slate-600 transition-all [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex items-center justify-between cursor-pointer font-bold text-white text-base sm:text-lg">
+            <span>¿Qué permisos requiere la aplicación y para qué?</span>
+            <span class="text-indigo-400 transition-transform group-open:rotate-180">↓</span>
+          </summary>
+          <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed">
+            Solo solicita los permisos necesarios para las acciones que tú decidas crear (por ejemplo: cámara para disparar fotos directas, modificar ajustes del sistema para el brillo o notificaciones para el lector de avisos y recordatorios). Ningún permiso se utiliza para rastreo.
+          </p>
+        </details>
       </div>
     </div>
   </div>

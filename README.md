@@ -123,11 +123,12 @@ chmod +x ./gradlew
 
 ## 🌐 Sitio Web y Documentos Legales (Cloudflare Pages)
 
-El proyecto incluye el sitio web oficial en la carpeta `/website`, construido con **Astro + Tailwind CSS**:
-- 🏠 **Landing Page (`/`):** Presentación del proyecto y descarga directa del APK.
+El proyecto incluye el sitio web oficial en la carpeta `/website`, construido con **Astro + Tailwind CSS** y optimizado para dispositivos móviles:
+- 🏠 **Landing Page (`/`):** Presentación del proyecto, sección de preguntas frecuentes (FAQ) y descarga directa del APK.
 - 📜 **Términos y Condiciones (`/legal/terminos`):** Marco legal para la ejecución de atajos locales.
 - 🛡️ **Política de Privacidad (`/legal/privacidad`):** Declaración de arquitectura 100% offline-first y sin rastreo.
-- 📚 **Documentación (`/docs`):** Guía de variables dinámicas y disparadores.
+- 📚 **Documentación (`/docs`):** Guía completa de variables dinámicas, acciones soportadas y disparadores.
+- 🐙 **Repositorio GitHub:** [https://github.com/LuisAlejandro544/Atajos](https://github.com/LuisAlejandro544/Atajos)
 
 Para desarrollo local del sitio web:
 ```bash
