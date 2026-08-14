@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Smartphone
@@ -103,6 +105,8 @@ private fun VariableChip(
         "power" -> Icons.Default.Power
         "content_paste" -> Icons.Default.ContentPaste
         "smartphone" -> Icons.Default.Smartphone
+        "notifications" -> Icons.Default.Notifications
+        "notifications_active" -> Icons.Default.NotificationsActive
         else -> Icons.Default.Tag
     }
 

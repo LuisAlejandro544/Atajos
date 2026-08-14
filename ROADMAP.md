@@ -10,7 +10,12 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
 - [x] Acciones nativas implementadas:
   - **Lanzador de Juegos y Apps**: Escaneo asíncrono (`Dispatchers.IO`) con estados de carga y selector visual.
   - **Vibración Háptica Avanzada**: Patrones enriquecidos (Ligero, Fuerte, Doble, Triple, Latido, SOS y duración libre).
-  - **Variables Dinámicas del Sistema**: Interpolación en vivo de `{HORA}`, `{FECHA}`, `{DIA_SEMANA}`, `{BATERIA}`, `{ESTADO_BATERIA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}` en Texto a Voz, Notificaciones, SMS, WhatsApp y Compartir.
+  - **Lectura Inteligente de Notificaciones**: Enlace directo entre notificaciones previas y síntesis de voz mediante `{ULTIMA_NOTIFICACION}` y `{NOTIFICACION_TITULO}`.
+  - **Ajuste de Brillo de Pantalla**: Control de luminosidad (`WRITE_SETTINGS`) con presets (+20%, -20%, 10%, 50%, 100%) y slider porcentual continuo.
+  - **Gestión Integral de Sonido y Volumen**: Control para canales Multimedia, Notificaciones, Tono de llamada y Alarma (Subir, Bajar, Silenciar o nivel exacto).
+  - **Apertura Directa de Cámara**: Acciones dedicadas para Foto estándar (trasera), Selfie (frontal) y Grabación de vídeo.
+  - **Claridad y Transparencia en Permisos**: Información explícita en banners y UI sobre el uso local de la cámara y notificaciones sin subida de datos externos.
+  - **Variables Dinámicas del Sistema**: Interpolación en vivo de `{HORA}`, `{FECHA}`, `{DIA_SEMANA}`, `{BATERIA}`, `{ESTADO_BATERIA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}`, `{ULTIMA_NOTIFICACION}`, `{NOTIFICACION_TITULO}` en Texto a Voz, Notificaciones, SMS, WhatsApp y Compartir.
   - **Selector Visual de Variables**: Chips interactivos `VariablePickerChips` para insertar datos sin memorizar sintaxis.
   - **App Shortcuts en el Icono**: Accesos directos dinámicos en el launcher del dispositivo sincronizados automáticamente con los atajos favoritos.
   - Síntesis de voz (Text-to-Speech).

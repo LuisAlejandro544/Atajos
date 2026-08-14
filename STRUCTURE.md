@@ -77,10 +77,13 @@ app/src/main/java/com/example/
 │   └── handlers/                 # Manejadores de acciones modulares individuales
 │       ├── ActionHandler.kt              # Interfaz base con contrato de ejecución y release
 │       ├── AppLauncherActionHandler.kt   # Lanzador directo de juegos y aplicaciones instaladas
-│       ├── TtsActionHandler.kt           # Manejo de Text-To-Speech del sistema con tags dinámicos
+│       ├── CameraActionHandler.kt        # Lanzador nativo de cámara (Foto trasera, Selfie frontal, Vídeo)
+│       ├── BrightnessActionHandler.kt    # Control y ajuste de brillo de pantalla del sistema (WRITE_SETTINGS)
+│       ├── VolumeActionHandler.kt        # Gestor de canales de audio (Multimedia, Notificaciones, Llamadas, Alarma)
+│       ├── TtsActionHandler.kt           # Manejo de Text-To-Speech con soporte para lectura de notificaciones previas
 │       ├── FlashlightActionHandler.kt    # Control de CameraManager y linterna
 │       ├── VibrationActionHandler.kt     # Patrones hápticos avanzados (Ligero, Fuerte, Doble, SOS)
-│       ├── NotificationActionHandler.kt  # Despacho de notificaciones con tags dinámicos
+│       ├── NotificationActionHandler.kt  # Despacho de notificaciones locales y caching de último mensaje
 │       ├── SystemIntentsActionHandler.kt # Intents: Web, WhatsApp, SMS, Portapapeles, Timer
 │       └── UtilityActionHandler.kt       # Delays de suspensión y cálculo de propinas
 │
@@ -98,7 +101,10 @@ app/src/main/java/com/example/
     │   │
     │   ├── actioninputs/         # Submódulos de parametrización por tipo de acción
     │   │   ├── AppLauncherInputSection.kt # Selector y visualizador de juego/app configurado
-    │   │   ├── TtsInputSection.kt         # Campo de voz con chips de variables dinámicas
+    │   │   ├── CameraInputSection.kt      # Selector de modo de cámara (Foto, Selfie, Vídeo) y transparencia
+    │   │   ├── BrightnessInputSection.kt  # Controles de brillo (+20%, -20%, presets y slider porcentual)
+    │   │   ├── VolumeInputSection.kt      # Controles de volumen para multimedia, llamadas y alertas
+    │   │   ├── TtsInputSection.kt         # Campo de voz, botón de lectura de notificaciones y chips
     │   │   ├── FlashlightInputSection.kt
     │   │   ├── VibrationInputSection.kt   # Selector de patrones hápticos y test en tiempo real
     │   │   ├── NotificationInputSection.kt# Título y mensaje con chips de variables dinámicas

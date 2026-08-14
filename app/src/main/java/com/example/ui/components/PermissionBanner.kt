@@ -60,13 +60,13 @@ fun PermissionBanner(
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Permisos recomendados",
+                    text = "Permisos seguros y transparentes",
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Notificaciones y cámara para linterna y alertas.",
+                    text = "Cámara para linterna y atajos de foto/vídeo. Notificaciones para avisos locales. 100% offline y privado.",
                     fontSize = 11.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -87,6 +87,24 @@ object DefaultActionFactory {
                 param1 = "",
                 param2 = ""
             )
+            ActionType.SET_BRIGHTNESS -> ShortcutAction(
+                type = type,
+                title = "Ajustar Brillo",
+                param1 = "50",
+                param2 = "manual"
+            )
+            ActionType.SET_VOLUME -> ShortcutAction(
+                type = type,
+                title = "Ajustar Volumen",
+                param1 = "music",
+                param2 = "raise"
+            )
+            ActionType.OPEN_CAMERA -> ShortcutAction(
+                type = type,
+                title = "Abrir Cámara",
+                param1 = "photo",
+                param2 = "back"
+            )
         }
     }
 }

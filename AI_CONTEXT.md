@@ -26,7 +26,10 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 3. **`ActionType`** (`data/model/ActionType.kt`):
    - Tipos soportados:
      - `LAUNCH_APP`: Iniciar juego o aplicación instalada. `param1`: `packageName`, `param2`: `appName`.
-     - `SPEAK_TEXT`: Síntesis de voz con soporte para tags dinámicos. `param1`: texto a hablar, `param2`: idioma.
+     - `SET_BRIGHTNESS`: Control de brillo de pantalla (`WRITE_SETTINGS`). `param1`: porcentaje "0"-"100" o acción "increase" / "decrease".
+     - `SET_VOLUME`: Control de volumen de audio. `param1`: canal ("music", "notification", "ring", "alarm"), `param2`: nivel ("0"-"100", "raise", "lower", "mute", "max").
+     - `OPEN_CAMERA`: Apertura directa de la cámara nativa en modo Foto, Selfie o Grabación de Vídeo. `param1`: modo ("photo", "selfie", "video"), `param2`: lente ("back", "front", "video").
+     - `SPEAK_TEXT`: Síntesis de voz con soporte para tags dinámicos y lectura de notificaciones previas (`{ULTIMA_NOTIFICACION}`). `param1`: texto a hablar, `param2`: idioma o "read_notification".
      - `TOGGLE_FLASHLIGHT`: Control de linterna. `param1`: "toggle" / "on" / "off".
      - `VIBRATE`: Vibración háptica avanzada. `param1`: duración en ms / "sos", `param2`: patrón ("click", "heavy", "double", "triple", "heartbeat", "sos", "custom").
      - `SHOW_NOTIFICATION`: Notificación local con tags dinámicos. `param1`: título, `param2`: mensaje.
@@ -55,7 +58,9 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 3. **`AppShortcutsHelper`**: Sincroniza dinámicamente los atajos favoritos con el launcher de Android mediante `ShortcutManagerCompat` para ejecución directa desde el icono de la app.
 4. **`ActionHandler`** (`engine/handlers/`):
    - `AppLauncherActionHandler`: Lanza intents de apps instaladas de forma segura.
-   - `TtsActionHandler`: Inicialización y síntesis con `TextToSpeech` y resolución de variables.
+   - `BrightnessActionHandler`: Ajuste de brillo con verificación de permisos `WRITE_SETTINGS` y fallback contextual.
+   - `VolumeActionHandler`: Ajuste seguro de volumen por canal (AudioManager) con modos subir, bajar, silenciar o porcentaje.
+   - `TtsActionHandler`: Inicialización y síntesis con `TextToSpeech`, resolución de variables y lectura directa de notificaciones.
    - `FlashlightActionHandler`: Control de `CameraManager`.
    - `VibrationActionHandler`: Generación de patrones con `Vibrator` / `VibrationEffect` con fallbacks de API.
    - `NotificationActionHandler`: Publicación en `NotificationManager` con resolución de variables.

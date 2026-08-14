@@ -5,12 +5,15 @@ import com.example.data.model.ActionType
 import com.example.data.model.ShortcutAction
 import com.example.engine.handlers.ActionHandler
 import com.example.engine.handlers.AppLauncherActionHandler
+import com.example.engine.handlers.BrightnessActionHandler
+import com.example.engine.handlers.CameraActionHandler
 import com.example.engine.handlers.FlashlightActionHandler
 import com.example.engine.handlers.NotificationActionHandler
 import com.example.engine.handlers.SystemIntentsActionHandler
 import com.example.engine.handlers.TtsActionHandler
 import com.example.engine.handlers.UtilityActionHandler
 import com.example.engine.handlers.VibrationActionHandler
+import com.example.engine.handlers.VolumeActionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +50,10 @@ class ActionExecutor(context: Context) {
         NotificationActionHandler(context),
         SystemIntentsActionHandler(context),
         UtilityActionHandler(context),
-        AppLauncherActionHandler(context)
+        AppLauncherActionHandler(context),
+        BrightnessActionHandler(context),
+        VolumeActionHandler(context),
+        CameraActionHandler(context)
     )
 
     private val handlerMap: Map<ActionType, ActionHandler> = buildMap {

@@ -33,7 +33,13 @@ class TtsActionHandler(private val context: Context) : ActionHandler, TextToSpee
     }
 
     override suspend fun execute(action: ShortcutAction): String {
-        val rawText = action.param1.ifBlank { "Atajo ejecutado correctamente" }
+        val rawText = action.param1.ifBlank {
+            if (action.param2.equals("read_notification", ignoreCase = true)) {
+                "{ULTIMA_NOTIFICACION}"
+            } else {
+                "Atajo ejecutado correctamente"
+            }
+        }
         val text = com.example.engine.VariableResolverHelper.resolve(rawText, context)
         return if (tts != null && isTtsReady) {
             tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "atajos_tts_${System.currentTimeMillis()}")

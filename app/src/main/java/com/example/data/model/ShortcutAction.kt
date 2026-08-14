@@ -89,6 +89,24 @@ enum class ActionType(
         categoryName = "Aplicaciones y Juegos",
         description = "Inicia directamente un juego o aplicación instalada en tu teléfono",
         iconKey = "sports_esports"
+    ),
+    SET_BRIGHTNESS(
+        displayName = "Brillo de pantalla",
+        categoryName = "Dispositivo",
+        description = "Ajusta, sube o baja el nivel de brillo de la pantalla",
+        iconKey = "brightness_6"
+    ),
+    SET_VOLUME(
+        displayName = "Volumen / Sonido",
+        categoryName = "Sistema y Audio",
+        description = "Sube, baja, silencia o ajusta el volumen de multimedia, llamadas o alarmas",
+        iconKey = "volume_up"
+    ),
+    OPEN_CAMERA(
+        displayName = "Abrir Cámara Directa",
+        categoryName = "Dispositivo",
+        description = "Abre directamente la cámara en modo Foto, Selfie o Grabación de Vídeo",
+        iconKey = "camera_alt"
     )
 }
 

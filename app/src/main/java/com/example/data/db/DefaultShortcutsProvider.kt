@@ -175,6 +175,97 @@ object DefaultShortcutsProvider {
     fun getGalleryTemplates(): List<ShortcutEntity> {
         return listOf(
             ShortcutEntity(
+                title = "📢 Notificar y Leer en Voz Alta",
+                description = "Muestra una notificación personalizada y el sintetizador de voz la lee de inmediato",
+                colorHex = "#4F46E5",
+                iconKey = "notifications_active",
+                category = "Alertas",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.SHOW_NOTIFICATION,
+                            title = "Aviso de Juego",
+                            param1 = "Atajos",
+                            param2 = "¡Es la hora de jugar y relajarse!"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SPEAK_TEXT,
+                            title = "Leer Notificación en Voz Alta",
+                            param1 = "{ULTIMA_NOTIFICACION}",
+                            param2 = "read_notification"
+                        )
+                    )
+                )
+            ),
+            ShortcutEntity(
+                title = "🌙 Modo Noche: Brillo Bajo & Silencio",
+                description = "Baja el brillo de pantalla al 10% y silencia los altavoces para descansar",
+                colorHex = "#3B82F6",
+                iconKey = "brightness_6",
+                category = "Dispositivo",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.SET_BRIGHTNESS,
+                            title = "Bajar Brillo al Mínimo",
+                            param1 = "10"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SET_VOLUME,
+                            title = "Silenciar Multimedia",
+                            param1 = "music",
+                            param2 = "mute"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SHOW_NOTIFICATION,
+                            title = "Modo Noche Activado",
+                            param1 = "Buenas noches",
+                            param2 = "Brillo y sonido reducidos para descansar"
+                        )
+                    )
+                )
+            ),
+            ShortcutEntity(
+                title = "📸 Cámara Rápida con Linterna",
+                description = "Enciende un pulso háptico y abre la cámara lista para capturar fotos",
+                colorHex = "#F59E0B",
+                iconKey = "camera_alt",
+                category = "Dispositivo",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.VIBRATE,
+                            title = "Pulso Háptico",
+                            param1 = "100",
+                            param2 = "click"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.OPEN_CAMERA,
+                            title = "Abrir Cámara Foto",
+                            param1 = "photo",
+                            param2 = "back"
+                        )
+                    )
+                )
+            ),
+            ShortcutEntity(
+                title = "🤳 Selfie Instantánea",
+                description = "Abre directamente la cámara frontal para una selfie rápida",
+                colorHex = "#EC4899",
+                iconKey = "camera_front",
+                category = "Dispositivo",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.OPEN_CAMERA,
+                            title = "Abrir Modo Selfie",
+                            param1 = "selfie",
+                            param2 = "front"
+                        )
+                    )
+                )
+            ),
+            ShortcutEntity(
                 title = "🎮 Lanzador de Juego Rápido",
                 description = "Emite doble pulso háptico y abre tu juego favorito directamente",
                 colorHex = "#8B5CF6",

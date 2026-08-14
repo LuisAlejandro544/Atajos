@@ -64,6 +64,18 @@ object VariableResolverHelper {
             previewValue = "Texto copiado"
         ),
         SystemVariable(
+            tag = "{ULTIMA_NOTIFICACION}",
+            label = "Texto de notificación",
+            iconName = "notifications",
+            previewValue = "Es la hora de jugar"
+        ),
+        SystemVariable(
+            tag = "{NOTIFICACION_TITULO}",
+            label = "Título de notificación",
+            iconName = "notifications_active",
+            previewValue = "Aviso"
+        ),
+        SystemVariable(
             tag = "{DISPOSITIVO}",
             label = "Modelo de teléfono",
             iconName = "smartphone",
@@ -72,12 +84,37 @@ object VariableResolverHelper {
     )
 
     /**
-     * Resuelve y reemplaza todas las etiquetas encontradas en el texto por sus valores reales del sistema.
+     * Resuelve y reemplaza todas las etiquetas encontradas en el texto por sus valores reales del sistema
+     * o valores contextuales de la ejecución (notificaciones previas, etc.).
      */
-    fun resolve(text: String, context: Context): String {
+    fun resolve(
+        text: String,
+        context: Context,
+        lastNotificationText: String? = null,
+        lastNotificationTitle: String? = null
+    ): String {
         if (text.isBlank()) return text
 
         var resolved = text
+
+        // 0. Última Notificación ({ULTIMA_NOTIFICACION} y {NOTIFICACION_TITULO})
+        if (resolved.contains("{ULTIMA_NOTIFICACION}", ignoreCase = true) ||
+            resolved.contains("{NOTIFICACION}", ignoreCase = true) ||
+            resolved.contains("{NOTIFICACION_TEXTO}", ignoreCase = true)
+        ) {
+            val notifText = lastNotificationText?.ifBlank { null }
+                ?: getCachedNotification(context)
+            resolved = resolved
+                .replace("(?i)\\{ULTIMA_NOTIFICACION\\}".toRegex(), notifText)
+                .replace("(?i)\\{NOTIFICACION\\}".toRegex(), notifText)
+                .replace("(?i)\\{NOTIFICACION_TEXTO\\}".toRegex(), notifText)
+        }
+
+        if (resolved.contains("{NOTIFICACION_TITULO}", ignoreCase = true)) {
+            val notifTitle = lastNotificationTitle?.ifBlank { null }
+                ?: getCachedNotificationTitle(context)
+            resolved = resolved.replace("(?i)\\{NOTIFICACION_TITULO\\}".toRegex(), notifTitle)
+        }
 
         // 1. Hora ({HORA})
         if (resolved.contains("{HORA}", ignoreCase = true)) {
@@ -157,4 +194,16 @@ object VariableResolverHelper {
             "nada en el portapapeles"
         }
     }
+
+    private var cachedLastNotificationBody: String = "Es la hora de jugar"
+    private var cachedLastNotificationTitle: String = "Aviso de Atajos"
+
+    fun saveLastNotification(title: String, body: String) {
+        if (title.isNotBlank()) cachedLastNotificationTitle = title
+        if (body.isNotBlank()) cachedLastNotificationBody = body
+    }
+
+    fun getCachedNotification(context: Context): String = cachedLastNotificationBody
+
+    fun getCachedNotificationTitle(context: Context): String = cachedLastNotificationTitle
 }

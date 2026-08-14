@@ -1,8 +1,10 @@
-refactor: arquitectura modular para ShortcutEditorScreen, ShortcutsViewModel y MainActivity
+feat: lectura de notificaciones por voz, control de brillo y volumen del sistema, y apertura directa de cámara
 
-- Modularizar ShortcutEditorScreen dividiendo la vista en submódulos especializados dentro de ui/components/editor/ (ShortcutLivePreviewCard, ShortcutMetadataSection, ShortcutActionsSection: header, empty state y botones de pipeline).
-- Modularizar ShortcutsViewModel implementando el patrón Delegate/Manager con ShortcutEditorManager (gestor de estado y mutaciones del editor) y AutomationsManager (gestor de CRUD y testing de automatizaciones), reduciendo la complejidad del ViewModel principal.
-- Modularizar MainActivity y la capa de navegación extrayendo componentes a ui/navigation/ (ShortcutsTopBar, ShortcutsBottomBar, MainTabContent) y ui/components/ (PermissionBanner), manteniendo el Activity como un punto de entrada ligero y desacoplado.
-- Corregir error de sintaxis en el workflow de sincronización (.github/workflows/sync-from-zip.yml) eliminando el conflicto entre paths y paths-ignore en el trigger push.
-- Configurar el workflow de métricas y tamaño del repositorio (.github/workflows/repo-size-report.yml) para ejecución exclusivamente manual (workflow_dispatch) y visualización en el Step Summary de GitHub Actions sin generar commits ni ensuciar el repositorio con archivos de reporte.
-- Actualizar STRUCTURE.md con el nuevo desglose de directorios, submódulos y diagrama de responsabilidades.
+- Implementar acción de apertura directa de cámara (OPEN_CAMERA) con modos para Foto estándar (trasera), Selfie (frontal) y Grabación de Vídeo mediante CameraActionHandler y CameraInputSection.
+- Añadir claridad y transparencia sobre permisos en la interfaz con mensajes claros y tranquilizadores (100% offline y privado).
+- Implementar lectura inteligente de notificaciones previas en Text-To-Speech mediante las nuevas variables dinámicas {ULTIMA_NOTIFICACION} y {NOTIFICACION_TITULO}, con botón de inserción directa y caching de notificaciones en VariableResolverHelper.
+- Añadir acción de control de brillo de pantalla (SET_BRIGHTNESS) con soporte para subir (+20%), bajar (-20%), niveles predefinidos (10%, 50%, 100%) y ajuste porcentual exacto mediante BrightnessActionHandler y BrightnessInputSection.
+- Añadir acción de control de volumen y sonido (SET_VOLUME) con soporte independiente para canales Multimedia, Tono de llamada, Notificaciones y Alarma (subir, bajar, silenciar o porcentaje exacto) mediante VolumeActionHandler y VolumeInputSection.
+- Registrar el permiso WRITE_SETTINGS en AndroidManifest.xml con redirección inteligente y control de excepciones seguro.
+- Añadir nuevas plantillas en DefaultShortcutsProvider para lectura por voz de notificaciones, modo noche con reducción de brillo y volumen, y cámara rápida con linterna / selfie instantánea.
+- Actualizar documentación técnica en README.md, ROADMAP.md, STRUCTURE.md y AI_CONTEXT.md.

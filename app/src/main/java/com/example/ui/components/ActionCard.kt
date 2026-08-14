@@ -35,12 +35,15 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.ActionType
 import com.example.data.model.ShortcutAction
 import com.example.ui.components.actioninputs.AppLauncherInputSection
+import com.example.ui.components.actioninputs.BrightnessInputSection
+import com.example.ui.components.actioninputs.CameraInputSection
 import com.example.ui.components.actioninputs.FlashlightInputSection
 import com.example.ui.components.actioninputs.MessagingInputSection
 import com.example.ui.components.actioninputs.NotificationInputSection
 import com.example.ui.components.actioninputs.TtsInputSection
 import com.example.ui.components.actioninputs.UtilitiesInputSection
 import com.example.ui.components.actioninputs.VibrationInputSection
+import com.example.ui.components.actioninputs.VolumeInputSection
 import com.example.ui.components.actioninputs.WebUrlInputSection
 import com.example.ui.theme.IndigoPrimary
 
@@ -201,6 +204,18 @@ fun ActionCard(
 
                 ActionType.LAUNCH_APP -> {
                     AppLauncherInputSection(action = action, onUpdate = onUpdate)
+                }
+
+                ActionType.SET_BRIGHTNESS -> {
+                    BrightnessInputSection(action = action, onUpdate = onUpdate)
+                }
+
+                ActionType.SET_VOLUME -> {
+                    VolumeInputSection(action = action, onUpdate = onUpdate)
+                }
+
+                ActionType.OPEN_CAMERA -> {
+                    CameraInputSection(action = action, onUpdate = onUpdate)
                 }
             }
         }

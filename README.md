@@ -8,8 +8,13 @@ Una aplicación nativa para Android construida con **Kotlin** y **Jetpack Compos
 
 ## 📱 Características Principales
 
-- ⚡ **Motor de Ejecución de Acciones**: Encadenamiento secuencial de acciones de hardware y software (Lanzador de juegos y apps, Texto a voz, Linterna, Vibración háptica con patrones avanzados, Notificaciones, Portapapeles, Delays, URLs, Búsquedas y Mensajería).
-- 🏷️ **Variables Dinámicas del Sistema**: Posibilidad de insertar datos en tiempo real (`{HORA}`, `{FECHA}`, `{DIA_SEMANA}`, `{BATERIA}`, `{ESTADO_BATERIA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}`) en tus mensajes de voz, notificaciones, WhatsApp y SMS con chips autocompletables para no tener que memorizar comandos.
+- ⚡ **Motor de Ejecución de Acciones**: Encadenamiento secuencial de acciones de hardware y software (Lanzador de juegos y apps, Apertura directa de Cámara en modo Foto/Selfie/Vídeo, Texto a voz inteligente con lectura de notificaciones, Control de Brillo de pantalla, Ajuste de Volumen/Sonido, Linterna, Vibración háptica con patrones avanzados, Notificaciones, Portapapeles, Delays, URLs, Búsquedas y Mensajería).
+- 📷 **Apertura Directa de Cámara (Foto / Vídeo / Selfie)**: Lanza la cámara nativa del teléfono en el modo seleccionado (Cámara trasera, Selfie frontal o Grabación de vídeo) sin almacenar fotos en servidores y respetando 100% la privacidad.
+- 🛡️ **Claridad y Transparencia en Permisos**: Banners y avisos contextuales que explican de manera transparente el uso de la cámara y notificaciones, garantizando un funcionamiento 100% offline y seguro.
+- 📢 **Lectura Inteligente de Notificaciones**: El motor de texto a voz puede leer de forma directa o encadenada el contenido o título de la última notificación del flujo mediante `{ULTIMA_NOTIFICACION}` y `{NOTIFICACION_TITULO}` o con el botón de lectura rápida.
+- ☀️ **Control de Brillo de Pantalla**: Acciones dedicadas para subir (+20%), bajar (-20%), definir niveles fijos (10%, 50%, 100%) o deslizar al porcentaje exacto de luminosidad deseado.
+- 🔊 **Gestor de Volumen y Canales de Audio**: Ajuste independiente para Multimedia, Tono de llamada, Notificaciones y Alarmas con soporte para subir, bajar, silenciar o porcentaje exacto.
+- 🏷️ **Variables Dinámicas del Sistema**: Posibilidad de insertar datos en tiempo real (`{HORA}`, `{FECHA}`, `{DIA_SEMANA}`, `{BATERIA}`, `{ESTADO_BATERIA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}`, `{ULTIMA_NOTIFICACION}`) en tus mensajes de voz, notificaciones, WhatsApp y SMS con chips autocompletables para no tener que memorizar comandos.
 - 📲 **App Shortcuts en el Icono**: Mantén presionado el icono de la aplicación en el launcher de tu teléfono para ejecutar al instante tus atajos favoritos sin necesidad de abrir la app.
 - 🎮 **Lanzador de Juegos y Apps**: Escaneo asíncrono en segundo plano (`Dispatchers.IO`) de todos los juegos y aplicaciones instaladas en el dispositivo, con selector visual con barra de búsqueda y pantalla de carga.
 - 📳 **Vibración Háptica Avanzada**: Soporte para patrones preconfigurados (Pulso suave, Golpe fuerte, Doble pulso, Triple pulso, Latido de corazón, Código Morse SOS y Duración en milisegundos a medida).
@@ -79,9 +84,10 @@ chmod +x ./gradlew
 
 | Permiso | Propósito |
 | :--- | :--- |
-| `CAMERA` / `FLASHLIGHT` | Control del flash/linterna del dispositivo en acciones de iluminación. |
+| `CAMERA` / `FLASHLIGHT` | Control del flash/linterna y apertura de la cámara nativa para fotos, selfies y vídeos sin almacenar datos. |
 | `VIBRATE` | Retroalimentación háptica y pulsos vibratorios avanzados. |
 | `POST_NOTIFICATIONS` | Emisión de notificaciones locales de sistema con estados de atajos. |
+| `WRITE_SETTINGS` | Modificación segura del nivel de brillo de pantalla del sistema. |
 | `QUERY_ALL_PACKAGES` | Escaneo y listado de juegos/apps instaladas para la acción de inicio rápido. |
 | `INTERNET` | Apertura de URLs y consultas de búsqueda web. |
 

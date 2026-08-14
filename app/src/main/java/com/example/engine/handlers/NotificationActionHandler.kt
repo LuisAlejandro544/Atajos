@@ -50,6 +50,7 @@ class NotificationActionHandler(private val context: Context) : ActionHandler {
             .build()
 
         notificationManager?.notify((System.currentTimeMillis() % 10000).toInt(), notification)
+        com.example.engine.VariableResolverHelper.saveLastNotification(title, message)
         return "Notificación enviada: $title"
     }
 }
