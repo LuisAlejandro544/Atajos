@@ -156,7 +156,8 @@ fun ShortcutsApp(
                 topBar = TopBarActions(
                     onRequestPermissions = { permissionLauncher.launch(permissionList) },
                     onDismissPermissionBanner = { showPermissionBanner = false },
-                    onDismissExecutionStatus = viewModel::dismissExecutionStatus
+                    onDismissExecutionStatus = viewModel::dismissExecutionStatus,
+                    onCancelExecution = viewModel::cancelExecution
                 )
             )
         }

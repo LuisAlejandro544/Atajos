@@ -16,6 +16,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,10 +27,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,6 +63,7 @@ import com.example.ui.theme.RoseAccent
 fun ExecutionStatusBanner(
     status: ExecutionStatus,
     onDismiss: () -> Unit,
+    onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isVisible = status.isRunning || status.isFinished
@@ -96,8 +102,13 @@ fun ExecutionStatusBanner(
                         Brush.horizontalGradient(
                             colors = if (status.isRunning) {
                                 listOf(
-                                    IndigoPrimary.copy(alpha = 0.85f),
-                                    Color(0xFF312E81).copy(alpha = 0.95f)
+                                    IndigoPrimary.copy(alpha = 0.90f),
+                                    Color(0xFF312E81).copy(alpha = 0.98f)
+                                )
+                            } else if (status.isCancelled) {
+                                listOf(
+                                    Color(0xFFF97316).copy(alpha = 0.90f), // Warm Orange
+                                    Color(0xFFC2410C).copy(alpha = 0.98f)
                                 )
                             } else if (status.isSuccess) {
                                 listOf(
@@ -138,6 +149,13 @@ fun ExecutionStatusBanner(
                                     color = Color.White,
                                     strokeWidth = 2.5.dp
                                 )
+                            } else if (status.isCancelled) {
+                                Icon(
+                                    imageVector = Icons.Default.Cancel,
+                                    contentDescription = "Cancelado",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
                             } else if (status.isSuccess) {
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
@@ -168,7 +186,7 @@ fun ExecutionStatusBanner(
                                     overflow = TextOverflow.Ellipsis
                                 )
 
-                                if (status.totalSteps > 0) {
+                                if (status.totalSteps > 0 && !status.isCancelled) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Box(
                                         modifier = Modifier
@@ -198,18 +216,49 @@ fun ExecutionStatusBanner(
                         }
                     }
 
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .testTag("dismiss_status_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Cerrar",
-                            tint = Color.White.copy(alpha = 0.8f),
-                            modifier = Modifier.size(18.dp)
-                        )
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    if (status.isRunning) {
+                        Button(
+                            onClick = onCancel,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White.copy(alpha = 0.25f),
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            modifier = Modifier
+                                .height(34.dp)
+                                .testTag("cancel_execution_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Stop,
+                                contentDescription = "Cancelar",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Cancelar",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .size(32.dp)
+                                .testTag("dismiss_status_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Cerrar",
+                                tint = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 }
             }

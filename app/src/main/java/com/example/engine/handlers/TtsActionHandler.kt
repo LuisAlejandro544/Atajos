@@ -50,6 +50,14 @@ class TtsActionHandler(private val context: Context) : ActionHandler, TextToSpee
         }
     }
 
+    override fun onCancelled() {
+        try {
+            tts?.stop()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     override fun release() {
         try {
             tts?.stop()

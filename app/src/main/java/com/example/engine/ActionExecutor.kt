@@ -31,7 +31,8 @@ data class ExecutionStatus(
     val currentActionTitle: String = "",
     val resultMessage: String = "",
     val isFinished: Boolean = false,
-    val isSuccess: Boolean = true
+    val isSuccess: Boolean = true,
+    val isCancelled: Boolean = false
 )
 
 /**
@@ -43,6 +44,9 @@ class ActionExecutor(context: Context) {
 
     private val _status = MutableStateFlow(ExecutionStatus())
     val status: StateFlow<ExecutionStatus> = _status.asStateFlow()
+
+    @Volatile
+    private var isCancelledRequested: Boolean = false
 
     private val handlers: List<ActionHandler> = listOf(
         TtsActionHandler(context),
@@ -73,6 +77,8 @@ class ActionExecutor(context: Context) {
         onFinished: (Boolean, String, Long) -> Unit
     ) {
         val startTime = System.currentTimeMillis()
+        isCancelledRequested = false
+
         if (actions.isEmpty()) {
             _status.value = ExecutionStatus(
                 isRunning = false,
@@ -80,7 +86,8 @@ class ActionExecutor(context: Context) {
                 shortcutTitle = shortcutTitle,
                 resultMessage = "El atajo no contiene acciones",
                 isFinished = true,
-                isSuccess = false
+                isSuccess = false,
+                isCancelled = false
             )
             onFinished(false, "Sin acciones", 0L)
             return
@@ -93,14 +100,23 @@ class ActionExecutor(context: Context) {
             currentStep = 0,
             totalSteps = actions.size,
             currentActionTitle = "Iniciando...",
-            resultMessage = "Ejecutando..."
+            resultMessage = "Ejecutando...",
+            isCancelled = false
         )
 
         var allSuccessful = true
         var lastMessage = "Ejecutado con éxito"
+        var executedSteps = 0
 
         for (index in actions.indices) {
+            if (isCancelledRequested) {
+                allSuccessful = false
+                lastMessage = "Cancelado por el usuario"
+                break
+            }
+
             val action = actions[index]
+            executedSteps = index + 1
             _status.value = ExecutionStatus(
                 isRunning = true,
                 shortcutId = shortcutId,
@@ -108,7 +124,8 @@ class ActionExecutor(context: Context) {
                 currentStep = index + 1,
                 totalSteps = actions.size,
                 currentActionTitle = action.title.ifBlank { action.type.displayName },
-                resultMessage = "Paso ${index + 1} de ${actions.size}: ${action.type.displayName}"
+                resultMessage = "Paso ${index + 1} de ${actions.size}: ${action.type.displayName}",
+                isCancelled = false
             )
 
             try {
@@ -123,26 +140,52 @@ class ActionExecutor(context: Context) {
                 break
             }
 
+            if (isCancelledRequested) {
+                allSuccessful = false
+                lastMessage = "Cancelado por el usuario"
+                break
+            }
+
             // Pausa estética breve entre pasos para retroalimentación visual en la UI
             if (actions.size > 1 && action.type != ActionType.WAIT_DELAY) {
                 delay(300)
             }
+
+            if (isCancelledRequested) {
+                allSuccessful = false
+                lastMessage = "Cancelado por el usuario"
+                break
+            }
         }
 
         val duration = System.currentTimeMillis() - startTime
+        val wasCancelled = isCancelledRequested
+
         _status.value = ExecutionStatus(
             isRunning = false,
             shortcutId = shortcutId,
             shortcutTitle = shortcutTitle,
-            currentStep = actions.size,
+            currentStep = executedSteps,
             totalSteps = actions.size,
-            currentActionTitle = if (allSuccessful) "Completado" else "Error",
-            resultMessage = lastMessage,
+            currentActionTitle = if (wasCancelled) "Cancelado" else if (allSuccessful) "Completado" else "Error",
+            resultMessage = if (wasCancelled) "Cancelado por el usuario" else lastMessage,
             isFinished = true,
-            isSuccess = allSuccessful
+            isSuccess = allSuccessful && !wasCancelled,
+            isCancelled = wasCancelled
         )
 
-        onFinished(allSuccessful, lastMessage, duration)
+        onFinished(allSuccessful && !wasCancelled, if (wasCancelled) "Cancelado por el usuario" else lastMessage, duration)
+    }
+
+    fun cancelExecution() {
+        isCancelledRequested = true
+        for (handler in handlers) {
+            try {
+                handler.onCancelled()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private suspend fun executeSingleAction(action: ShortcutAction): String = withContext(Dispatchers.Main) {

@@ -54,7 +54,7 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 
 ## ⚙️ Arquitectura Modular del Motor de Ejecución
 
-1. **`ActionExecutor`**: Orquestador principal que despacha cada paso a un `ActionHandler` específico según su `ActionType`.
+1. **`ActionExecutor`**: Orquestador principal que despacha cada paso a un `ActionHandler` específico según su `ActionType`. Soporta cancelación interactiva en tiempo real (`cancelExecution()`), deteniendo corrutinas y liberando recursos (`onCancelled()` en handlers como TTS y vibración).
 2. **`VariableResolverHelper`**: Interpola variables del sistema en tiempo real (`{HORA}`, `{FECHA}`, `{DIA_SEMANA}`, `{BATERIA}`, `{ESTADO_BATERIA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}`) para personalizar textos de voz, notificaciones y mensajería.
 3. **`AppShortcutsHelper`**: Sincroniza dinámicamente los atajos favoritos con el launcher de Android mediante `ShortcutManagerCompat` para ejecución directa desde el icono de la app.
 4. **`ActionHandler`** (`engine/handlers/`):

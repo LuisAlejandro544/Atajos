@@ -38,7 +38,8 @@ data class HistoryTabActions(
 data class TopBarActions(
     val onRequestPermissions: () -> Unit,
     val onDismissPermissionBanner: () -> Unit,
-    val onDismissExecutionStatus: () -> Unit
+    val onDismissExecutionStatus: () -> Unit,
+    val onCancelExecution: () -> Unit
 )
 
 /**

@@ -15,6 +15,7 @@ import com.example.data.repository.ShortcutRepository
 import com.example.engine.ActionExecutor
 import com.example.engine.AppShortcutsHelper
 import com.example.engine.ExecutionStatus
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +32,9 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val repository: ShortcutRepository
     val actionExecutor: ActionExecutor
+
+    // Control de trabajo de ejecución activa para cancelación
+    private var activeExecutionJob: Job? = null
 
     // Gestores modulares
     private val editorManager: ShortcutEditorManager
@@ -142,7 +146,8 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
 
     // ── Operaciones con Atajos ────────────────────────────────────────────────
     fun runShortcut(shortcut: ShortcutEntity) {
-        viewModelScope.launch {
+        activeExecutionJob?.cancel()
+        activeExecutionJob = viewModelScope.launch {
             val actions = ActionJsonHelper.fromJson(shortcut.actionsJson)
             actionExecutor.executeShortcut(
                 shortcutId = shortcut.id,
@@ -150,7 +155,15 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
                 actions = actions
             ) { success, resultMessage, durationMs ->
                 viewModelScope.launch {
-                    repository.recordExecution(shortcut.id)
+                    val isCancelled = resultMessage.contains("Cancelado", ignoreCase = true)
+                    if (success && !isCancelled) {
+                        repository.recordExecution(shortcut.id)
+                    }
+                    val statusStr = when {
+                        isCancelled -> "CANCELLED"
+                        success -> "SUCCESS"
+                        else -> "FAILED"
+                    }
                     repository.logExecution(
                         ExecutionLogEntity(
                             shortcutId = shortcut.id,
@@ -158,7 +171,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
                             iconKey = shortcut.iconKey,
                             colorHex = shortcut.colorHex,
                             timestamp = System.currentTimeMillis(),
-                            status = if (success) "SUCCESS" else "FAILED",
+                            status = statusStr,
                             actionCount = actions.size,
                             durationMs = durationMs,
                             summary = resultMessage
@@ -167,6 +180,11 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
                 }
             }
         }
+    }
+
+    fun cancelExecution() {
+        actionExecutor.cancelExecution()
+        activeExecutionJob?.cancel()
     }
 
     fun runShortcutById(shortcutId: Long) {

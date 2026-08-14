@@ -46,7 +46,8 @@ fun MainTabContent(
                 executionStatus = executionStatus,
                 onRequestPermissions = actions.topBar.onRequestPermissions,
                 onDismissPermissionBanner = actions.topBar.onDismissPermissionBanner,
-                onDismissExecutionStatus = actions.topBar.onDismissExecutionStatus
+                onDismissExecutionStatus = actions.topBar.onDismissExecutionStatus,
+                onCancelExecution = actions.topBar.onCancelExecution
             )
         },
         bottomBar = {

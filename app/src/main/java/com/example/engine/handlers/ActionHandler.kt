@@ -10,5 +10,6 @@ import com.example.data.model.ShortcutAction
 interface ActionHandler {
     val supportedTypes: Set<ActionType>
     suspend fun execute(action: ShortcutAction): String
+    fun onCancelled() {}
     fun release() {}
 }

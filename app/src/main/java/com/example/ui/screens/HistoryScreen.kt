@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
@@ -128,6 +129,17 @@ fun HistoryScreen(
         } else {
             items(logs, key = { it.id }) { log ->
                 val isSuccess = log.status == "SUCCESS"
+                val isCancelled = log.status == "CANCELLED"
+                val statusColor = when {
+                    isCancelled -> Color(0xFFF97316)
+                    isSuccess -> EmeraldAccent
+                    else -> RoseAccent
+                }
+                val statusIcon = when {
+                    isCancelled -> Icons.Default.Cancel
+                    isSuccess -> Icons.Default.CheckCircle
+                    else -> Icons.Default.Error
+                }
                 val dateStr = try {
                     dateFormat.format(Date(log.timestamp))
                 } catch (e: Exception) {
@@ -154,16 +166,13 @@ fun HistoryScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(
-                                    if (isSuccess) EmeraldAccent.copy(alpha = 0.15f)
-                                    else RoseAccent.copy(alpha = 0.15f)
-                                ),
+                                .background(statusColor.copy(alpha = 0.15f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = if (isSuccess) Icons.Default.CheckCircle else Icons.Default.Error,
-                                contentDescription = if (isSuccess) "Éxito" else "Error",
-                                tint = if (isSuccess) EmeraldAccent else RoseAccent,
+                                imageVector = statusIcon,
+                                contentDescription = if (isCancelled) "Cancelado" else if (isSuccess) "Éxito" else "Error",
+                                tint = statusColor,
                                 modifier = Modifier.size(22.dp)
                             )
                         }

@@ -111,4 +111,20 @@ class VibrationActionHandler(private val context: Context) : ActionHandler {
             return "Error al vibrar: ${e.message}"
         }
     }
+
+    override fun onCancelled() {
+        try {
+            getVibrator()?.cancel()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun release() {
+        try {
+            getVibrator()?.cancel()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }

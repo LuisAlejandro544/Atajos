@@ -42,6 +42,7 @@ fun ShortcutsTopBar(
     onRequestPermissions: () -> Unit,
     onDismissPermissionBanner: () -> Unit,
     onDismissExecutionStatus: () -> Unit,
+    onCancelExecution: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -87,7 +88,8 @@ fun ShortcutsTopBar(
         // Banner de estado de ejecución en tiempo real
         ExecutionStatusBanner(
             status = executionStatus,
-            onDismiss = onDismissExecutionStatus
+            onDismiss = onDismissExecutionStatus,
+            onCancel = onCancelExecution
         )
     }
 }

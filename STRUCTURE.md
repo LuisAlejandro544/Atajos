@@ -163,6 +163,7 @@ app/src/main/java/com/example/
    - Si el paso contiene texto (Voz, Notificaciones, SMS, WhatsApp), `VariableResolverHelper` interpola las variables (`{HORA}`, `{BATERIA}`, `{FECHA}`, `{PORTAPAPELES}`) con datos del sistema en tiempo real.
    - El manejador especializado (`AppLauncherActionHandler`, `TtsActionHandler`, `VibrationActionHandler`, etc.) ejecuta la lógica de hardware o sistema de forma segura.
 4. **Persistencia de Resultado**:
-   - Se registra la ejecución en `execution_logs` mediante `ShortcutRepository.logExecution()`.
-   - Se actualiza el contador de ejecuciones y la marca de tiempo `lastRunTimestamp` en `ShortcutDao`.
+   - Se registra la ejecución en `execution_logs` mediante `ShortcutRepository.logExecution()` con estado `SUCCESS`, `FAILED` o `CANCELLED`.
+   - Se actualiza el contador de ejecuciones y la marca de tiempo `lastRunTimestamp` en `ShortcutDao` (solo en ejecuciones exitosas no canceladas).
 5. **Feedback al Usuario**: La UI muestra en tiempo real `ExecutionStatusBanner` y notifica la culminación exitosa o cualquier error capturado.
+6. **Cancelación Interactiva**: En cualquier momento durante la ejecución, el usuario puede presionar "Cancelar" en `ExecutionStatusBanner`. El `ActionExecutor` cancela la corrutina en curso, invoca `onCancelled()` en los handlers activos (deteniendo TTS o vibraciones) y actualiza el banner y los registros históricos a estado "CANCELLED".

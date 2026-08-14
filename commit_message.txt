@@ -1,7 +1,9 @@
-refactor: modularizar AutomationsScreen, MainTabContent, MainActivity y AddActionBottomSheet
+feat: soporte para cancelación interactiva de atajos y resolución de compatibilidad de Compose Compiler
 
-- Extraer componentes modulares en `ui/components/automations/` (`AutomationCard.kt`, `NewAutomationDialog.kt`) para desacoplar responsabilidades y reducir el tamaño de `AutomationsScreen.kt`.
-- Modularizar los ítems de selección de acción creando el componente reutilizable `ui/components/ActionTypeItem.kt`.
-- Desacoplar el paso de eventos entre `MainActivity.kt` y `MainTabContent.kt` mediante contratos tipados en `ui/navigation/NavigationContracts.kt` (`MainTabActions`, `HomeTabActions`, `AutomationsTabActions`, etc.).
-- Actualizar `STRUCTURE.md` con la nueva topología de submódulos y delegaciones de interfaz.
-- Mantener la integridad de sincronización continua y compatibilidad para distribución en tiendas de terceros y APK directo.
+- Implementar cancelación interactiva y en tiempo real de atajos en ejecución (`cancelExecution`), liberando recursos de audio (TTS) y hápticos (vibración).
+- Añadir botón interactivo de cancelación en el `ExecutionStatusBanner` con estilos dinámicos (naranja/ámbar) para estados cancelados.
+- Registrar el estado "CANCELLED" en el historial de ejecuciones (`HistoryScreen`) con insignias y etiquetas diferenciadas.
+- Configurar el plugin oficial `org.jetbrains.kotlin.plugin.compose` (Kotlin 2.x) en el catálogo de versiones y Gradle para solucionar el `AbstractMethodError` de `ComposePluginRegistrar`.
+- Actualizar el entorno de compilación de GitHub Actions a JDK 21 y Gradle 8.11.1 para compatibilidad total con Android Gradle Plugin (AGP) 9.1.1.
+- Asegurar la correcta compilación del APK Debug (`assembleDebug`) en entornos CI/CD y compilación local.
+- Mantener la integridad de los workflows de sincronización y empaquetado para distribución directa.

@@ -145,10 +145,13 @@ class ShortcutEditorManager(
         }
     }
 
+    private var testRunJob: kotlinx.coroutines.Job? = null
+
     fun testRunShortcut() {
         val state = _editorState.value
         val title = state.title.ifBlank { "Prueba de Atajo" }
-        coroutineScope.launch {
+        testRunJob?.cancel()
+        testRunJob = coroutineScope.launch {
             actionExecutor.executeShortcut(
                 shortcutId = state.id,
                 shortcutTitle = title,

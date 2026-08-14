@@ -25,6 +25,7 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
   - Copiado al portapapeles.
   - Delays/Pausas controladas.
   - Intents para compartir texto, enviar WhatsApp/SMS y búsqueda web.
+  - **Cancelación Interactiva en Tiempo Real**: Aborto instantáneo de atajos en ejecución desde el banner superior, liberación inmediata de recursos del sistema (TTS y vibración) y registro de estado "CANCELLED".
 - [x] Solicitud dinámica de permisos en tiempo de ejecución al iniciar la app con banner configurable.
 - [x] Editor visual de atajos modularizado con selección de iconos, colores en degradado y reordenación de pasos.
 - [x] Persistencia local completa con Room SQLite (Atajos, Automatizaciones, Logs de historial).
