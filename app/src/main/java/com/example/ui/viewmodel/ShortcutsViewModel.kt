@@ -185,6 +185,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
     fun cancelExecution() {
         actionExecutor.cancelExecution()
         activeExecutionJob?.cancel()
+        activeExecutionJob = null
     }
 
     fun runShortcutById(shortcutId: Long) {

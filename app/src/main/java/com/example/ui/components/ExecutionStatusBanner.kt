@@ -186,7 +186,22 @@ fun ExecutionStatusBanner(
                                     overflow = TextOverflow.Ellipsis
                                 )
 
-                                if (status.totalSteps > 0 && !status.isCancelled) {
+                                if (status.isCancelled) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(Color.White.copy(alpha = 0.30f))
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    ) {
+                                        Text(
+                                            text = "Cancelado",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                    }
+                                } else if (status.totalSteps > 0) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Box(
                                         modifier = Modifier

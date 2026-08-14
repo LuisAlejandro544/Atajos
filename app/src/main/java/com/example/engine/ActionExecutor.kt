@@ -186,6 +186,15 @@ class ActionExecutor(context: Context) {
                 e.printStackTrace()
             }
         }
+        val current = _status.value
+        _status.value = current.copy(
+            isRunning = false,
+            isFinished = true,
+            isCancelled = true,
+            isSuccess = false,
+            currentActionTitle = "Cancelado",
+            resultMessage = "Atajo cancelado correctamente"
+        )
     }
 
     private suspend fun executeSingleAction(action: ShortcutAction): String = withContext(Dispatchers.Main) {

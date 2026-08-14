@@ -261,14 +261,15 @@ fun ShortcutCard(
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(6.dp))
-                                        .background(Color(0xFFFFD54F).copy(alpha = 0.35f))
+                                        .background(Color.Black.copy(alpha = 0.35f))
                                         .padding(horizontal = 5.dp, vertical = 2.dp)
                                 ) {
                                     Text(
                                         text = triggerBadge,
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFFFFF9C4)
+                                        color = Color(0xFFFFD54F),
+                                        maxLines = 1
                                     )
                                 }
                             }
