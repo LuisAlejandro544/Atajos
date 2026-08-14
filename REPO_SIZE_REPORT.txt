@@ -1,18 +1,19 @@
 =======================================================
 INFORME DE PESO Y METRICAS DEL REPOSITORIO
 =======================================================
-Fecha: 2026-08-14 09:19:44 UTC
+Fecha: 2026-08-14 09:20:04 UTC
 Rama:  main
 
 [RESUMEN]
-- Peso Archivos Proyecto: 1.4M
+- Peso Archivos Proyecto: 2.3M
 - Peso Historial .git:    1.5M
-- Peso Total Disco:       2.9M
-- Total Archivos:         91
-- Total Commits:          13
-- Total Lineas Codigo:    7609 (KT: 6858, XML: 135, GRADLE: 175)
+- Peso Total Disco:       3.8M
+- Total Archivos:         94
+- Total Commits:          15
+- Total Lineas Codigo:    7673 (KT: 6858, XML: 135, GRADLE: 175)
 
 [TOP 10 ARCHIVOS MAS GRANDES]
+952K	./zip/droidflow.zip
 532K	./app/src/main/res/drawable/ic_shortcuts_app.jpg
 20K	./app/src/main/java/com/example/ui/screens/ShortcutEditorScreen.kt
 20K	./app/src/main/java/com/example/ui/screens/AutomationsScreen.kt
@@ -22,5 +23,4 @@ Rama:  main
 16K	./app/src/main/java/com/example/ui/components/ShortcutCard.kt
 16K	./app/src/main/java/com/example/data/db/DefaultShortcutsProvider.kt
 12K	./app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp
-12K	./app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp
 =======================================================
