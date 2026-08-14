@@ -1,14 +1,13 @@
-feat(triggers): disparadores nativos en segundo plano y sincronización asíncrona de voz (TTS)
+feat(tiles,triggers): añadir Quick Settings Tile y disparadores automáticos de batería
 
-- Integrar disparador automático nativo directamente en el editor de cada atajo (`ShortcutTriggerSection`) para eventos de alimentación (`ACTION_POWER_CONNECTED` y `ACTION_POWER_DISCONNECTED`).
-- Implementar `PowerTriggerReceiver` con `goAsync()` en `Dispatchers.IO` para ejecución desatendida y confiable en segundo plano.
-- Solucionar asincronía y condición de carrera en `TtsActionHandler`:
-  - Añadir espera asíncrona no bloqueante (`initDeferred.await()` con timeout de 2000ms) para garantizar que el motor de voz `TextToSpeech` esté listo antes de pronunciar el mensaje en ejecuciones de fondo.
-  - Añadir `UtteranceProgressListener` para asegurar la finalización del audio antes de cerrar el contexto de ejecución.
-  - Asegurar la ejecución segura de mensajes de alerta en el hilo principal (`Looper.getMainLooper()`).
-- Extender entidad `ShortcutEntity` con el atributo `trigger` y migrar `AppDatabase` a la versión 2.
-- Añadir insignias visuales dinámicas (`⚡ Al conectar` / `🔌 Al desconectar`) en `ShortcutCard`.
-- Corregir el estado visual al cancelar atajos:
-  - Actualizar instantáneamente `ExecutionStatus` en `ActionExecutor.cancelExecution()` con estado `isCancelled = true` e `isRunning = false`.
-  - Reemplazar el spinner de carga infinita por un icono distintivo de cancelación (`Icons.Default.Cancel`), fondo cálido anaranjado, insignia "Cancelado" y botón para cerrar el banner.
+- Implementar `ShortcutTileService` (`TileService` de Android) para permitir la ejecución inmediata del atajo favorito o más reciente desde el panel de Ajustes Rápidos (Quick Settings Tile) en la cortina de notificaciones o pantalla de bloqueo.
+- Diseñar y registrar el icono vectorial `@drawable/ic_qs_tile` para el mosaico del sistema.
+- Expandir el motor de disparadores nativos (`ShortcutTrigger`) con soporte para eventos de batería:
+  - Batería baja (<15% `ACTION_BATTERY_LOW`).
+  - Batería restablecida a nivel seguro (`ACTION_BATTERY_OKAY`).
+  - Carga completa al 100% (`BATTERY_FULL`).
+- Actualizar `PowerTriggerReceiver` para despachar eventos de energía y batería de forma asíncrona (`goAsync()` en `Dispatchers.IO`).
+- Añadir opciones e iconos correspondientes en `ShortcutTriggerSection` dentro del editor visual de atajos.
+- Añadir insignias visuales dinámicas (`🪫 Batería baja`, `🔋 Batería OK`, `🔋 Batería 100%`) en `ShortcutCard`.
+- Incorporar plantillas preconfiguradas en la Galería: "Modo Ahorro: Alerta Batería Baja" y "Aviso de Carga Completa (100%)".
 - Actualizar documentación del proyecto (`README.md`, `ROADMAP.md`, `STRUCTURE.md`, `AI_CONTEXT.md`).

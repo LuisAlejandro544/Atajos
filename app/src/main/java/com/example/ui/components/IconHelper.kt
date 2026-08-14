@@ -2,7 +2,10 @@ package com.example.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.BatteryFull
+import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Brightness6
 import androidx.compose.material.icons.filled.Calculate
@@ -41,6 +44,9 @@ object IconHelper {
     val availableIcons = listOf(
         "flash_on" to Icons.Default.FlashOn,
         "battery_charging_full" to Icons.Default.BatteryChargingFull,
+        "battery_alert" to Icons.Default.BatteryAlert,
+        "battery_saver" to Icons.Default.BatterySaver,
+        "battery_full" to Icons.Default.BatteryFull,
         "power_off" to Icons.Default.PowerOff,
         "bolt" to Icons.Default.Bolt,
         "play_circle" to Icons.Default.PlayCircle,

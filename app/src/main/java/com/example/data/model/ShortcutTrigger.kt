@@ -32,6 +32,24 @@ enum class ShortcutTrigger(
         label = "Al conectar o desconectar",
         description = "Se activa en ambos cambios de estado de alimentación",
         iconKey = "bolt"
+    ),
+    BATTERY_LOW(
+        key = "BATTERY_LOW",
+        label = "Batería baja (<15%)",
+        description = "Se activa automáticamente cuando la batería desciende del 15%",
+        iconKey = "battery_alert"
+    ),
+    BATTERY_OK(
+        key = "BATTERY_OK",
+        label = "Batería restablecida",
+        description = "Se activa al salir del estado de batería baja",
+        iconKey = "battery_saver"
+    ),
+    BATTERY_FULL(
+        key = "BATTERY_FULL",
+        label = "Batería cargada al 100%",
+        description = "Se activa automáticamente cuando la recarga llega al 100%",
+        iconKey = "battery_full"
     );
 
     companion object {

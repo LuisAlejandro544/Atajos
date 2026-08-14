@@ -547,6 +547,63 @@ object DefaultShortcutsProvider {
                         )
                     )
                 )
+            ),
+            ShortcutEntity(
+                title = "🪫 Modo Ahorro: Alerta Batería Baja",
+                description = "Se activa en segundo plano cuando la batería baja de 15%: reduce brillo y alerta por voz",
+                colorHex = "#EF4444",
+                iconKey = "battery_alert",
+                category = "Automatización",
+                trigger = "BATTERY_LOW",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.VIBRATE,
+                            title = "Vibración de alerta",
+                            param1 = "300",
+                            param2 = "double"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SET_BRIGHTNESS,
+                            title = "Bajar brillo al 10%",
+                            param1 = "10"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SPEAK_TEXT,
+                            title = "Aviso de batería crítica",
+                            param1 = "¡Atención! Nivel de batería crítico al {BATERIA}. Conecta el cargador."
+                        )
+                    )
+                )
+            ),
+            ShortcutEntity(
+                title = "🔋 Aviso de Carga Completa (100%)",
+                description = "Se activa automáticamente al llegar al 100% de carga para proteger la salud de la batería",
+                colorHex = "#10B981",
+                iconKey = "battery_full",
+                category = "Automatización",
+                trigger = "BATTERY_FULL",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.VIBRATE,
+                            title = "Pulso de confirmación",
+                            param1 = "200",
+                            param2 = "single"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SPEAK_TEXT,
+                            title = "Aviso de carga completa",
+                            param1 = "Batería cargada al 100%. Puedes desconectar el cargador."
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SHOW_NOTIFICATION,
+                            title = "Batería 100%",
+                            param1 = "Carga Completa",
+                            param2 = "El dispositivo ha finalizado su recarga completa."
+                        )
+                    )
+                )
             )
         )
     }

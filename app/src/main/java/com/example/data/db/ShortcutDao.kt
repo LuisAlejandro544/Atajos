@@ -17,8 +17,11 @@ interface ShortcutDao {
     @Query("SELECT * FROM shortcuts WHERE category = :category ORDER BY id ASC")
     fun getShortcutsByCategory(category: String): Flow<List<ShortcutEntity>>
 
-    @Query("SELECT * FROM shortcuts WHERE trigger = :trigger OR trigger = 'POWER_BOTH' ORDER BY id ASC")
+    @Query("SELECT * FROM shortcuts WHERE trigger = :trigger OR (trigger = 'POWER_BOTH' AND (:trigger = 'POWER_CONNECTED' OR :trigger = 'POWER_DISCONNECTED')) ORDER BY id ASC")
     suspend fun getShortcutsForPowerTrigger(trigger: String): List<ShortcutEntity>
+
+    @Query("SELECT * FROM shortcuts WHERE trigger = :trigger OR (trigger = 'POWER_BOTH' AND (:trigger = 'POWER_CONNECTED' OR :trigger = 'POWER_DISCONNECTED')) ORDER BY id ASC")
+    suspend fun getShortcutsForTrigger(trigger: String): List<ShortcutEntity>
 
     @Query("SELECT * FROM shortcuts WHERE trigger != 'NONE' ORDER BY id ASC")
     fun getAutomatedShortcuts(): Flow<List<ShortcutEntity>>

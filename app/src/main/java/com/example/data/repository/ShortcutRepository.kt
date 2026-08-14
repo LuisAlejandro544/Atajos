@@ -32,6 +32,9 @@ class ShortcutRepository(private val database: AppDatabase) {
     suspend fun getShortcutsForPowerTrigger(trigger: String): List<ShortcutEntity> =
         shortcutDao.getShortcutsForPowerTrigger(trigger)
 
+    suspend fun getShortcutsForTrigger(trigger: String): List<ShortcutEntity> =
+        shortcutDao.getShortcutsForTrigger(trigger)
+
     val automatedShortcuts: Flow<List<ShortcutEntity>> = shortcutDao.getAutomatedShortcuts()
 
     suspend fun saveShortcut(shortcut: ShortcutEntity): Long {

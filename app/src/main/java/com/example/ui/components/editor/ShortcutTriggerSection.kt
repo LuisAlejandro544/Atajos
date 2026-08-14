@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.BatteryFull
+import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material.icons.filled.TouchApp
@@ -66,6 +69,24 @@ fun ShortcutTriggerSection(
             icon = Icons.Default.Bolt,
             title = "Al conectar o desconectar",
             subtitle = "Se activa ante cualquier cambio en el estado de alimentación."
+        ),
+        TriggerOption(
+            trigger = ShortcutTrigger.BATTERY_LOW,
+            icon = Icons.Default.BatteryAlert,
+            title = "Batería baja (<15%)",
+            subtitle = "Se ejecuta automáticamente cuando la batería desciende al nivel crítico."
+        ),
+        TriggerOption(
+            trigger = ShortcutTrigger.BATTERY_OK,
+            icon = Icons.Default.BatterySaver,
+            title = "Batería restablecida (>20%)",
+            subtitle = "Se ejecuta al recuperar un nivel de batería seguro."
+        ),
+        TriggerOption(
+            trigger = ShortcutTrigger.BATTERY_FULL,
+            icon = Icons.Default.BatteryFull,
+            title = "Batería cargada al 100%",
+            subtitle = "Se ejecuta cuando el dispositivo finaliza la recarga completa."
         )
     )
 

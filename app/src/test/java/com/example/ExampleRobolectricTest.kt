@@ -17,6 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import com.example.data.model.ShortcutTrigger
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36])
@@ -27,6 +28,15 @@ class ExampleRobolectricTest {
     val context = ApplicationProvider.getApplicationContext<Context>()
     val appName = context.getString(R.string.app_name)
     assertEquals("Atajos", appName)
+  }
+
+  @Test
+  fun `shortcut triggers parsing and defaults`() {
+    assertEquals(ShortcutTrigger.BATTERY_LOW, ShortcutTrigger.fromKey("BATTERY_LOW"))
+    assertEquals(ShortcutTrigger.BATTERY_OK, ShortcutTrigger.fromKey("BATTERY_OK"))
+    assertEquals(ShortcutTrigger.BATTERY_FULL, ShortcutTrigger.fromKey("BATTERY_FULL"))
+    assertEquals(ShortcutTrigger.POWER_CONNECTED, ShortcutTrigger.fromKey("POWER_CONNECTED"))
+    assertEquals(ShortcutTrigger.NONE, ShortcutTrigger.fromKey("UNKNOWN_TRIGGER"))
   }
 
   @Test

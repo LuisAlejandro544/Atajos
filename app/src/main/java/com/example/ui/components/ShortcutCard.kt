@@ -253,6 +253,9 @@ fun ShortcutCard(
                                 "POWER_CONNECTED" -> "⚡ Al conectar"
                                 "POWER_DISCONNECTED" -> "🔌 Al desconectar"
                                 "POWER_BOTH" -> "⚡🔌 Carga"
+                                "BATTERY_LOW" -> "🪫 Batería baja"
+                                "BATTERY_OK" -> "🔋 Batería OK"
+                                "BATTERY_FULL" -> "🔋 Batería 100%"
                                 else -> null
                             }
 
