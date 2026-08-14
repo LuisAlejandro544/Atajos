@@ -88,11 +88,11 @@ fun ExecutionStatusBanner(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 4.dp)
                 .testTag("execution_status_banner"),
-            shape = RoundedCornerShape(24.dp),
-            tonalElevation = 8.dp,
-            shadowElevation = 12.dp,
+            shape = RoundedCornerShape(16.dp),
+            tonalElevation = 4.dp,
+            shadowElevation = 6.dp,
             color = MaterialTheme.colorScheme.surfaceVariant
         ) {
             Box(
@@ -102,28 +102,28 @@ fun ExecutionStatusBanner(
                         Brush.horizontalGradient(
                             colors = if (status.isRunning) {
                                 listOf(
-                                    IndigoPrimary.copy(alpha = 0.90f),
+                                    IndigoPrimary.copy(alpha = 0.92f),
                                     Color(0xFF312E81).copy(alpha = 0.98f)
                                 )
                             } else if (status.isCancelled) {
                                 listOf(
-                                    Color(0xFFF97316).copy(alpha = 0.90f), // Warm Orange
+                                    Color(0xFFF97316).copy(alpha = 0.92f), // Warm Orange
                                     Color(0xFFC2410C).copy(alpha = 0.98f)
                                 )
                             } else if (status.isSuccess) {
                                 listOf(
-                                    EmeraldAccent.copy(alpha = 0.85f),
-                                    Color(0xFF065F46).copy(alpha = 0.95f)
+                                    EmeraldAccent.copy(alpha = 0.90f),
+                                    Color(0xFF065F46).copy(alpha = 0.98f)
                                 )
                             } else {
                                 listOf(
-                                    RoseAccent.copy(alpha = 0.85f),
-                                    Color(0xFF881337).copy(alpha = 0.95f)
+                                    RoseAccent.copy(alpha = 0.90f),
+                                    Color(0xFF881337).copy(alpha = 0.98f)
                                 )
                             }
                         )
                     )
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -134,10 +134,10 @@ fun ExecutionStatusBanner(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        // Animated Indicator Icon
+                        // Compact Animated Indicator Icon
                         Box(
                             modifier = Modifier
-                                .size(38.dp)
+                                .size(28.dp)
                                 .scale(if (status.isRunning) pulseScale else 1f)
                                 .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.2f)),
@@ -145,73 +145,73 @@ fun ExecutionStatusBanner(
                         ) {
                             if (status.isRunning) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(16.dp),
                                     color = Color.White,
-                                    strokeWidth = 2.5.dp
+                                    strokeWidth = 2.dp
                                 )
                             } else if (status.isCancelled) {
                                 Icon(
                                     imageVector = Icons.Default.Cancel,
                                     contentDescription = "Cancelado",
                                     tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             } else if (status.isSuccess) {
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
                                     contentDescription = "Éxito",
                                     tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             } else {
                                 Icon(
                                     imageVector = Icons.Default.Error,
                                     contentDescription = "Error",
                                     tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
 
-                        Column {
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = status.shortcutTitle.ifBlank { "Atajo en ejecución" },
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp,
+                                    fontSize = 13.sp,
                                     color = Color.White,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
 
                                 if (status.isCancelled) {
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
+                                            .clip(RoundedCornerShape(6.dp))
                                             .background(Color.White.copy(alpha = 0.30f))
-                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                            .padding(horizontal = 5.dp, vertical = 1.dp)
                                     ) {
                                         Text(
                                             text = "Cancelado",
-                                            fontSize = 11.sp,
+                                            fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White
                                         )
                                     }
                                 } else if (status.totalSteps > 0) {
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
+                                            .clip(RoundedCornerShape(6.dp))
                                             .background(Color.White.copy(alpha = 0.25f))
-                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                            .padding(horizontal = 5.dp, vertical = 1.dp)
                                     ) {
                                         Text(
                                             text = "${status.currentStep}/${status.totalSteps}",
-                                            fontSize = 11.sp,
+                                            fontSize = 10.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             color = Color.White
                                         )
@@ -219,12 +219,10 @@ fun ExecutionStatusBanner(
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(2.dp))
-
                             Text(
                                 text = status.resultMessage.ifBlank { status.currentActionTitle },
-                                fontSize = 13.sp,
-                                color = Color.White.copy(alpha = 0.9f),
+                                fontSize = 11.sp,
+                                color = Color.White.copy(alpha = 0.88f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -240,22 +238,22 @@ fun ExecutionStatusBanner(
                                 containerColor = Color.White.copy(alpha = 0.25f),
                                 contentColor = Color.White
                             ),
-                            shape = RoundedCornerShape(12.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                             modifier = Modifier
-                                .height(34.dp)
+                                .height(28.dp)
                                 .testTag("cancel_execution_button")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Stop,
                                 contentDescription = "Cancelar",
                                 tint = Color.White,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(13.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
                             Text(
                                 text = "Cancelar",
-                                fontSize = 12.sp,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
@@ -264,14 +262,14 @@ fun ExecutionStatusBanner(
                         IconButton(
                             onClick = onDismiss,
                             modifier = Modifier
-                                .size(32.dp)
+                                .size(28.dp)
                                 .testTag("dismiss_status_button")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Cerrar",
-                                tint = Color.White.copy(alpha = 0.8f),
-                                modifier = Modifier.size(18.dp)
+                                tint = Color.White.copy(alpha = 0.85f),
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }

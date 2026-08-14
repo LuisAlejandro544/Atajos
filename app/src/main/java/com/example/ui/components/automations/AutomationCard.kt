@@ -17,9 +17,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.BatteryFull
+import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -57,7 +60,10 @@ fun AutomationCard(
     val triggerIcon: ImageVector = when (automation.triggerType) {
         TriggerType.TIME_OF_DAY -> Icons.Default.Schedule
         TriggerType.CHARGER_CONNECTED -> Icons.Default.BatteryChargingFull
+        TriggerType.CHARGER_DISCONNECTED -> Icons.Default.PowerOff
         TriggerType.BATTERY_LOW -> Icons.Default.BatteryAlert
+        TriggerType.BATTERY_OK -> Icons.Default.BatterySaver
+        TriggerType.BATTERY_FULL -> Icons.Default.BatteryFull
         TriggerType.APP_OPENED -> Icons.Default.PlayCircle
     }
 

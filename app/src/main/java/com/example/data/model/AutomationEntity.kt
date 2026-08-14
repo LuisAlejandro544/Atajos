@@ -6,7 +6,10 @@ import androidx.room.PrimaryKey
 enum class TriggerType(val label: String, val description: String, val iconKey: String) {
     TIME_OF_DAY("Hora del día", "Se activa a una hora programada específica", "schedule"),
     CHARGER_CONNECTED("Al conectar cargador", "Se activa cuando el teléfono empieza a cargar", "battery_charging_full"),
+    CHARGER_DISCONNECTED("Al desconectar cargador", "Se activa cuando el cargador se desenchufa", "power_off"),
     BATTERY_LOW("Batería baja (<20%)", "Se activa cuando el nivel de batería desciende", "battery_alert"),
+    BATTERY_OK("Batería restablecida", "Se activa al recuperar nivel normal de batería", "battery_saver"),
+    BATTERY_FULL("Batería 100%", "Se activa al completarse la carga al 100%", "battery_full"),
     APP_OPENED("Al abrir la app", "Se activa automáticamente al iniciar Atajos", "play_circle")
 }
 

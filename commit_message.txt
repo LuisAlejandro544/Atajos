@@ -1,8 +1,10 @@
-feat(website): actualizar repositorio GitHub, responsividad móvil, sección FAQ y documentación
+fix(engine): corregir ejecución de atajos y automatizaciones por eventos de energía y batería
 
-- Vincular todos los accesos de GitHub al repositorio oficial `https://github.com/LuisAlejandro544/Atajos`.
-- Corregir y optimizar la barra de navegación y los encabezados en dispositivos móviles para evitar solapamientos y desbordamientos.
-- Agregar sección interactiva de Preguntas Frecuentes (FAQ) en la página de inicio para resolver dudas sobre instalación de APK, permisos y privacidad offline.
-- Añadir sección dedicada de Descarga Directa con enlaces a las releases de GitHub.
-- Ampliar la guía de documentación (`/docs`) con todas las variables dinámicas del sistema (`{DIA_SEMANA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}`, `{ULTIMA_NOTIFICACION}`, etc.) y catálogo de 17+ acciones.
-- Actualizar la documentación del repositorio (`README.md`, `ROADMAP.md`) con las nuevas características del portal web.
+- Unificar la ejecución en `PowerTriggerReceiver` para consultar tanto atajos con disparador directo como automatizaciones activas (`TriggerType.CHARGER_CONNECTED`, `CHARGER_DISCONNECTED`, etc.).
+- Añadir los tipos de disparador faltantes (`CHARGER_DISCONNECTED`, `BATTERY_OK`, `BATTERY_FULL`) en `TriggerType` y `AutomationDao`.
+- Resolver el cierre prematuro de `goAsync().finish()` asegurando que la ejecución de acciones, la síntesis de voz (TTS) y el guardado de registros en Room se completen de manera síncrona dentro de la corrutina.
+- Garantizar la liberación segura de recursos de hardware mediante `ActionExecutor.release()`.
+- Agregar iconos y soporte visual para todos los tipos de disparadores en `AutomationCard`.
+- Rediseñar y compactar el banner de estado de ejecución (`ExecutionStatusBanner`) haciéndolo más discreto, elegante y con proporciones ajustadas.
+- Limitar el historial de ejecuciones a un máximo de 20 elementos recientes y purgar automáticamente los registros antiguos en la base de datos Room (`ExecutionLogDao`).
+

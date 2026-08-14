@@ -16,6 +16,12 @@ class ShortcutRepository(private val database: AppDatabase) {
     val allAutomations: Flow<List<AutomationEntity>> = automationDao.getAllAutomations()
     val recentLogs: Flow<List<ExecutionLogEntity>> = executionLogDao.getRecentLogs()
 
+    suspend fun getActiveAutomations(): List<AutomationEntity> =
+        automationDao.getActiveAutomationsList()
+
+    suspend fun getActiveAutomationsByTriggerType(triggerType: com.example.data.model.TriggerType): List<AutomationEntity> =
+        automationDao.getActiveAutomationsByTriggerType(triggerType)
+
     suspend fun checkAndSeedDefaults() {
         val count = shortcutDao.getCount()
         if (count == 0) {
@@ -60,6 +66,9 @@ class ShortcutRepository(private val database: AppDatabase) {
 
     suspend fun logExecution(log: ExecutionLogEntity) {
         executionLogDao.insertLog(log)
+        try {
+            executionLogDao.pruneOldLogs()
+        } catch (_: Exception) {}
     }
 
     suspend fun clearLogs() {

@@ -17,6 +17,12 @@ interface AutomationDao {
     @Query("SELECT * FROM automations WHERE isEnabled = 1")
     fun getActiveAutomations(): Flow<List<AutomationEntity>>
 
+    @Query("SELECT * FROM automations WHERE isEnabled = 1")
+    suspend fun getActiveAutomationsList(): List<AutomationEntity>
+
+    @Query("SELECT * FROM automations WHERE isEnabled = 1 AND triggerType = :triggerType")
+    suspend fun getActiveAutomationsByTriggerType(triggerType: com.example.data.model.TriggerType): List<AutomationEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAutomation(automation: AutomationEntity): Long
 
