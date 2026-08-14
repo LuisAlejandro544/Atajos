@@ -12,13 +12,15 @@ La aplicación sigue una arquitectura modular y reactiva basada en **Model-View-
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          CAPA DE PRESENTACIÓN                           │
 │  • MainActivity (Ciclo de vida, Intent resolution, Edge-to-edge)        │
+│  • Navigation Contracts (MainTabActions, Home/Automations/Gallery tabs) │
 │  • AppNavigation (ShortcutsTopBar, ShortcutsBottomBar, MainTabContent)  │
-│  • Jetpack Compose Screens (Home, Editor, Gallery, History)             │
+│  • Jetpack Compose Screens (Home, Editor, Gallery, History, Auto)       │
+│  • Automations Submódulos: AutomationCard, NewAutomationDialog          │
 │  • Editor Submódulos: LivePreviewCard, MetadataSection, ActionsSection  │
 │  • ShortcutsViewModel (StateFlow, Coordinación y fachada MVVM)          │
 │  • Gestores Modulares: ShortcutEditorManager, AutomationsManager        │
 │  • UI Submódulos: actioninputs/ (Tts, Flashlight, Vibration, Launcher)  │
-│  • Componentes Dinámicos: PermissionBanner, VariablePickerChips         │
+│  • Componentes Dinámicos: PermissionBanner, VariablePickerChips, Item   │
 └────────────────────────────────────┬────────────────────────────────────┘
                                      │
                                      ▼
@@ -91,6 +93,7 @@ app/src/main/java/com/example/
 └── ui/
     ├── components/               # Componentes reutilizables de Compose
     │   ├── ActionCard.kt         # Tarjeta de acción reordenable y contenedor modular
+    │   ├── ActionTypeItem.kt     # Componente modularizado para ítems de selección de acción
     │   ├── AddActionBottomSheet.kt # Diálogo modal para agregar acciones
     │   ├── AppPickerBottomSheet.kt # Selector visual de juegos/apps con buscador y estados de carga
     │   ├── CustomizationPickers.kt # Selectores de paletas de color e iconos
@@ -99,6 +102,10 @@ app/src/main/java/com/example/
     │   ├── PermissionBanner.kt   # Banner informativo para activación de permisos en tiempo de ejecución
     │   ├── ShortcutCard.kt       # Tarjeta de atajo en la pantalla principal
     │   ├── VariablePickerChips.kt# Selector horizontal para autocompletar variables dinámicas
+    │   │
+    │   ├── automations/          # Submódulos desacoplados del sistema de automatizaciones
+    │   │   ├── AutomationCard.kt       # Tarjeta individual con switches y acciones de prueba/borrado
+    │   │   └── NewAutomationDialog.kt  # Modal de creación de automatización y configuración de triggers
     │   │
     │   ├── actioninputs/         # Submódulos de parametrización por tipo de acción
     │   │   ├── AppLauncherInputSection.kt # Selector y visualizador de juego/app configurado
@@ -120,6 +127,7 @@ app/src/main/java/com/example/
     │       └── ShortcutActionsSection.kt  # Pipeline de acciones: header, lista y empty states
     │
     ├── navigation/               # Módulos de enrutamiento y barras de navegación
+    │   ├── NavigationContracts.kt# Contratos tipados de callbacks (HomeTabActions, AutomationsTabActions, etc.)
     │   ├── ShortcutsTopBar.kt    # Barra superior con branding, banner de permisos y monitor
     │   ├── ShortcutsBottomBar.kt # Barra de navegación inferior (Tabs M3)
     │   └── MainTabContent.kt     # Transición y orquestación de pantallas principales
@@ -127,7 +135,7 @@ app/src/main/java/com/example/
     ├── screens/
     │   ├── ShortcutsHomeScreen.kt   # Vista principal con cuadrícula de atajos
     │   ├── ShortcutEditorScreen.kt  # Editor visual modularizado
-    │   ├── AutomationsScreen.kt     # Gestión de disparadores horarios/hardware
+    │   ├── AutomationsScreen.kt     # Orquestador desacoplado de automatizaciones
     │   ├── GalleryScreen.kt         # Catálogo de plantillas prefabricadas
     │   └── HistoryScreen.kt         # Visor de logs y tiempos de ejecución
     │

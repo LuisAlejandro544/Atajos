@@ -1,8 +1,7 @@
-feat: solicitudes web y webhooks estilo iOS Shortcuts (GET/POST/APIs) con variables dinámicas
+refactor: modularizar AutomationsScreen, MainTabContent, MainActivity y AddActionBottomSheet
 
-- Implementar acción HTTP_REQUEST para realizar peticiones HTTP y Webhooks nativos (GET, POST, PUT, DELETE) en segundo plano (Dispatchers.IO) mediante HttpRequestActionHandler y HttpRequestInputSection.
-- Añadir interpolación de variables dinámicas del sistema ({HORA}, {BATERIA}, etc.) en la URL y en el cuerpo JSON de la petición.
-- Implementar persistencia y resolución en tiempo de ejecución de las nuevas variables dinámicas {RESPUESTA_WEB} y {HTTP_STATUS} en VariableResolverHelper para encadenar respuestas con voz, notificaciones o portapapeles.
-- Añadir selector visual con chips de métodos HTTP, variables rápidas y avisos de encadenamiento de respuestas.
-- Añadir nuevas plantillas de galería en DefaultShortcutsProvider para consulta en vivo de APIs REST con Text-To-Speech y disparo de Webhooks con telemetría de batería.
-- Actualizar documentación técnica en README.md, ROADMAP.md, STRUCTURE.md y AI_CONTEXT.md.
+- Extraer componentes modulares en `ui/components/automations/` (`AutomationCard.kt`, `NewAutomationDialog.kt`) para desacoplar responsabilidades y reducir el tamaño de `AutomationsScreen.kt`.
+- Modularizar los ítems de selección de acción creando el componente reutilizable `ui/components/ActionTypeItem.kt`.
+- Desacoplar el paso de eventos entre `MainActivity.kt` y `MainTabContent.kt` mediante contratos tipados en `ui/navigation/NavigationContracts.kt` (`MainTabActions`, `HomeTabActions`, `AutomationsTabActions`, etc.).
+- Actualizar `STRUCTURE.md` con la nueva topología de submódulos y delegaciones de interfaz.
+- Mantener la integridad de sincronización continua y compatibilidad para distribución en tiendas de terceros y APK directo.

@@ -132,25 +132,7 @@ jobs:
           touch zip/.gitkeep
           echo "Archive cleanup completed successfully."
 
-      - name: Read Custom Commit Message
-        if: steps.find-archive.outputs.found == 'true'
-        id: commit-msg
-        run: |
-          if [ -f "commit_message.txt" ] && [ -s "commit_message.txt" ]; then
-            # Read first line or complete text
-            MSG=$(cat commit_message.txt | head -n 5)
-            echo "Found custom commit message: $MSG"
-          else
-            MSG="Update codebase from archive in zip/ [skip ci]"
-            echo "Using default commit message"
-          fi
-          
-          # Set multiline output safely for GitHub Actions
-          echo "message<<EOF" >> $GITHUB_OUTPUT
-          echo "$MSG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Commit and Push Changes
+      - name: Commit and Push Changes (Amend into Single Commit)
         if: steps.find-archive.outputs.found == 'true'
         env:
           GITHUB_TOKEN: ${{ steps.auth-token.outputs.TOKEN }}
@@ -160,14 +142,16 @@ jobs:
           
           git add -A
           
-          # Check if there are actual changes
-          if git diff-index --quiet HEAD --; then
-            echo "No changes detected after extraction. Working tree is clean."
+          # Check if there are changes or if we are amending the zip upload commit
+          if [ -f "commit_message.txt" ] && [ -s "commit_message.txt" ]; then
+            echo "Amending commit using commit_message.txt..."
+            git commit --amend -F commit_message.txt
           else
-            echo "Committing changes..."
-            git commit -m "${{ steps.commit-msg.outputs.message }}"
-            
-            # Push changes using the resolved authentication token
-            git push origin HEAD:${{ github.ref }}
-            echo "Successfully pushed changes to ${{ github.ref }}."
+            echo "Amending commit with default message..."
+            git commit --amend -m "Update codebase from zip archive [skip ci]"
           fi
+          
+          # Force push to replace the temporary upload commit with the final clean commit
+          echo "Force-pushing amended single commit to ${{ github.ref }}..."
+          git push --force origin HEAD:${{ github.ref }}
+          echo "Successfully synchronized codebase in 1 single clean commit."

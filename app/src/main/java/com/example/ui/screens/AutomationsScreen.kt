@@ -1,7 +1,6 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,46 +20,30 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoMode
-import androidx.compose.material.icons.filled.BatteryAlert
-import androidx.compose.material.icons.filled.BatteryChargingFull
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.AutomationEntity
 import com.example.data.model.ShortcutEntity
-import com.example.data.model.TriggerType
+import com.example.ui.components.automations.AutomationCard
+import com.example.ui.components.automations.NewAutomationDialog
 import com.example.ui.theme.CyanAccent
 import com.example.ui.theme.IndigoPrimary
 
+/**
+ * Pantalla principal de Automatizaciones personales.
+ */
 @Composable
 fun AutomationsScreen(
     automations: List<AutomationEntity>,
@@ -194,268 +177,4 @@ fun AutomationsScreen(
             onSave = onSaveAutomation
         )
     }
-}
-
-@Composable
-fun AutomationCard(
-    automation: AutomationEntity,
-    onToggle: (Boolean) -> Unit,
-    onDelete: () -> Unit,
-    onTestRun: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val triggerIcon: ImageVector = when (automation.triggerType) {
-        TriggerType.TIME_OF_DAY -> Icons.Default.Schedule
-        TriggerType.CHARGER_CONNECTED -> Icons.Default.BatteryChargingFull
-        TriggerType.BATTERY_LOW -> Icons.Default.BatteryAlert
-        TriggerType.APP_OPENED -> Icons.Default.PlayCircle
-    }
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .testTag("automation_card_${automation.id}"),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (automation.isEnabled) IndigoPrimary.copy(alpha = 0.2f)
-                                else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = triggerIcon,
-                            contentDescription = null,
-                            tint = if (automation.isEnabled) IndigoPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column {
-                        Text(
-                            text = automation.title,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Disparador: ${automation.triggerType.label}",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Switch(
-                    checked = automation.isEnabled,
-                    onCheckedChange = onToggle,
-                    modifier = Modifier.testTag("automation_switch_${automation.id}")
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Action details row
-            Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Ejecuta: ${automation.shortcutTitle.ifBlank { "Atajo #${automation.shortcutId}" }}",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Button(
-                            onClick = onTestRun,
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            modifier = Modifier
-                                .height(30.dp)
-                                .testTag("test_automation_${automation.id}")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(2.dp))
-                            Text("Probar", fontSize = 11.sp)
-                        }
-
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        IconButton(
-                            onClick = onDelete,
-                            modifier = Modifier.size(30.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Eliminar",
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NewAutomationDialog(
-    availableShortcuts: List<ShortcutEntity>,
-    onDismiss: () -> Unit,
-    onSave: (AutomationEntity) -> Unit
-) {
-    var title by remember { mutableStateOf("") }
-    var selectedTrigger by remember { mutableStateOf(TriggerType.TIME_OF_DAY) }
-    var triggerValue by remember { mutableStateOf("08:00") }
-    var selectedShortcutId by remember {
-        mutableStateOf(availableShortcuts.firstOrNull()?.id ?: 0L)
-    }
-
-    val selectedShortcut = availableShortcuts.firstOrNull { it.id == selectedShortcutId }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = "Nueva Automatización", fontWeight = FontWeight.Bold)
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Nombre") },
-                    placeholder = { Text("Ej: Rutina de Mañana") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("automation_title_field"),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                Text(
-                    text = "Selecciona el Disparador:",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    TriggerType.values().forEach { trigger ->
-                        FilterChip(
-                            selected = selectedTrigger == trigger,
-                            onClick = {
-                                selectedTrigger = trigger
-                                if (title.isBlank()) {
-                                    title = "Automatización: ${trigger.label}"
-                                }
-                            },
-                            label = { Text(trigger.label) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-
-                if (selectedTrigger == TriggerType.TIME_OF_DAY) {
-                    OutlinedTextField(
-                        value = triggerValue,
-                        onValueChange = { triggerValue = it },
-                        label = { Text("Hora programada (HH:MM)") },
-                        placeholder = { Text("08:00") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-
-                Text(
-                    text = "Atajo a ejecutar:",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                if (availableShortcuts.isEmpty()) {
-                    Text(
-                        text = "Primero debes crear al menos un atajo en tu biblioteca.",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        availableShortcuts.take(4).forEach { shortcut ->
-                            FilterChip(
-                                selected = selectedShortcutId == shortcut.id,
-                                onClick = { selectedShortcutId = shortcut.id },
-                                label = { Text(shortcut.title) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val finalTitle = title.ifBlank { "Auto: ${selectedTrigger.label}" }
-                    onSave(
-                        AutomationEntity(
-                            title = finalTitle,
-                            triggerType = selectedTrigger,
-                            triggerValue = triggerValue,
-                            shortcutId = selectedShortcutId,
-                            shortcutTitle = selectedShortcut?.title ?: "Atajo",
-                            isEnabled = true
-                        )
-                    )
-                },
-                enabled = availableShortcuts.isNotEmpty(),
-                modifier = Modifier.testTag("save_automation_button")
-            ) {
-                Text("Crear")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
-            }
-        }
-    )
 }

@@ -20,7 +20,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ui.navigation.AutomationsTabActions
+import com.example.ui.navigation.GalleryTabActions
+import com.example.ui.navigation.HistoryTabActions
+import com.example.ui.navigation.HomeTabActions
+import com.example.ui.navigation.MainTabActions
 import com.example.ui.navigation.MainTabContent
+import com.example.ui.navigation.TopBarActions
 import com.example.ui.screens.ShortcutEditorScreen
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.viewmodel.ShortcutsViewModel
@@ -120,6 +126,41 @@ fun ShortcutsApp(
             onClose = viewModel::closeEditor
         )
     } else {
+        val mainTabActions = remember(viewModel) {
+            MainTabActions(
+                home = HomeTabActions(
+                    onCategorySelected = viewModel::setSelectedCategory,
+                    onSearchQueryChange = viewModel::setSearchQuery,
+                    onRunShortcut = viewModel::runShortcut,
+                    onEditShortcut = viewModel::openEditShortcut,
+                    onDuplicateShortcut = viewModel::duplicateShortcut,
+                    onToggleFavorite = viewModel::toggleFavorite,
+                    onDeleteShortcut = viewModel::deleteShortcut,
+                    onCreateNewShortcut = viewModel::openNewShortcutEditor
+                ),
+                automations = AutomationsTabActions(
+                    onToggleAutomation = viewModel::toggleAutomation,
+                    onDeleteAutomation = viewModel::deleteAutomation,
+                    onTestRunAutomation = viewModel::testRunAutomation,
+                    onOpenNewDialog = viewModel::openNewAutomationDialog,
+                    onCloseDialog = viewModel::closeAutomationDialog,
+                    onSaveAutomation = viewModel::saveAutomation
+                ),
+                gallery = GalleryTabActions(
+                    onInstallTemplate = viewModel::installGalleryTemplate,
+                    onTestRunTemplate = viewModel::runShortcut
+                ),
+                history = HistoryTabActions(
+                    onClearHistory = viewModel::clearLogs
+                ),
+                topBar = TopBarActions(
+                    onRequestPermissions = { permissionLauncher.launch(permissionList) },
+                    onDismissPermissionBanner = { showPermissionBanner = false },
+                    onDismissExecutionStatus = viewModel::dismissExecutionStatus
+                )
+            )
+        }
+
         MainTabContent(
             selectedTab = selectedTab,
             filteredShortcuts = filteredShortcuts,
@@ -133,25 +174,7 @@ fun ShortcutsApp(
             executionStatus = executionStatus,
             showPermissionBanner = showPermissionBanner,
             onTabSelected = viewModel::setSelectedTab,
-            onCategorySelected = viewModel::setSelectedCategory,
-            onSearchQueryChange = viewModel::setSearchQuery,
-            onRunShortcut = viewModel::runShortcut,
-            onEditShortcut = viewModel::openEditShortcut,
-            onDuplicateShortcut = viewModel::duplicateShortcut,
-            onToggleFavorite = viewModel::toggleFavorite,
-            onDeleteShortcut = viewModel::deleteShortcut,
-            onCreateNewShortcut = viewModel::openNewShortcutEditor,
-            onToggleAutomation = viewModel::toggleAutomation,
-            onDeleteAutomation = viewModel::deleteAutomation,
-            onTestRunAutomation = viewModel::testRunAutomation,
-            onOpenNewAutomationDialog = viewModel::openNewAutomationDialog,
-            onCloseAutomationDialog = viewModel::closeAutomationDialog,
-            onSaveAutomation = viewModel::saveAutomation,
-            onInstallGalleryTemplate = viewModel::installGalleryTemplate,
-            onClearHistory = viewModel::clearLogs,
-            onRequestPermissions = { permissionLauncher.launch(permissionList) },
-            onDismissPermissionBanner = { showPermissionBanner = false },
-            onDismissExecutionStatus = viewModel::dismissExecutionStatus
+            actions = mainTabActions
         )
     }
 }
