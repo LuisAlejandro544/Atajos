@@ -25,13 +25,18 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel principal que centraliza los flujos de datos reactivos (Room + StateFlow)
- * y coordina la navegación de pestañas, edición, automatizaciones e historial.
+ * y delega la lógica en gestores especializados (ShortcutEditorManager, AutomationsManager).
  */
 class ShortcutsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: ShortcutRepository
     val actionExecutor: ActionExecutor
 
+    // Gestores modulares
+    private val editorManager: ShortcutEditorManager
+    private val automationsManager: AutomationsManager
+
+    // Flujos de datos principales
     val allShortcuts: StateFlow<List<ShortcutEntity>>
     val allAutomations: StateFlow<List<AutomationEntity>>
     val recentLogs: StateFlow<List<ExecutionLogEntity>>
@@ -47,22 +52,26 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    // Estado del editor
-    private val _editorState = MutableStateFlow(EditorState())
-    val editorState: StateFlow<EditorState> = _editorState.asStateFlow()
+    // Delegación de estados de gestores
+    val editorState: StateFlow<EditorState>
+        get() = editorManager.editorState
 
-    // Diálogos de automatizaciones
-    private val _showAutomationDialog = MutableStateFlow(false)
-    val showAutomationDialog: StateFlow<Boolean> = _showAutomationDialog.asStateFlow()
+    val showAutomationDialog: StateFlow<Boolean>
+        get() = automationsManager.showAutomationDialog
 
-    private val _editingAutomation = MutableStateFlow<AutomationEntity?>(null)
-    val editingAutomation: StateFlow<AutomationEntity?> = _editingAutomation.asStateFlow()
+    val editingAutomation: StateFlow<AutomationEntity?>
+        get() = automationsManager.editingAutomation
 
     init {
         val database = AppDatabase.getInstance(application)
         repository = ShortcutRepository(database)
         actionExecutor = ActionExecutor(application)
         executionStatus = actionExecutor.status
+
+        editorManager = ShortcutEditorManager(repository, actionExecutor, viewModelScope)
+        automationsManager = AutomationsManager(repository, viewModelScope) { shortcutId ->
+            runShortcutById(shortcutId)
+        }
 
         allShortcuts = repository.allShortcuts.stateIn(
             viewModelScope,
@@ -207,185 +216,33 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    // ── Gestión del Editor de Atajos ──────────────────────────────────────────
-    fun openNewShortcutEditor() {
-        _editorState.value = EditorState(
-            isEditing = true,
-            isNew = true,
-            title = "",
-            description = "",
-            colorHex = "#4F46E5",
-            iconKey = "flash_on",
-            category = "Utilidades",
-            actions = listOf(
-                ShortcutAction(
-                    type = ActionType.VIBRATE,
-                    title = "Vibración de aviso",
-                    param1 = "150",
-                    param2 = "single"
-                )
-            ),
-            isFavorite = false
-        )
-    }
+    // ── Delegaciones al Editor de Atajos ─────────────────────────────────────
+    fun openNewShortcutEditor() = editorManager.openNewShortcutEditor()
+    fun openEditShortcut(shortcut: ShortcutEntity) = editorManager.openEditShortcut(shortcut)
+    fun closeEditor() = editorManager.closeEditor()
+    fun updateEditorTitle(title: String) = editorManager.updateTitle(title)
+    fun updateEditorDescription(desc: String) = editorManager.updateDescription(desc)
+    fun updateEditorColor(colorHex: String) = editorManager.updateColor(colorHex)
+    fun updateEditorIcon(iconKey: String) = editorManager.updateIcon(iconKey)
+    fun updateEditorCategory(category: String) = editorManager.updateCategory(category)
+    fun addActionToEditor(type: ActionType) = editorManager.addAction(type)
+    fun removeActionFromEditor(index: Int) = editorManager.removeAction(index)
+    fun updateActionInEditor(index: Int, updatedAction: ShortcutAction) = editorManager.updateAction(index, updatedAction)
+    fun moveActionUp(index: Int) = editorManager.moveActionUp(index)
+    fun moveActionDown(index: Int) = editorManager.moveActionDown(index)
+    fun saveEditorShortcut() = editorManager.saveShortcut()
+    fun testRunEditorShortcut() = editorManager.testRunShortcut()
 
-    fun openEditShortcut(shortcut: ShortcutEntity) {
-        _editorState.value = EditorState(
-            isEditing = true,
-            isNew = false,
-            id = shortcut.id,
-            title = shortcut.title,
-            description = shortcut.description,
-            colorHex = shortcut.colorHex,
-            iconKey = shortcut.iconKey,
-            category = shortcut.category,
-            actions = ActionJsonHelper.fromJson(shortcut.actionsJson),
-            isFavorite = shortcut.isFavorite
-        )
-    }
+    // ── Delegaciones a Automatizaciones ──────────────────────────────────────
+    fun openNewAutomationDialog() = automationsManager.openNewAutomationDialog()
+    fun openEditAutomationDialog(automation: AutomationEntity) = automationsManager.openEditAutomationDialog(automation)
+    fun closeAutomationDialog() = automationsManager.closeAutomationDialog()
+    fun saveAutomation(automation: AutomationEntity) = automationsManager.saveAutomation(automation)
+    fun toggleAutomation(id: Long, enabled: Boolean) = automationsManager.toggleAutomation(id, enabled)
+    fun deleteAutomation(id: Long) = automationsManager.deleteAutomation(id)
+    fun testRunAutomation(automation: AutomationEntity) = automationsManager.testRunAutomation(automation)
 
-    fun closeEditor() {
-        _editorState.value = EditorState(isEditing = false)
-    }
-
-    fun updateEditorTitle(title: String) {
-        _editorState.value = _editorState.value.copy(title = title)
-    }
-
-    fun updateEditorDescription(desc: String) {
-        _editorState.value = _editorState.value.copy(description = desc)
-    }
-
-    fun updateEditorColor(colorHex: String) {
-        _editorState.value = _editorState.value.copy(colorHex = colorHex)
-    }
-
-    fun updateEditorIcon(iconKey: String) {
-        _editorState.value = _editorState.value.copy(iconKey = iconKey)
-    }
-
-    fun updateEditorCategory(category: String) {
-        _editorState.value = _editorState.value.copy(category = category)
-    }
-
-    fun addActionToEditor(type: ActionType) {
-        val defaultAction = DefaultActionFactory.createDefaultAction(type)
-        val current = _editorState.value.actions.toMutableList()
-        current.add(defaultAction)
-        _editorState.value = _editorState.value.copy(actions = current)
-    }
-
-    fun removeActionFromEditor(index: Int) {
-        val current = _editorState.value.actions.toMutableList()
-        if (index in current.indices) {
-            current.removeAt(index)
-            _editorState.value = _editorState.value.copy(actions = current)
-        }
-    }
-
-    fun updateActionInEditor(index: Int, updatedAction: ShortcutAction) {
-        val current = _editorState.value.actions.toMutableList()
-        if (index in current.indices) {
-            current[index] = updatedAction
-            _editorState.value = _editorState.value.copy(actions = current)
-        }
-    }
-
-    fun moveActionUp(index: Int) {
-        if (index > 0) {
-            val current = _editorState.value.actions.toMutableList()
-            val item = current.removeAt(index)
-            current.add(index - 1, item)
-            _editorState.value = _editorState.value.copy(actions = current)
-        }
-    }
-
-    fun moveActionDown(index: Int) {
-        val current = _editorState.value.actions.toMutableList()
-        if (index < current.size - 1) {
-            val item = current.removeAt(index)
-            current.add(index + 1, item)
-            _editorState.value = _editorState.value.copy(actions = current)
-        }
-    }
-
-    fun saveEditorShortcut() {
-        val state = _editorState.value
-        val title = state.title.ifBlank { "Mi Atajo Personal" }
-        val shortcut = ShortcutEntity(
-            id = state.id,
-            title = title,
-            description = state.description,
-            colorHex = state.colorHex,
-            iconKey = state.iconKey,
-            category = state.category.ifBlank { "General" },
-            actionsJson = ActionJsonHelper.toJson(state.actions),
-            isFavorite = state.isFavorite,
-            createdAt = System.currentTimeMillis()
-        )
-        viewModelScope.launch {
-            repository.saveShortcut(shortcut)
-            closeEditor()
-        }
-    }
-
-    fun testRunEditorShortcut() {
-        val state = _editorState.value
-        val title = state.title.ifBlank { "Prueba de Atajo" }
-        viewModelScope.launch {
-            actionExecutor.executeShortcut(
-                shortcutId = state.id,
-                shortcutTitle = title,
-                actions = state.actions
-            ) { _, _, _ -> }
-        }
-    }
-
-    // ── Automatizaciones ──────────────────────────────────────────────────────
-    fun openNewAutomationDialog() {
-        _editingAutomation.value = null
-        _showAutomationDialog.value = true
-    }
-
-    fun openEditAutomationDialog(automation: AutomationEntity) {
-        _editingAutomation.value = automation
-        _showAutomationDialog.value = true
-    }
-
-    fun closeAutomationDialog() {
-        _showAutomationDialog.value = false
-        _editingAutomation.value = null
-    }
-
-    fun saveAutomation(automation: AutomationEntity) {
-        viewModelScope.launch {
-            repository.saveAutomation(automation)
-            closeAutomationDialog()
-        }
-    }
-
-    fun toggleAutomation(id: Long, enabled: Boolean) {
-        viewModelScope.launch {
-            repository.toggleAutomation(id, enabled)
-        }
-    }
-
-    fun deleteAutomation(id: Long) {
-        viewModelScope.launch {
-            repository.deleteAutomation(id)
-        }
-    }
-
-    fun testRunAutomation(automation: AutomationEntity) {
-        viewModelScope.launch {
-            val shortcut = repository.getShortcutById(automation.shortcutId)
-            if (shortcut != null) {
-                runShortcut(shortcut)
-            }
-        }
-    }
-
-    // ── Historial & Auditoría ─────────────────────────────────────────────────
+    // ── Historial & Estado ───────────────────────────────────────────────────
     fun clearLogs() {
         viewModelScope.launch {
             repository.clearLogs()

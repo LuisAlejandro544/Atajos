@@ -2,61 +2,32 @@ name: Repository Size & Metrics Report
 
 on:
   workflow_dispatch:
-    inputs:
-      commit_report:
-        description: 'Commit REPO_SIZE_REPORT.md to repository'
-        required: false
-        default: true
-        type: boolean
-  push:
-    branches:
-      - main
-      - master
-    paths-ignore:
-      - 'REPO_SIZE_REPORT.md'
-      - 'REPO_SIZE_REPORT.txt'
 
 concurrency:
   group: repo-size-report-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 jobs:
   analyze-repo-size:
-    name: Analyze Repo Size & Generate Report
+    name: Analyze Repo Size & Metrics
     runs-on: ubuntu-latest
 
     steps:
-      - name: Resolve GitHub Auth Token
-        id: auth-token
-        run: |
-          if [ -n "${{ secrets.GH_PAT }}" ]; then
-            echo "TOKEN=${{ secrets.GH_PAT }}" >> $GITHUB_OUTPUT
-          elif [ -n "${{ secrets.PERSONAL_ACCESS_TOKEN }}" ]; then
-            echo "TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }}" >> $GITHUB_OUTPUT
-          elif [ -n "${{ secrets.GH_TOKEN }}" ]; then
-            echo "TOKEN=${{ secrets.GH_TOKEN }}" >> $GITHUB_OUTPUT
-          else
-            echo "TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.auth-token.outputs.TOKEN }}
           fetch-depth: 0
 
-      - name: Calculate Storage Metrics & Generate Report
+      - name: Calculate Storage Metrics & Display Summary
         id: generate-report
         run: |
-          REPORT_MD="REPO_SIZE_REPORT.md"
-          REPORT_TXT="REPO_SIZE_REPORT.txt"
           TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
 
-          echo "Generating Repository Size and Storage Metrics Report..."
+          echo "Calculating repository storage metrics..."
 
           # Overall sizes
           TOTAL_WORKING_DIR_SIZE=$(du -sh --exclude='.git' . | awk '{print $1}')
@@ -72,132 +43,73 @@ jobs:
           MD_LINES=$(find . -not -path '*/.*' -name "*.md" -exec cat {} + 2>/dev/null | wc -l || echo "0")
           TOTAL_CODE_LINES=$((KT_LINES + XML_LINES + GRADLE_LINES + MD_LINES))
 
-          # Build Markdown Report
-          cat <<EOF > "$REPORT_MD"
-          # 📊 Informe de Peso y Métricas del Repositorio
+          # Render metrics directly into GitHub Step Summary
+          {
+            echo "# 📊 Informe de Peso y Métricas del Repositorio"
+            echo ""
+            echo "> **Ejecutado:** \`$TIMESTAMP\`"
+            echo "> **Rama / Referencia:** \`${{ github.ref_name }}\` (\`${{ github.sha }}\`)"
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 📦 Resumen General de Almacenamiento"
+            echo ""
+            echo "| Métrica | Valor | Descripción |"
+            echo "| :--- | :--- | :--- |"
+            echo "| **Peso Total del Workspace (Código/Assets)** | **$TOTAL_WORKING_DIR_SIZE** | Espacio ocupado por los archivos del proyecto (sin \`.git\`) |"
+            echo "| **Peso del Historial Git (\`.git\`)** | **$TOTAL_GIT_DIR_SIZE** | Historial de versiones y objetos internos de Git |"
+            echo "| **Peso Total del Repositorio** | **$TOTAL_REPO_SIZE** | Tamaño combinado en disco |"
+            echo "| **Total de Archivos del Proyecto** | **$TOTAL_FILES_COUNT** | Archivos activos en el árbol |"
+            echo "| **Total de Commits Registrados** | **$TOTAL_COMMITS_COUNT** | Puntos en la historia de la rama |"
+            echo "| **Líneas Totales de Código y Docs** | **$TOTAL_CODE_LINES** | Kotlin ($KT_LINES), XML ($XML_LINES), Gradle ($GRADLE_LINES), Markdown ($MD_LINES) |"
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 📁 Peso por Carpetas Principales"
+            echo ""
+            echo "| Carpeta / Módulo | Tamaño |"
+            echo "| :--- | :--- |"
 
-          > **Generado automáticamente:** \`$TIMESTAMP\`
-          > **Rama / Referencia:** \`${{ github.ref_name }}\` (\`${{ github.sha }}\`)
+            for dir in app gradle .github assets zip; do
+              if [ -d "$dir" ]; then
+                SIZE=$(du -sh "$dir" 2>/dev/null | awk '{print $1}')
+                echo "| \`$dir/\` | $SIZE |"
+              fi
+            done
 
-          ---
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 📄 Peso y Cantidad por Tipo de Archivo"
+            echo ""
+            echo "| Extensión / Tipo | Cantidad de Archivos | Tamaño Total |"
+            echo "| :--- | :--- | :--- |"
 
-          ## 📦 Resumen General de Almacenamiento
+            for ext in kt xml kts json md properties gradle png webp jar; do
+              COUNT=$(find . -not -path '*/.*' -name "*.$ext" 2>/dev/null | wc -l)
+              if [ "$COUNT" -gt 0 ]; then
+                SIZE=$(find . -not -path '*/.*' -name "*.$ext" -exec du -ch {} + 2>/dev/null | tail -n 1 | awk '{print $1}')
+                echo "| \`.$ext\` | $COUNT | $SIZE |"
+              fi
+            done
 
-          | Métrica | Valor | Descripción |
-          | :--- | :--- | :--- |
-          | **Peso Total del Workspace (Código/Assets)** | **$TOTAL_WORKING_DIR_SIZE** | Espacio ocupado por los archivos del proyecto (sin \`.git\`) |
-          | **Peso del Historial Git (\`.git\`)** | **$TOTAL_GIT_DIR_SIZE** | Historial de versiones y objetos internos de Git |
-          | **Peso Total del Repositorio** | **$TOTAL_REPO_SIZE** | Tamaño combinado en disco |
-          | **Total de Archivos del Proyecto** | **$TOTAL_FILES_COUNT** | Archivos activos en el árbol |
-          | **Total de Commits Registrados** | **$TOTAL_COMMITS_COUNT** | Puntos en la historia de la rama |
-          | **Líneas Totales de Código y Docs** | **$TOTAL_CODE_LINES** | Kotlin ($KT_LINES), XML ($XML_LINES), Gradle ($GRADLE_LINES), Markdown ($MD_LINES) |
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 🔝 Top 10 Archivos Más Pesados del Proyecto"
+            echo ""
+            echo "| Archivo | Tamaño |"
+            echo "| :--- | :--- |"
 
-          ---
+            find . -not -path '*/.*' -type f -exec du -h {} + 2>/dev/null | sort -rh | head -n 10 | while read -r line; do
+              FILE_SIZE=$(echo "$line" | awk '{print $1}')
+              FILE_PATH=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^[ \t]*//')
+              echo "| \`$FILE_PATH\` | $FILE_SIZE |"
+            done
 
-          ## 📁 Peso por Carpetas Principales
+            echo ""
+            echo "---"
+            echo "*Visualización en consola y pestaña Summary de GitHub Actions sin modificar el repositorio.*"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-          | Carpeta / Módulo | Tamaño |
-          | :--- | :--- |
-          EOF
-
-          # Directory breakdown
-          for dir in app gradle .github assets zip; do
-            if [ -d "$dir" ]; then
-              SIZE=$(du -sh "$dir" 2>/dev/null | awk '{print $1}')
-              echo "| \`$dir/\` | $SIZE |" >> "$REPORT_MD"
-            fi
-          done
-
-          cat <<EOF >> "$REPORT_MD"
-
-          ---
-
-          ## 📄 Peso y Cantidad por Tipo de Archivo
-
-          | Extensión / Tipo | Cantidad de Archivos | Tamaño Total |
-          | :--- | :--- | :--- |
-          EOF
-
-          # Extension breakdown
-          for ext in kt xml kts json md properties gradle png webp jar; do
-            COUNT=$(find . -not -path '*/.*' -name "*.$ext" 2>/dev/null | wc -l)
-            if [ "$COUNT" -gt 0 ]; then
-              SIZE=$(find . -not -path '*/.*' -name "*.$ext" -exec du -ch {} + 2>/dev/null | tail -n 1 | awk '{print $1}')
-              echo "| \`.$ext\` | $COUNT | $SIZE |" >> "$REPORT_MD"
-            fi
-          done
-
-          cat <<EOF >> "$REPORT_MD"
-
-          ---
-
-          ## 🔝 Top 10 Archivos Más Pesados del Proyecto
-
-          | Archivo | Tamaño |
-          | :--- | :--- |
-          EOF
-
-          # Top 10 largest files (excluding .git)
-          find . -not -path '*/.*' -type f -exec du -h {} + 2>/dev/null | sort -rh | head -n 10 | while read -r line; do
-            FILE_SIZE=$(echo "$line" | awk '{print $1}')
-            FILE_PATH=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^[ \t]*//')
-            echo "| \`$FILE_PATH\` | $FILE_SIZE |" >> "$REPORT_MD"
-          done
-
-          cat <<EOF >> "$REPORT_MD"
-
-          ---
-          *Informe generado automáticamente por el workflow de GitHub Actions.*
-          EOF
-
-          # Plain text report
-          cat <<EOF > "$REPORT_TXT"
-          =======================================================
-          INFORME DE PESO Y METRICAS DEL REPOSITORIO
-          =======================================================
-          Fecha: $TIMESTAMP
-          Rama:  ${{ github.ref_name }}
-
-          [RESUMEN]
-          - Peso Archivos Proyecto: $TOTAL_WORKING_DIR_SIZE
-          - Peso Historial .git:    $TOTAL_GIT_DIR_SIZE
-          - Peso Total Disco:       $TOTAL_REPO_SIZE
-          - Total Archivos:         $TOTAL_FILES_COUNT
-          - Total Commits:          $TOTAL_COMMITS_COUNT
-          - Total Lineas Codigo:    $TOTAL_CODE_LINES (KT: $KT_LINES, XML: $XML_LINES, GRADLE: $GRADLE_LINES)
-
-          [TOP 10 ARCHIVOS MAS GRANDES]
-          $(find . -not -path '*/.*' -type f -exec du -h {} + 2>/dev/null | sort -rh | head -n 10)
-          =======================================================
-          EOF
-
-          # Append to GitHub Step Summary for direct web viewing
-          cat "$REPORT_MD" >> $GITHUB_STEP_SUMMARY
-          echo "Report generated successfully."
-
-      - name: Upload Report Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: repo-size-report
-          path: |
-            REPO_SIZE_REPORT.md
-            REPO_SIZE_REPORT.txt
-          retention-days: 30
-
-      - name: Commit and Push Report (if enabled)
-        if: ${{ github.event_name == 'push' || github.event.inputs.commit_report == 'true' || github.event.inputs.commit_report == '' }}
-        env:
-          GITHUB_TOKEN: ${{ steps.auth-token.outputs.TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git add REPO_SIZE_REPORT.md REPO_SIZE_REPORT.txt
-          
-          if git diff-index --quiet HEAD --; then
-            echo "No changes in size report to commit."
-          else
-            git commit -m "docs: actualizar informe de peso y métricas del repositorio [skip ci]"
-            git push origin HEAD:${{ github.ref }}
-            echo "Report committed and pushed successfully."
-          fi
+          echo "Storage analysis complete. View results in the GitHub Actions Step Summary tab."

@@ -1,40 +1,26 @@
 package com.example.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -43,10 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -54,14 +37,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ActionType
 import com.example.data.model.ShortcutAction
-import com.example.data.model.ShortcutEntity
 import com.example.ui.components.ActionCard
 import com.example.ui.components.AddActionBottomSheet
-import com.example.ui.components.ColorPickerRow
-import com.example.ui.components.IconHelper
-import com.example.ui.components.IconPickerRow
+import com.example.ui.components.editor.AddNextActionButton
+import com.example.ui.components.editor.ShortcutActionsEmptyState
+import com.example.ui.components.editor.ShortcutActionsHeader
+import com.example.ui.components.editor.ShortcutLivePreviewCard
+import com.example.ui.components.editor.ShortcutMetadataSection
 import com.example.ui.viewmodel.EditorState
 
+/**
+ * Pantalla principal del Editor de Atajos.
+ * Orquesta la previsualización, metadatos y lista de acciones de forma modular.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShortcutEditorScreen(
@@ -83,7 +71,9 @@ fun ShortcutEditorScreen(
 ) {
     var showActionPicker by remember { mutableStateOf(false) }
 
-    val categories = listOf("Utilidades", "Productividad", "Comunicación", "Sistema", "Navegación", "General")
+    val categories = remember {
+        listOf("Utilidades", "Productividad", "Comunicación", "Sistema", "Navegación", "General")
+    }
 
     val activeColor = try {
         Color(android.graphics.Color.parseColor(state.colorHex))
@@ -152,242 +142,41 @@ fun ShortcutEditorScreen(
         ) {
             // Live Preview Card
             item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(130.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    shadowElevation = 6.dp
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        activeColor,
-                                        activeColor.copy(alpha = 0.85f),
-                                        Color(0xFF0F172A).copy(alpha = 0.6f)
-                                    )
-                                )
-                            )
-                            .padding(16.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(Color.White.copy(alpha = 0.25f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = IconHelper.getIcon(state.iconKey),
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(Color.Black.copy(alpha = 0.3f))
-                                        .padding(horizontal = 8.dp, vertical = 3.dp)
-                                ) {
-                                    Text(
-                                        text = state.category,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color.White
-                                    )
-                                }
-                            }
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Bottom
-                            ) {
-                                Text(
-                                    text = state.title.ifBlank { "Nombre de tu Atajo" },
-                                    fontSize = 17.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    maxLines = 2
-                                )
-
-                                Text(
-                                    text = "${state.actions.size} ${if (state.actions.size == 1) "acción" else "acciones"}",
-                                    fontSize = 12.sp,
-                                    color = Color.White.copy(alpha = 0.8f)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Title & Description
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = state.title,
-                        onValueChange = onTitleChange,
-                        label = { Text("Nombre del Atajo") },
-                        placeholder = { Text("Ej: Modo Enfoque, Saludo Matutino") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("editor_title_input"),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp)
-                    )
-
-                    OutlinedTextField(
-                        value = state.description,
-                        onValueChange = onDescriptionChange,
-                        label = { Text("Descripción (opcional)") },
-                        placeholder = { Text("¿Qué hace este atajo?") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("editor_desc_input"),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp)
-                    )
-                }
-            }
-
-            // Category Selector
-            item {
-                Column {
-                    Text(
-                        text = "Categoría",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(vertical = 2.dp)
-                    ) {
-                        items(categories) { category ->
-                            FilterChip(
-                                selected = state.category == category,
-                                onClick = { onCategoryChange(category) },
-                                label = { Text(category) }
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Color Picker
-            item {
-                ColorPickerRow(
-                    selectedColorHex = state.colorHex,
-                    onColorSelected = onColorChange
+                ShortcutLivePreviewCard(
+                    state = state,
+                    activeColor = activeColor
                 )
             }
 
-            // Icon Picker
+            // Metadatos (Título, Descripción, Categoría, Color, Icono)
             item {
-                IconPickerRow(
-                    selectedIconKey = state.iconKey,
-                    selectedColorHex = state.colorHex,
-                    onIconSelected = onIconChange
+                ShortcutMetadataSection(
+                    state = state,
+                    categories = categories,
+                    onTitleChange = onTitleChange,
+                    onDescriptionChange = onDescriptionChange,
+                    onCategoryChange = onCategoryChange,
+                    onColorChange = onColorChange,
+                    onIconChange = onIconChange
                 )
             }
 
-            // Action Pipeline Header
+            // Pipeline de Acciones Header
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Flujo de Acciones (${state.actions.size})",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Button(
-                        onClick = { showActionPicker = true },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        modifier = Modifier.testTag("add_action_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Añadir", fontSize = 13.sp)
-                    }
-                }
+                ShortcutActionsHeader(
+                    actionCount = state.actions.size,
+                    onAddClick = { showActionPicker = true }
+                )
             }
 
-            // Actions Empty State
+            // Pipeline de Acciones Items o Estado Vacío
             if (state.actions.isEmpty()) {
                 item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Widgets,
-                                contentDescription = null,
-                                modifier = Modifier.size(40.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                text = "Sin acciones todavía",
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Añade acciones como hablar, linterna, temporizador o abrir webs",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(14.dp))
-                            Button(
-                                onClick = { showActionPicker = true },
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Icon(Icons.Default.Add, contentDescription = null)
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Añadir primera acción")
-                            }
-                        }
-                    }
+                    ShortcutActionsEmptyState(
+                        onAddClick = { showActionPicker = true }
+                    )
                 }
             } else {
-                // Action Items
                 itemsIndexed(state.actions) { index, action ->
                     ActionCard(
                         stepIndex = index,
@@ -401,22 +190,12 @@ fun ShortcutEditorScreen(
                 }
 
                 item {
-                    OutlinedButton(
-                        onClick = { showActionPicker = true },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                            .testTag("add_more_actions_button"),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Añadir siguiente acción")
-                    }
+                    AddNextActionButton(
+                        onClick = { showActionPicker = true }
+                    )
                 }
             }
 
-            // Bottom Spacing
             item {
                 Spacer(modifier = Modifier.height(24.dp))
             }

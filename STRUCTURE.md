@@ -4,18 +4,21 @@ Este documento detalla la organización de capas, responsabilidades y el flujo d
 
 ---
 
-## 📐 Patrón Arquitectónico: MVVM + Clean Architecture + Command/Strategy Pattern
+## 📐 Patrón Arquitectónico: MVVM + Clean Architecture + Command/Strategy Pattern + Modular Delegations
 
 La aplicación sigue una arquitectura modular y reactiva basada en **Model-View-ViewModel (MVVM)** con separación estricta de responsabilidades:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          CAPA DE PRESENTACIÓN                           │
+│  • MainActivity (Ciclo de vida, Intent resolution, Edge-to-edge)        │
+│  • AppNavigation (ShortcutsTopBar, ShortcutsBottomBar, MainTabContent)  │
 │  • Jetpack Compose Screens (Home, Editor, Gallery, History)             │
-│  • ShortcutsViewModel (StateFlow, UI Events, Coordinación)              │
+│  • Editor Submódulos: LivePreviewCard, MetadataSection, ActionsSection  │
+│  • ShortcutsViewModel (StateFlow, Coordinación y fachada MVVM)          │
+│  • Gestores Modulares: ShortcutEditorManager, AutomationsManager        │
 │  • UI Submódulos: actioninputs/ (Tts, Flashlight, Vibration, Launcher)  │
-│  • Selectores Asíncronos: AppPickerBottomSheet con estados de carga     │
-│  • VariablePickerChips: Inserción visual de variables dinámicas         │
+│  • Componentes Dinámicos: PermissionBanner, VariablePickerChips         │
 └────────────────────────────────────┬────────────────────────────────────┘
                                      │
                                      ▼
@@ -45,7 +48,7 @@ La aplicación sigue una arquitectura modular y reactiva basada en **Model-View-
 ```
 app/src/main/java/com/example/
 │
-├── MainActivity.kt               # Contenedor raíz, permisos dinámicos, launcher shortcuts y navegación
+├── MainActivity.kt               # Contenedor raíz, permisos dinámicos y launcher shortcuts
 │
 ├── data/
 │   ├── db/
@@ -89,21 +92,33 @@ app/src/main/java/com/example/
     │   ├── CustomizationPickers.kt # Selectores de paletas de color e iconos
     │   ├── ExecutionStatusBanner.kt# Banner dinámico de progreso en vivo
     │   ├── IconHelper.kt         # Mapeo tipado de iconos de Material Symbols
+    │   ├── PermissionBanner.kt   # Banner informativo para activación de permisos en tiempo de ejecución
     │   ├── ShortcutCard.kt       # Tarjeta de atajo en la pantalla principal
     │   ├── VariablePickerChips.kt# Selector horizontal para autocompletar variables dinámicas
-    │   └── actioninputs/         # Submódulos de parametrización por tipo de acción
-    │       ├── AppLauncherInputSection.kt # Selector y visualizador de juego/app configurado
-    │       ├── TtsInputSection.kt         # Campo de voz con chips de variables dinámicas
-    │       ├── FlashlightInputSection.kt
-    │       ├── VibrationInputSection.kt   # Selector de patrones hápticos y test en tiempo real
-    │       ├── NotificationInputSection.kt# Título y mensaje con chips de variables dinámicas
-    │       ├── WebUrlInputSection.kt
-    │       ├── MessagingInputSection.kt   # WhatsApp/SMS con chips de variables dinámicas
-    │       └── UtilitiesInputSection.kt
+    │   │
+    │   ├── actioninputs/         # Submódulos de parametrización por tipo de acción
+    │   │   ├── AppLauncherInputSection.kt # Selector y visualizador de juego/app configurado
+    │   │   ├── TtsInputSection.kt         # Campo de voz con chips de variables dinámicas
+    │   │   ├── FlashlightInputSection.kt
+    │   │   ├── VibrationInputSection.kt   # Selector de patrones hápticos y test en tiempo real
+    │   │   ├── NotificationInputSection.kt# Título y mensaje con chips de variables dinámicas
+    │   │   ├── WebUrlInputSection.kt
+    │   │   ├── MessagingInputSection.kt   # WhatsApp/SMS con chips de variables dinámicas
+    │   │   └── UtilitiesInputSection.kt
+    │   │
+    │   └── editor/               # Submódulos desacoplados del editor de atajos
+    │       ├── ShortcutLivePreviewCard.kt # Tarjeta de previsualización reactiva en tiempo real
+    │       ├── ShortcutMetadataSection.kt # Formulario de título, descripción, categoría, color e icono
+    │       └── ShortcutActionsSection.kt  # Pipeline de acciones: header, lista y empty states
+    │
+    ├── navigation/               # Módulos de enrutamiento y barras de navegación
+    │   ├── ShortcutsTopBar.kt    # Barra superior con branding, banner de permisos y monitor
+    │   ├── ShortcutsBottomBar.kt # Barra de navegación inferior (Tabs M3)
+    │   └── MainTabContent.kt     # Transición y orquestación de pantallas principales
     │
     ├── screens/
     │   ├── ShortcutsHomeScreen.kt   # Vista principal con cuadrícula de atajos
-    │   ├── ShortcutEditorScreen.kt  # Editor visual de pasos, iconos y colores
+    │   ├── ShortcutEditorScreen.kt  # Editor visual modularizado
     │   ├── AutomationsScreen.kt     # Gestión de disparadores horarios/hardware
     │   ├── GalleryScreen.kt         # Catálogo de plantillas prefabricadas
     │   └── HistoryScreen.kt         # Visor de logs y tiempos de ejecución
@@ -114,7 +129,9 @@ app/src/main/java/com/example/
     │   └── Type.kt               # Tipografía Material Design
     │
     └── viewmodel/
-        ├── ShortcutsViewModel.kt    # Estado centralizado (UIState) y sincronización con App Shortcuts
+        ├── ShortcutsViewModel.kt    # Fachada central y coordinación de flujos (StateFlow)
+        ├── ShortcutEditorManager.kt # Gestor modular de mutaciones del editor
+        ├── AutomationsManager.kt    # Gestor modular de lógica y CRUD de automatizaciones
         ├── EditorState.kt           # Modelo de estado inmutable para el editor
         └── DefaultActionFactory.kt  # Fábrica de acciones predeterminadas
 ```

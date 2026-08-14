@@ -1,32 +1,8 @@
-refactor: modularizar ActionExecutor, ActionCard y ShortcutsViewModel
+refactor: arquitectura modular para ShortcutEditorScreen, ShortcutsViewModel y MainActivity
 
-- Implementar patrón Strategy/Command en el motor de ejecución creando la interfaz ActionHandler y manejadores especializados en engine/handlers/ (TtsActionHandler, FlashlightActionHandler, VibrationActionHandler, NotificationActionHandler, SystemIntentsActionHandler, UtilityActionHandler).
-- Modularizar ActionCard dividiendo las secciones de entrada en componentes dedicados dentro de ui/components/actioninputs/ (Tts, Flashlight, Vibration, Notification, WebUrl, Messaging, Utilities).
-- Modularizar ShortcutsViewModel desacoplando EditorState y DefaultActionFactory en archivos dedicados para mejorar legibilidad y mantenimiento.
-- Actualizar STRUCTURE.md con el árbol de componentes y patrones arquitectónicos renovados.
-
-feat: agregar permisos dinámicos al inicio, vibración háptica avanzada y acción para abrir juegos/apps
-
-- Implementar flujo automático de solicitud de permisos en tiempo de ejecución al entrar a la app (POST_NOTIFICATIONS, CAMERA) con banner de aviso configurable.
-- Crear motor de vibración háptica enriquecido con patrones avanzados (Ligero, Fuerte, Doble, Triple, Pulso cardíaco, Alerta SOS y Duración personalizada) con soporte multiplataforma para Android 8.0, 10.0 y 12.0+.
-- Implementar la acción LAUNCH_APP con escaneo asíncrono de juegos y aplicaciones en hilo secundario (Dispatchers.IO) mediante AppScannerHelper y selector visual AppPickerBottomSheet con estados de carga.
-- Diseñar componente AppLauncherInputSection y manejador AppLauncherActionHandler para ejecutar intents directos de aplicaciones.
-- Integrar plantilla predefinida 'Lanzador de Juego Rápido' en la Galería.
-
-feat: soporte de variables dinámicas del sistema con selector visual y App Shortcuts en el launcher
-
-- Crear motor de interpolación de variables del sistema en tiempo real mediante VariableResolverHelper ({HORA}, {FECHA}, {DIA_SEMANA}, {BATERIA}, {ESTADO_BATERIA}, {PORTAPAPELES}, {DISPOSITIVO}).
-- Implementar componente visual VariablePickerChips para autocompletar e insertar etiquetas dinámicas con un toque en Texto a Voz, Notificaciones, WhatsApp, SMS y Compartir, sin necesidad de memorizar comandos.
-- Implementar AppShortcutsHelper para registrar y sincronizar accesos directos dinámicos en el icono del launcher (App Shortcuts) para ejecutar los atajos favoritos directamente desde la pantalla de inicio.
-- Configurar manejo de Intent ("com.example.ACTION_RUN_SHORTCUT") en MainActivity para ejecución instantánea sin intermediarios.
-
-ci: limpieza automática de archivos zip procesados y GitHub Action para informe de métricas y peso del repositorio
-
-- Añadir paso de limpieza en sync-from-zip.yml para eliminar el archivo comprimido procesado y los directorios temporales de extracción, evitando dejar residuos o inflar el tamaño de Git.
-- Crear workflow repo-size-report.yml para generar automáticamente un informe detallado en Markdown (REPO_SIZE_REPORT.md) y texto plano (REPO_SIZE_REPORT.txt) con el peso del workspace, tamaño de .git, conteo de líneas de código, desglose por carpetas y extensiones, y el Top 10 de archivos más pesados.
-- Publicar las métricas de peso directamente en el Step Summary de GitHub Actions y en los artefactos descargables del workflow.
-
-ci: disparo automático del workflow de sincronización al subir o detectar archivos comprimidos en zip/
-
-- Configurar trigger push.paths en sync-from-zip.yml para detectar automáticamente archivos .zip, .7z, .tar.gz, .tar y .tgz en la carpeta zip/, iniciando la sincronización, extracción y limpieza de forma 100% desatendida.
-
+- Modularizar ShortcutEditorScreen dividiendo la vista en submódulos especializados dentro de ui/components/editor/ (ShortcutLivePreviewCard, ShortcutMetadataSection, ShortcutActionsSection: header, empty state y botones de pipeline).
+- Modularizar ShortcutsViewModel implementando el patrón Delegate/Manager con ShortcutEditorManager (gestor de estado y mutaciones del editor) y AutomationsManager (gestor de CRUD y testing de automatizaciones), reduciendo la complejidad del ViewModel principal.
+- Modularizar MainActivity y la capa de navegación extrayendo componentes a ui/navigation/ (ShortcutsTopBar, ShortcutsBottomBar, MainTabContent) y ui/components/ (PermissionBanner), manteniendo el Activity como un punto de entrada ligero y desacoplado.
+- Corregir error de sintaxis en el workflow de sincronización (.github/workflows/sync-from-zip.yml) eliminando el conflicto entre paths y paths-ignore en el trigger push.
+- Configurar el workflow de métricas y tamaño del repositorio (.github/workflows/repo-size-report.yml) para ejecución exclusivamente manual (workflow_dispatch) y visualización en el Step Summary de GitHub Actions sin generar commits ni ensuciar el repositorio con archivos de reporte.
+- Actualizar STRUCTURE.md con el nuevo desglose de directorios, submódulos y diagrama de responsabilidades.

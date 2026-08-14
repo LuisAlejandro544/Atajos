@@ -14,8 +14,6 @@ on:
       - 'zip/**.tar.gz'
       - 'zip/**.tar'
       - 'zip/**.tgz'
-      - 'zip/**'
-      - 'zip/.gitkeep'
 
 concurrency:
   group: sync-from-zip-${{ github.ref }}
