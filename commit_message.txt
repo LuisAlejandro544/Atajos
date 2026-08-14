@@ -1,15 +1,15 @@
-feat(website,legal): crear portal web con Astro y adoptar licencia oficial PolyForm Noncommercial 1.0.0
+feat(website,legal): crear portal web Astro para Cloudflare Pages y adoptar licencia PolyForm Noncommercial 1.0.0
 
 - Incorporar el texto íntegro y canónico oficial de la **PolyForm Noncommercial License 1.0.0** (`LICENSE`) con titularidad de derechos a nombre de **Luis Alejandro Sosa Camacho** (`Required Notice: Copyright (c) 2026 Luis Alejandro Sosa Camacho`).
-- Crear el directorio `/website` con arquitectura modular basada en **Astro v4** y **Tailwind CSS** para Cloudflare Pages.
-- Configurar compilación estática (`output: 'static'`) en `astro.config.mjs` optimizada para despliegue directo en **Cloudflare Pages** (`atajos.pages.dev`).
-- Implementar Layouts modulares:
-  - `Layout.astro`: Cabecera sticky con navegación fluida, enlaces a redes/GitHub y pie de página responsive.
-  - `LegalLayout.astro`: Contenedor estilizado para lectura clara y accesible de documentos legales.
-- Desarrollar las páginas y rutas iniciales:
-  - `src/pages/index.astro`: Landing page principal con llamada a la acción de descarga directa de APK, ventajas clave y distintivo de licencia PolyForm Noncommercial 1.0.0.
-  - `src/pages/legal/terminos.astro`: Términos y Condiciones de Uso estipulando la licencia PolyForm Noncommercial 1.0.0, atribución al autor y restricciones de redistribución.
-  - `src/pages/legal/privacidad.astro`: Política de Privacidad centrada en la filosofía *Offline-First*, ausencia de telemetría y uso de permisos de Android.
-  - `src/pages/docs/index.astro`: Centro de documentación técnica con referencia de variables dinámicas (`{HORA}`, `{BATERIA}`, `{RESPUESTA_WEB}`) y disparadores en segundo plano.
-- Agregar icono vectorial en `public/favicon.svg` y configuración de tema oscuro en `tailwind.config.mjs`.
-- Actualizar exhaustivamente los archivos de documentación del proyecto: `README.md`, `STRUCTURE.md`, `ROADMAP.md` y `AI_CONTEXT.md`.
+- Crear el directorio `/website` con arquitectura modular basada en **Astro v4** y **Tailwind CSS** optimizada para **Cloudflare Pages**.
+- Configurar compilación estática (`output: 'static'`) en `astro.config.mjs`.
+- Implementar Layouts modulares y responsivos:
+  - `Layout.astro`: Navegación principal, header con badges y footer legal.
+  - `LegalLayout.astro`: Contenedor estilizado para lectura clara de documentos legales.
+- Desarrollar las páginas y rutas:
+  - `src/pages/index.astro`: Landing page principal con llamada a la acción de descarga directa de APK y distintivo de licencia.
+  - `src/pages/legal/terminos.astro`: Términos y Condiciones de Uso estipulando la licencia PolyForm Noncommercial 1.0.0 y restricciones de redistribución por terceros.
+  - `src/pages/legal/privacidad.astro`: Política de Privacidad centrada en arquitectura *Offline-First* y cero telemetría.
+  - `src/pages/docs/index.astro`: Centro de documentación técnica con referencia de variables dinámicas (`{HORA}`, `{BATERIA}`, `{RESPUESTA_WEB}`).
+- Corregir resolución de rutas relativas de layouts en subpáginas (`../../layouts/Layout.astro`) para compatibilidad completa con el pipeline de compilación de Cloudflare Pages / Vite.
+- Actualizar exhaustivamente los archivos de documentación: `README.md`, `STRUCTURE.md`, `ROADMAP.md` y `AI_CONTEXT.md`.
