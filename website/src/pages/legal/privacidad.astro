@@ -1,0 +1,41 @@
+---
+import LegalLayout from '../../layouts/LegalLayout.astro';
+---
+
+<LegalLayout title="Política de Privacidad" lastUpdated="14 de Agosto de 2026">
+  <section class="space-y-4">
+    <h2 class="text-xl font-bold text-white">1. Filosofía Offline-First y Cero Telemetría</h2>
+    <p>
+      En <strong>Atajos</strong> creemos firmemente en la privacidad y soberanía de los datos del usuario. La aplicación está diseñada desde su núcleo bajo la arquitectura <em>Local & Offline-First</em>.
+    </p>
+    <div class="p-4 rounded-xl bg-emerald-950/40 border border-emerald-800/40 text-emerald-300 text-sm">
+      ✓ <strong>Sin servidores propios de rastreo:</strong> No recopilamos, procesamos ni almacenamos datos personales, métricas analíticas ni registros de uso en servidores externos.
+    </div>
+  </section>
+
+  <section class="space-y-4">
+    <h2 class="text-xl font-bold text-white">2. Datos Almacenados en el Dispositivo</h2>
+    <p>
+      Toda la información creada por el usuario (incluyendo nombres de atajos, configuraciones de disparadores, historial de ejecuciones y credenciales o tokens en peticiones HTTP) se almacena <strong>exclusivamente en el almacenamiento local del dispositivo mediante SQLite (Room Database)</strong>.
+    </p>
+  </section>
+
+  <section class="space-y-4">
+    <h2 class="text-xl font-bold text-white">3. Permisos del Sistema Operativo</h2>
+    <p>
+      Para ejecutar las acciones solicitadas por el usuario, la aplicación puede requerir acceso a ciertos permisos de Android:
+    </p>
+    <ul class="list-disc pl-6 space-y-2 text-slate-300">
+      <li><strong>Cámara y Linterna:</strong> Requerido únicamente para encender la linterna física o abrir la cámara a petición del usuario. No se capturan imágenes en segundo plano.</li>
+      <li><strong>Modificación de Ajustes del Sistema (WRITE_SETTINGS):</strong> Utilizado exclusivamente para calibrar el nivel de brillo de pantalla configurado por el usuario.</li>
+      <li><strong>Acceso a Internet:</strong> Utilizado únicamente para ejecutar las peticiones HTTP que el usuario haya configurado explícitamente en una acción de tipo Webhook/Petición Web.</li>
+    </ul>
+  </section>
+
+  <section class="space-y-4">
+    <h2 class="text-xl font-bold text-white">4. Contacto y Consultas</h2>
+    <p>
+      Para cualquier duda o inquietud respecto a esta Política de Privacidad o el funcionamiento de la aplicación, puedes abrir un issue en nuestro repositorio o comunicarte a través de los canales oficiales del proyecto.
+    </p>
+  </section>
+</LegalLayout>

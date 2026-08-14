@@ -1,0 +1,47 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Documentación y Guías">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-14">
+    <div class="mb-10 pb-8 border-b border-slate-800">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-950/60 text-indigo-400 border border-indigo-800/50 mb-4">
+        📚 Documentación Técnica
+      </span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Guía de Inicio y Referencia</h1>
+      <p class="text-sm text-slate-400 mt-2">Aprende a exprimir al máximo el motor de automatizaciones de Atajos.</p>
+    </div>
+
+    <div class="space-y-10 text-slate-300">
+      <section class="space-y-3">
+        <h2 class="text-2xl font-bold text-white">Variables Dinámicas Disponibles</h2>
+        <p class="text-slate-400">Puedes insertar cualquiera de estas etiquetas en campos de texto, voz (TTS) o notificaciones:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60">
+            <code class="text-indigo-400 font-mono text-sm font-semibold">{'{HORA}'}</code>
+            <p class="text-xs text-slate-400 mt-1">Hora actual del sistema (formato HH:mm).</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60">
+            <code class="text-indigo-400 font-mono text-sm font-semibold">{'{BATERIA}'}</code>
+            <p class="text-xs text-slate-400 mt-1">Nivel porcentual exacto de la batería.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60">
+            <code class="text-indigo-400 font-mono text-sm font-semibold">{'{FECHA}'}</code>
+            <p class="text-xs text-slate-400 mt-1">Fecha del día en curso.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60">
+            <code class="text-indigo-400 font-mono text-sm font-semibold">{'{RESPUESTA_WEB}'}</code>
+            <p class="text-xs text-slate-400 mt-1">Cuerpo de respuesta de la última petición HTTP.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-2xl font-bold text-white">Disparadores en Segundo Plano</h2>
+        <p class="text-slate-400">
+          Los atajos con disparadores como <code>BATTERY_LOW</code>, <code>BATTERY_FULL</code> o conexión de cargador se ejecutan mediante <code>BroadcastReceivers</code> nativos sin requerir servicios en primer plano persistentes que agoten la batería.
+        </p>
+      </section>
+    </div>
+  </div>
+</Layout>

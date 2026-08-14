@@ -1,0 +1,26 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+interface Props {
+  title: string;
+  lastUpdated: string;
+}
+
+const { title, lastUpdated } = Astro.props;
+---
+
+<Layout title={title}>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-14">
+    <div class="mb-10 pb-8 border-b border-slate-800">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-950/60 text-indigo-400 border border-indigo-800/50 mb-4">
+        🛡️ Documento Legal
+      </span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{title}</h1>
+      <p class="text-sm text-slate-400 mt-2">Última actualización: {lastUpdated}</p>
+    </div>
+
+    <div class="prose prose-invert prose-indigo max-w-none text-slate-300 leading-relaxed space-y-6">
+      <slot />
+    </div>
+  </div>
+</Layout>

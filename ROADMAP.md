@@ -73,7 +73,14 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
 
 ---
 
-## 📍 Fase 4: Portabilidad y Distribución
+## 📍 Fase 4: Portabilidad, Presencia Web y Distribución
+- [x] **Sitio Web Oficial y Documentación Legal para Cloudflare Pages**:
+  - Arquitectura moderna con **Astro v4 + Tailwind CSS** lista para despliegue estático ultra-rápido en Cloudflare.
+  - Marco legal Source-Available bajo **PolyForm Noncommercial License 1.0.0** (`LICENSE`).
+  - Página de Términos y Condiciones de Uso (`/legal/terminos`) con cláusulas de no redistribución por terceros.
+  - Política de Privacidad con compromiso estricto Offline-First y Cero Telemetría (`/legal/privacidad`).
+  - Landing page (`/`) con descarga directa de APK y presentación de características.
+  - Centro de Documentación técnica (`/docs`).
 - [ ] **Importación y Exportación**:
   - Exportar atajos en formato JSON para respaldos locales.
   - Compartir atajos mediante enlaces o códigos QR.

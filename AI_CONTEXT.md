@@ -8,7 +8,8 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 
 - **Nombre**: Atajos (Shortcuts) para Android
 - **Propósito**: Automatización local y secuencial de tareas en el dispositivo Android mediante disparadores y acciones encadenadas.
-- **Enfoque de Distribución**: Sin ataduras a Google Play. Diseñado para funcionar de manera independiente, compatible con distribución directa (APK sideloading) o tiendas de terceros (Uptodown, F-Droid).
+- **Licencia y Modelo**: Source-Available bajo **PolyForm Noncommercial License 1.0.0** (Licensor / Autor: Luis Alejandro Sosa Camacho). Código visible para inspección y uso personal no comercial; redistribución y republicación por terceros estrictamente prohibida.
+- **Enfoque de Distribución**: Sin ataduras a Google Play. Diseñado para funcionar de manera independiente, compatible con distribución directa (APK sideloading) o tiendas de terceros (Uptodown).
 - **Paradigma**: 100% Kotlin nativo con Jetpack Compose y Room SQLite.
 
 ---
@@ -84,6 +85,10 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
    - `build-apk.yml`: Compilación y empaquetado del APK de desarrollo.
    - `sync-from-zip.yml`: Extracción y sincronización desde zip con activación automática ante push en `zip/`, y eliminación automática de archivos comprimidos y carpetas temporales.
    - `repo-size-report.yml`: Auditoría automática del peso del proyecto, desglose por directorios, extensiones y generación de `REPO_SIZE_REPORT.md`.
+
+7. **Portal Web y Documentación Legal (`/website`)**:
+   - Construido con **Astro v4 + Tailwind CSS** configurado para compilación estática (`output: 'static'`) en Cloudflare Pages (`https://atajos.pages.dev`).
+   - Contiene la Landing Page (`/`), Términos y Condiciones de Uso (`/legal/terminos`), Política de Privacidad (`/legal/privacidad`) y Guía de Documentación (`/docs`).
 
 ---
 

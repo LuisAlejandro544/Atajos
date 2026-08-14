@@ -1,13 +1,15 @@
-feat(tiles,triggers): añadir Quick Settings Tile y disparadores automáticos de batería
+feat(website,legal): crear portal web con Astro y adoptar licencia oficial PolyForm Noncommercial 1.0.0
 
-- Implementar `ShortcutTileService` (`TileService` de Android) para permitir la ejecución inmediata del atajo favorito o más reciente desde el panel de Ajustes Rápidos (Quick Settings Tile) en la cortina de notificaciones o pantalla de bloqueo.
-- Diseñar y registrar el icono vectorial `@drawable/ic_qs_tile` para el mosaico del sistema.
-- Expandir el motor de disparadores nativos (`ShortcutTrigger`) con soporte para eventos de batería:
-  - Batería baja (<15% `ACTION_BATTERY_LOW`).
-  - Batería restablecida a nivel seguro (`ACTION_BATTERY_OKAY`).
-  - Carga completa al 100% (`BATTERY_FULL`).
-- Actualizar `PowerTriggerReceiver` para despachar eventos de energía y batería de forma asíncrona (`goAsync()` en `Dispatchers.IO`).
-- Añadir opciones e iconos correspondientes en `ShortcutTriggerSection` dentro del editor visual de atajos.
-- Añadir insignias visuales dinámicas (`🪫 Batería baja`, `🔋 Batería OK`, `🔋 Batería 100%`) en `ShortcutCard`.
-- Incorporar plantillas preconfiguradas en la Galería: "Modo Ahorro: Alerta Batería Baja" y "Aviso de Carga Completa (100%)".
-- Actualizar documentación del proyecto (`README.md`, `ROADMAP.md`, `STRUCTURE.md`, `AI_CONTEXT.md`).
+- Incorporar el texto íntegro y canónico oficial de la **PolyForm Noncommercial License 1.0.0** (`LICENSE`) con titularidad de derechos a nombre de **Luis Alejandro Sosa Camacho** (`Required Notice: Copyright (c) 2026 Luis Alejandro Sosa Camacho`).
+- Crear el directorio `/website` con arquitectura modular basada en **Astro v4** y **Tailwind CSS** para Cloudflare Pages.
+- Configurar compilación estática (`output: 'static'`) en `astro.config.mjs` optimizada para despliegue directo en **Cloudflare Pages** (`atajos.pages.dev`).
+- Implementar Layouts modulares:
+  - `Layout.astro`: Cabecera sticky con navegación fluida, enlaces a redes/GitHub y pie de página responsive.
+  - `LegalLayout.astro`: Contenedor estilizado para lectura clara y accesible de documentos legales.
+- Desarrollar las páginas y rutas iniciales:
+  - `src/pages/index.astro`: Landing page principal con llamada a la acción de descarga directa de APK, ventajas clave y distintivo de licencia PolyForm Noncommercial 1.0.0.
+  - `src/pages/legal/terminos.astro`: Términos y Condiciones de Uso estipulando la licencia PolyForm Noncommercial 1.0.0, atribución al autor y restricciones de redistribución.
+  - `src/pages/legal/privacidad.astro`: Política de Privacidad centrada en la filosofía *Offline-First*, ausencia de telemetría y uso de permisos de Android.
+  - `src/pages/docs/index.astro`: Centro de documentación técnica con referencia de variables dinámicas (`{HORA}`, `{BATERIA}`, `{RESPUESTA_WEB}`) y disparadores en segundo plano.
+- Agregar icono vectorial en `public/favicon.svg` y configuración de tema oscuro en `tailwind.config.mjs`.
+- Actualizar exhaustivamente los archivos de documentación del proyecto: `README.md`, `STRUCTURE.md`, `ROADMAP.md` y `AI_CONTEXT.md`.

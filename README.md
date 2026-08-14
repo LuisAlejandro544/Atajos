@@ -101,7 +101,7 @@ chmod +x ./gradlew
 
 ```
 ├── .github/workflows/       # Workflows de CI/CD (Compilación de APK)
-├── app/
+├── app/                     # Módulo Android (Kotlin + Jetpack Compose + Room)
 │   ├── src/main/
 │   │   ├── java/com/example/
 │   │   │   ├── MainActivity.kt        # Punto de entrada, launcher shortcuts y navegación Compose
@@ -110,12 +110,46 @@ chmod +x ./gradlew
 │   │   │   └── ui/                    # Capa de presentación (Pantallas, ViewModel, Theme, Componentes)
 │   │   └── res/                       # Recursos XML, drawables, strings, iconos adaptativos
 │   └── build.gradle.kts               # Configuración de dependencias de la app
-├── metadata.json                      # Metadatos de la plataforma
-└── settings.gradle.kts                # Configuración de módulos del proyecto
+├── website/                 # Portal Web & Legal para Cloudflare Pages (Astro + Tailwind CSS)
+│   ├── src/pages/           # Landing page, /legal (Términos, Privacidad) y /docs
+│   ├── src/layouts/         # Layouts modulares y contenedores legales
+│   ├── astro.config.mjs     # Configuración de compilación estática para Cloudflare
+│   └── package.json         # Dependencias web (Astro v4 + Tailwind CSS)
+├── metadata.json            # Metadatos de la plataforma
+└── settings.gradle.kts      # Configuración de módulos del proyecto
+```
+
+---
+
+## 🌐 Sitio Web y Documentos Legales (Cloudflare Pages)
+
+El proyecto incluye el sitio web oficial en la carpeta `/website`, construido con **Astro + Tailwind CSS**:
+- 🏠 **Landing Page (`/`):** Presentación del proyecto y descarga directa del APK.
+- 📜 **Términos y Condiciones (`/legal/terminos`):** Marco legal para la ejecución de atajos locales.
+- 🛡️ **Política de Privacidad (`/legal/privacidad`):** Declaración de arquitectura 100% offline-first y sin rastreo.
+- 📚 **Documentación (`/docs`):** Guía de variables dinámicas y disparadores.
+
+Para desarrollo local del sitio web:
+```bash
+cd website
+npm install
+npm run dev
+```
+
+Para compilar para Cloudflare Pages:
+```bash
+npm run build # Genera la carpeta /dist lista para Cloudflare Pages
 ```
 
 ---
 
 ## 📄 Licencia
 
-Proyecto de código abierto disponible para uso y distribución directa.
+Este proyecto está protegido bajo la **PolyForm Noncommercial License 1.0.0** (modelo *Source-Available*).
+
+> **`Required Notice:`** Copyright (c) 2026 Luis Alejandro Sosa Camacho. Texto oficial disponible en [https://polyformproject.org/licenses/noncommercial/1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
+
+- Permite a los usuarios estudiar, inspeccionar y compilar el código fuente en sus propios dispositivos para fines privados y no comerciales.
+- **Prohíbe a terceros la redistribución, republicación o comercialización de paquetes APK** en tiendas de aplicaciones o sitios web sin el consentimiento expreso y por escrito del autor.
+- La distribución oficial y publicación en tiendas de terceros es facultad exclusiva del titular del proyecto.
+

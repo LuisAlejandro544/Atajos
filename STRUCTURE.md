@@ -158,6 +158,30 @@ app/src/main/java/com/example/
 
 ---
 
+## 🌐 Estructura del Portal Web (`/website` — Astro + Tailwind)
+
+```
+website/
+├── src/
+│   ├── layouts/
+│   │   ├── Layout.astro          # Layout global con cabecera y pie de página
+│   │   └── LegalLayout.astro     # Contenedor con estilos tipográficos para documentos legales
+│   └── pages/
+│       ├── index.astro           # Landing page principal
+│       ├── docs/
+│       │   └── index.astro       # Documentación de variables y triggers
+│       └── legal/
+│           ├── terminos.astro    # Términos y Condiciones de Uso
+│           └── privacidad.astro  # Política de Privacidad (Offline-first / Sin rastreo)
+├── public/
+│   └── favicon.svg               # Icono vectorial del sitio
+├── astro.config.mjs              # Configuración de Astro (Cloudflare Pages Static Output)
+├── tailwind.config.mjs           # Tema de colores oscuros y brand
+└── package.json                  # Dependencias de Astro v4 y Tailwind CSS
+```
+
+---
+
 ## ⚡ Flujo de Ejecución de un Atajo
 
 1. **Usuario presiona "Ejecutar" o toca un App Shortcut en el launcher**: Inicia la invocación en `ShortcutsViewModel`.

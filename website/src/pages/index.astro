@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Automatización nativa para Android">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-20">
+    <!-- Hero Section -->
+    <div class="text-center max-w-3xl mx-auto space-y-6">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/20">
+        ✨ 100% Offline-first • Cero Rastreo • Licencia PolyForm Noncommercial 1.0.0
+      </div>
+      
+      <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight">
+        Automatizaciones potentes en Android, <br />
+        <span class="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+          sin complicaciones.
+        </span>
+      </h1>
+
+      <p class="text-lg text-slate-300">
+        Crea pipelines de acciones, dispara atajos por estado de batería o cargador, y ejecuta flujos en un toque desde la cortina de notificaciones con Quick Settings.
+      </p>
+
+      <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#descarga" class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-base shadow-lg shadow-indigo-500/25 transition-all">
+          Descargar APK Directa
+        </a>
+        <a href="/legal/privacidad" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-semibold text-base border border-slate-700 transition-all">
+          Compromiso de Privacidad
+        </a>
+      </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="mt-28 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="p-6 rounded-2xl bg-slate-800/40 border border-slate-700/60 hover:border-slate-600 transition-all">
+        <div class="text-3xl mb-3">⚡</div>
+        <h3 class="text-lg font-bold text-white mb-2">Motor de Acciones Modular</h3>
+        <p class="text-sm text-slate-400">
+          Encadena solicitudes HTTP/Webhooks, control de brillo, voz TTS, linterna, vibración háptica y apertura de cámara.
+        </p>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-slate-800/40 border border-slate-700/60 hover:border-slate-600 transition-all">
+        <div class="text-3xl mb-3">🔋</div>
+        <h3 class="text-lg font-bold text-white mb-2">Disparadores de Batería y Carga</h3>
+        <p class="text-sm text-slate-400">
+          Ejecución automática en segundo plano cuando conectas el cargador, baja la batería de 15% o se completa al 100%.
+        </p>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-slate-800/40 border border-slate-700/60 hover:border-slate-600 transition-all">
+        <div class="text-3xl mb-3">🎛️</div>
+        <h3 class="text-lg font-bold text-white mb-2">Quick Settings Tile</h3>
+        <p class="text-sm text-slate-400">
+          Mosaico deslizable en la barra de ajustes rápidos de Android para disparar tu atajo favorito desde cualquier app.
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>
