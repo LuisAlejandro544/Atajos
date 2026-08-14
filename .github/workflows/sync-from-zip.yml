@@ -15,7 +15,6 @@ on:
       - 'zip/**.tar'
       - 'zip/**.tgz'
       - 'zip/**'
-    paths-ignore:
       - 'zip/.gitkeep'
 
 concurrency:
