@@ -1,9 +1,6 @@
 name: Sync Code from Zip Archive
 
 on:
-  push:
-    paths:
-      - 'zip/**'
   workflow_dispatch:
 
 concurrency:
@@ -13,7 +10,6 @@ concurrency:
 permissions:
   contents: write
   actions: write
-  workflows: write
 
 jobs:
   extract-and-sync:
