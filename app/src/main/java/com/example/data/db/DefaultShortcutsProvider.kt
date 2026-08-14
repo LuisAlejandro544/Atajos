@@ -169,7 +169,65 @@ object DefaultShortcutsProvider {
             isFavorite = false
         )
 
-        return listOf(s1, s2, s3, s4, s5, s6)
+        val s7 = ShortcutEntity(
+            id = 7L,
+            title = "Aviso al Conectar Cargador",
+            description = "Se activa automáticamente al enchufar el celular a la corriente y anuncia el nivel de batería",
+            colorHex = "#10B981", // Emerald
+            iconKey = "battery_charging_full",
+            category = "Sistema",
+            trigger = "POWER_CONNECTED",
+            actionsJson = ActionJsonHelper.toJson(
+                listOf(
+                    ShortcutAction(
+                        type = ActionType.VIBRATE,
+                        title = "Pulso de conexión",
+                        param1 = "150",
+                        param2 = "double"
+                    ),
+                    ShortcutAction(
+                        type = ActionType.SPEAK_TEXT,
+                        title = "Anunciar carga",
+                        param1 = "Cargador conectado. Nivel actual de batería: {BATERIA}."
+                    ),
+                    ShortcutAction(
+                        type = ActionType.SHOW_NOTIFICATION,
+                        title = "Cargador Conectado",
+                        param1 = "Cargando ({BATERIA})",
+                        param2 = "Iniciada recarga a las {HORA}"
+                    )
+                )
+            ),
+            isFavorite = true
+        )
+
+        val s8 = ShortcutEntity(
+            id = 8L,
+            title = "Aviso al Desconectar",
+            description = "Se activa al desenchufar el cargador y te recuerda llevar tus pertenencias",
+            colorHex = "#F59E0B", // Amber
+            iconKey = "power_off",
+            category = "Sistema",
+            trigger = "POWER_DISCONNECTED",
+            actionsJson = ActionJsonHelper.toJson(
+                listOf(
+                    ShortcutAction(
+                        type = ActionType.VIBRATE,
+                        title = "Vibración de desconexión",
+                        param1 = "200",
+                        param2 = "single"
+                    ),
+                    ShortcutAction(
+                        type = ActionType.SPEAK_TEXT,
+                        title = "Anuncio de desconexión",
+                        param1 = "Cargador desconectado. Batería restante: {BATERIA}."
+                    )
+                )
+            ),
+            isFavorite = false
+        )
+
+        return listOf(s1, s2, s3, s4, s5, s6, s7, s8)
     }
 
     fun getGalleryTemplates(): List<ShortcutEntity> {
@@ -435,6 +493,57 @@ object DefaultShortcutsProvider {
                             title = "Temporizador 5 min",
                             param1 = "300",
                             param2 = "Pausa Activa"
+                        )
+                    )
+                )
+            ),
+            ShortcutEntity(
+                title = "⚡ Rutina Automática al Conectar",
+                description = "Se activa en segundo plano al enchufar el móvil: baja el brillo y avisa por voz la batería",
+                colorHex = "#10B981",
+                iconKey = "battery_charging_full",
+                category = "Automatización",
+                trigger = "POWER_CONNECTED",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.VIBRATE,
+                            title = "Vibración de carga",
+                            param1 = "150",
+                            param2 = "double"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SET_BRIGHTNESS,
+                            title = "Ajustar brillo óptimo",
+                            param1 = "30"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SPEAK_TEXT,
+                            title = "Informe de Carga",
+                            param1 = "Cargador conectado. Batería al {BATERIA}."
+                        )
+                    )
+                )
+            ),
+            ShortcutEntity(
+                title = "🔌 Aviso Automático al Desconectar",
+                description = "Se activa en segundo plano al desenchufar el cargador: vibra y anuncia el estado",
+                colorHex = "#F59E0B",
+                iconKey = "power_off",
+                category = "Automatización",
+                trigger = "POWER_DISCONNECTED",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.VIBRATE,
+                            title = "Pulso háptico",
+                            param1 = "200",
+                            param2 = "single"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SPEAK_TEXT,
+                            title = "Aviso al desconectar",
+                            param1 = "Cargador desconectado. Nivel de batería: {BATERIA}."
                         )
                     )
                 )

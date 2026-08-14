@@ -44,11 +44,12 @@ import com.example.ui.components.editor.ShortcutActionsEmptyState
 import com.example.ui.components.editor.ShortcutActionsHeader
 import com.example.ui.components.editor.ShortcutLivePreviewCard
 import com.example.ui.components.editor.ShortcutMetadataSection
+import com.example.ui.components.editor.ShortcutTriggerSection
 import com.example.ui.viewmodel.EditorState
 
 /**
  * Pantalla principal del Editor de Atajos.
- * Orquesta la previsualización, metadatos y lista de acciones de forma modular.
+ * Orquesta la previsualización, metadatos, disparadores nativos y lista de acciones de forma modular.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +60,7 @@ fun ShortcutEditorScreen(
     onColorChange: (String) -> Unit,
     onIconChange: (String) -> Unit,
     onCategoryChange: (String) -> Unit,
+    onTriggerChange: (String) -> Unit,
     onAddAction: (ActionType) -> Unit,
     onUpdateAction: (Int, ShortcutAction) -> Unit,
     onRemoveAction: (Int) -> Unit,
@@ -158,6 +160,14 @@ fun ShortcutEditorScreen(
                     onCategoryChange = onCategoryChange,
                     onColorChange = onColorChange,
                     onIconChange = onIconChange
+                )
+            }
+
+            // Disparadores Nativos en Segundo Plano (Conectar/Desconectar Cargador)
+            item {
+                ShortcutTriggerSection(
+                    selectedTriggerKey = state.trigger,
+                    onTriggerSelected = onTriggerChange
                 )
             }
 

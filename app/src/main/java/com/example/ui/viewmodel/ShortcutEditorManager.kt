@@ -40,7 +40,8 @@ class ShortcutEditorManager(
                     param2 = "single"
                 )
             ),
-            isFavorite = false
+            isFavorite = false,
+            trigger = "NONE"
         )
     }
 
@@ -55,7 +56,8 @@ class ShortcutEditorManager(
             iconKey = shortcut.iconKey,
             category = shortcut.category,
             actions = ActionJsonHelper.fromJson(shortcut.actionsJson),
-            isFavorite = shortcut.isFavorite
+            isFavorite = shortcut.isFavorite,
+            trigger = shortcut.trigger
         )
     }
 
@@ -81,6 +83,10 @@ class ShortcutEditorManager(
 
     fun updateCategory(category: String) {
         _editorState.value = _editorState.value.copy(category = category)
+    }
+
+    fun updateTrigger(trigger: String) {
+        _editorState.value = _editorState.value.copy(trigger = trigger)
     }
 
     fun addAction(type: ActionType) {
@@ -136,6 +142,7 @@ class ShortcutEditorManager(
             category = state.category.ifBlank { "General" },
             actionsJson = ActionJsonHelper.toJson(state.actions),
             isFavorite = state.isFavorite,
+            trigger = state.trigger,
             createdAt = System.currentTimeMillis()
         )
         coroutineScope.launch {

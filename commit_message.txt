@@ -1,9 +1,16 @@
-feat: soporte para cancelación interactiva de atajos y resolución de compatibilidad de Compose Compiler
+fix(ci): actualizar a Gradle 9.3.1 para compatibilidad con AGP 9.1.1
 
-- Implementar cancelación interactiva y en tiempo real de atajos en ejecución (`cancelExecution`), liberando recursos de audio (TTS) y hápticos (vibración).
-- Añadir botón interactivo de cancelación en el `ExecutionStatusBanner` con estilos dinámicos (naranja/ámbar) para estados cancelados.
-- Registrar el estado "CANCELLED" en el historial de ejecuciones (`HistoryScreen`) con insignias y etiquetas diferenciadas.
-- Configurar el plugin oficial `org.jetbrains.kotlin.plugin.compose` (Kotlin 2.x) en el catálogo de versiones y Gradle para solucionar el `AbstractMethodError` de `ComposePluginRegistrar`.
-- Actualizar el entorno de compilación de GitHub Actions a JDK 21 y Gradle 8.11.1 para compatibilidad total con Android Gradle Plugin (AGP) 9.1.1.
-- Asegurar la correcta compilación del APK Debug (`assembleDebug`) en entornos CI/CD y compilación local.
-- Mantener la integridad de los workflows de sincronización y empaquetado para distribución directa.
+- Configurar gradle/wrapper/gradle-wrapper.properties con Gradle 9.3.1 (versión mínima requerida por Android Gradle Plugin 9.1.1).
+- Actualizar el workflow de GitHub Actions (build-apk.yml) con gradle-version: '9.3.1' y JDK 21 para compilar el APK Debug sin errores de incompatibilidad.
+- Asegurar la correcta ejecución de assembleDebug en entornos CI/CD.
+
+feat(triggers): agregar disparadores nativos en segundo plano (conectar/desconectar cargador)
+
+- Integrar disparador automático configurable directamente dentro del editor de cada atajo (`ShortcutTriggerSection`).
+- Implementar `PowerTriggerReceiver` escuchando `ACTION_POWER_CONNECTED` y `ACTION_POWER_DISCONNECTED` para ejecución desatendida en segundo plano con `ActionExecutor`.
+- Ampliar entidad `ShortcutEntity` con campo `trigger` (`NONE`, `POWER_CONNECTED`, `POWER_DISCONNECTED`, `POWER_BOTH`) y actualizar `AppDatabase` a v2.
+- Agregar consultas optimizadas en `ShortcutDao` y soporte reactivo en `ShortcutEditorManager`.
+- Mostrar insignia visual (`⚡ Al conectar` / `🔌 Al desconectar`) en las tarjetas de atajo (`ShortcutCard`).
+- Añadir plantillas y atajos predeterminados con disparadores automáticos en la Galería.
+- Actualizar arquitectura y documentación del proyecto.
+

@@ -116,6 +116,7 @@ fun ShortcutsApp(
             onColorChange = viewModel::updateEditorColor,
             onIconChange = viewModel::updateEditorIcon,
             onCategoryChange = viewModel::updateEditorCategory,
+            onTriggerChange = viewModel::updateEditorTrigger,
             onAddAction = viewModel::addActionToEditor,
             onUpdateAction = viewModel::updateActionInEditor,
             onRemoveAction = viewModel::removeActionFromEditor,

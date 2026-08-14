@@ -29,6 +29,11 @@ class ShortcutRepository(private val database: AppDatabase) {
 
     suspend fun getShortcutById(id: Long): ShortcutEntity? = shortcutDao.getShortcutById(id)
 
+    suspend fun getShortcutsForPowerTrigger(trigger: String): List<ShortcutEntity> =
+        shortcutDao.getShortcutsForPowerTrigger(trigger)
+
+    val automatedShortcuts: Flow<List<ShortcutEntity>> = shortcutDao.getAutomatedShortcuts()
+
     suspend fun saveShortcut(shortcut: ShortcutEntity): Long {
         return if (shortcut.id == 0L) {
             shortcutDao.insertShortcut(shortcut)

@@ -17,9 +17,12 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 
 1. **`ShortcutEntity`** (`data/model/ShortcutEntity.kt`):
    - Representa un atajo configurable.
-   - Campos: `id`, `title`, `description`, `iconKey`, `colorHex`, `category`, `actionsJson` (lista serializada de `ShortcutAction`), `isFavorite`, `runCount`, `lastRunTimestamp`, `createdAt`.
+   - Campos: `id`, `title`, `description`, `iconKey`, `colorHex`, `category`, `actionsJson` (lista serializada de `ShortcutAction`), `isFavorite`, `trigger` (`NONE`, `POWER_CONNECTED`, `POWER_DISCONNECTED`, `POWER_BOTH`), `runCount`, `lastRunTimestamp`, `createdAt`.
 
-2. **`ShortcutAction`** (`data/model/ShortcutAction.kt`):
+2. **`ShortcutTrigger`** (`data/model/ShortcutTrigger.kt`):
+   - Enum que define los disparadores automáticos nativos del sistema asociados directamente a cada atajo (`NONE`, `POWER_CONNECTED`, `POWER_DISCONNECTED`, `POWER_BOTH`).
+
+3. **`ShortcutAction`** (`data/model/ShortcutAction.kt`):
    - Paso individual dentro de un atajo.
    - Campos: `id`, `type` (`ActionType`), `title`, `param1`, `param2`, `param3`, `orderIndex`.
 
@@ -56,7 +59,8 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 
 1. **`ActionExecutor`**: Orquestador principal que despacha cada paso a un `ActionHandler` específico según su `ActionType`. Soporta cancelación interactiva en tiempo real (`cancelExecution()`), deteniendo corrutinas y liberando recursos (`onCancelled()` en handlers como TTS y vibración).
 2. **`VariableResolverHelper`**: Interpola variables del sistema en tiempo real (`{HORA}`, `{FECHA}`, `{DIA_SEMANA}`, `{BATERIA}`, `{ESTADO_BATERIA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}`) para personalizar textos de voz, notificaciones y mensajería.
-3. **`AppShortcutsHelper`**: Sincroniza dinámicamente los atajos favoritos con el launcher de Android mediante `ShortcutManagerCompat` para ejecución directa desde el icono de la app.
+3. **`PowerTriggerReceiver`** (`engine/triggers/PowerTriggerReceiver.kt`): `BroadcastReceiver` nativo del sistema que escucha `ACTION_POWER_CONNECTED` y `ACTION_POWER_DISCONNECTED`. Al dispararse, consulta `ShortcutDao` mediante `ShortcutRepository.getShortcutsForPowerTrigger()` y ejecuta de forma desatendida y asíncrona (`goAsync()`) en `Dispatchers.IO` todos los atajos asociados sin bloquear el hilo principal.
+4. **`AppShortcutsHelper`**: Sincroniza dinámicamente los atajos favoritos con el launcher de Android mediante `ShortcutManagerCompat` para ejecución directa desde el icono de la app.
 4. **`ActionHandler`** (`engine/handlers/`):
    - `HttpRequestActionHandler`: Peticiones HTTP seguras en segundo plano (`Dispatchers.IO`), con resolución de variables en URL y Body, timeouts y caching de respuestas en `{RESPUESTA_WEB}` y `{HTTP_STATUS}`.
    - `AppLauncherActionHandler`: Lanza intents de apps instaladas de forma segura.

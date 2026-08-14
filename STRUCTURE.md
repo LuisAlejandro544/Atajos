@@ -76,6 +76,8 @@ app/src/main/java/com/example/
 │   ├── AppScannerHelper.kt       # Escaneo en segundo plano (Dispatchers.IO) de apps y juegos
 │   ├── AppShortcutsHelper.kt     # Gestor de accesos directos dinámicos en el icono del launcher
 │   ├── VariableResolverHelper.kt # Motor de interpolación de variables del sistema en tiempo real
+│   ├── triggers/                 # Disparadores nativos de sistema en segundo plano
+│   │   └── PowerTriggerReceiver.kt # BroadcastReceiver para conexión y desconexión de corriente (ACTION_POWER_CONNECTED / DISCONNECTED)
 │   └── handlers/                 # Manejadores de acciones modulares individuales
 │       ├── ActionHandler.kt              # Interfaz base con contrato de ejecución y release
 │       ├── HttpRequestActionHandler.kt   # Peticiones HTTP y Webhooks (GET, POST, PUT, DELETE) con variables dinámicas

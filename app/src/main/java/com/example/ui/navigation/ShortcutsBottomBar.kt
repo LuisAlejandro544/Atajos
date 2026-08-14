@@ -48,19 +48,6 @@ fun ShortcutsBottomBar(
         NavigationBarItem(
             selected = selectedTab == 1,
             onClick = { onTabSelected(1) },
-            icon = { Icon(Icons.Default.AutoMode, contentDescription = "Automatizaciones") },
-            label = { Text("Automatizar") },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = CyanAccent,
-                selectedTextColor = CyanAccent,
-                indicatorColor = CyanAccent.copy(alpha = 0.15f)
-            ),
-            modifier = Modifier.testTag("tab_automations")
-        )
-
-        NavigationBarItem(
-            selected = selectedTab == 2,
-            onClick = { onTabSelected(2) },
             icon = { Icon(Icons.Default.AutoAwesome, contentDescription = "Galería") },
             label = { Text("Galería") },
             colors = NavigationBarItemDefaults.colors(
@@ -72,8 +59,8 @@ fun ShortcutsBottomBar(
         )
 
         NavigationBarItem(
-            selected = selectedTab == 3,
-            onClick = { onTabSelected(3) },
+            selected = selectedTab == 2,
+            onClick = { onTabSelected(2) },
             icon = { Icon(Icons.Default.History, contentDescription = "Historial") },
             label = { Text("Historial") },
             colors = NavigationBarItemDefaults.colors(

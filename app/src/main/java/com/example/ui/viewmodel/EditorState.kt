@@ -15,5 +15,6 @@ data class EditorState(
     val iconKey: String = "flash_on",
     val category: String = "General",
     val actions: List<ShortcutAction> = emptyList(),
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val trigger: String = "NONE"
 )

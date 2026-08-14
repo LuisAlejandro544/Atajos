@@ -38,14 +38,20 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
 
 ---
 
-## 📍 Fase 2: Automatizaciones en Segundo Plano y Sensores (En Progreso / Próxima)
+## 📍 Fase 2: Disparadores Nativos en Segundo Plano y Sensores (En Progreso)
+- [x] **Disparadores Nativos de Carga en Atajos (BroadcastReceivers)**:
+  - Disparador integrado en el editor de cada atajo (`ShortcutTriggerSection`).
+  - Detección en segundo plano de conexión a la corriente (`ACTION_POWER_CONNECTED`).
+  - Detección en segundo plano de desconexión de corriente (`ACTION_POWER_DISCONNECTED`).
+  - Detección combinada (`POWER_BOTH`).
+  - Ejecución desatendida mediante `PowerTriggerReceiver` con `goAsync()` y registro en historial.
+  - Insignia visual en tarjetas (`ShortcutCard`) y plantillas en Galería.
 - [ ] **Background Execution con Android WorkManager**:
   - Ejecución de atajos programados incluso con la app cerrada.
   - Notificaciones de progreso para atajos de larga duración.
-- [ ] **Disparadores de Sistema (BroadcastReceivers nativos)**:
-  - Detección real de conexión/desconexión del cargador (`ACTION_POWER_CONNECTED`).
+- [ ] **Disparadores de Sistema Adicionales**:
   - Detección de batería baja (`ACTION_BATTERY_LOW`) y nivel porcentual configurable.
-  - Detección de cambios de red (Conexión/Desconexión de WiFi).
+  - Detección de cambios de red (Conexión/Desconexión de WiFi o Bluetooth).
   - Modo No Molestar automático.
 
 ---

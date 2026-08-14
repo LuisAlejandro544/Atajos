@@ -83,27 +83,29 @@ fun MainTabContent(
                         onCreateNewShortcut = actions.home.onCreateNewShortcut
                     )
 
-                    1 -> AutomationsScreen(
-                        automations = automations,
-                        availableShortcuts = allShortcuts,
-                        showDialog = showAutomationDialog,
-                        onToggleAutomation = actions.automations.onToggleAutomation,
-                        onDeleteAutomation = actions.automations.onDeleteAutomation,
-                        onTestRunAutomation = actions.automations.onTestRunAutomation,
-                        onOpenNewDialog = actions.automations.onOpenNewDialog,
-                        onCloseDialog = actions.automations.onCloseDialog,
-                        onSaveAutomation = actions.automations.onSaveAutomation
-                    )
-
-                    2 -> GalleryScreen(
+                    1 -> GalleryScreen(
                         templates = galleryTemplates,
                         onInstallTemplate = actions.gallery.onInstallTemplate,
                         onTestRunTemplate = actions.gallery.onTestRunTemplate
                     )
 
-                    3 -> HistoryScreen(
+                    2 -> HistoryScreen(
                         logs = recentLogs,
                         onClearHistory = actions.history.onClearHistory
+                    )
+
+                    else -> ShortcutsHomeScreen(
+                        shortcuts = filteredShortcuts,
+                        selectedCategory = selectedCategory,
+                        searchQuery = searchQuery,
+                        onCategorySelected = actions.home.onCategorySelected,
+                        onSearchQueryChange = actions.home.onSearchQueryChange,
+                        onRunShortcut = actions.home.onRunShortcut,
+                        onEditShortcut = actions.home.onEditShortcut,
+                        onDuplicateShortcut = actions.home.onDuplicateShortcut,
+                        onToggleFavorite = actions.home.onToggleFavorite,
+                        onDeleteShortcut = actions.home.onDeleteShortcut,
+                        onCreateNewShortcut = actions.home.onCreateNewShortcut
                     )
                 }
             }

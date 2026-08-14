@@ -2,6 +2,8 @@ package com.example.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Brightness6
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CameraAlt
@@ -18,6 +20,8 @@ import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
@@ -36,6 +40,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 object IconHelper {
     val availableIcons = listOf(
         "flash_on" to Icons.Default.FlashOn,
+        "battery_charging_full" to Icons.Default.BatteryChargingFull,
+        "power_off" to Icons.Default.PowerOff,
+        "bolt" to Icons.Default.Bolt,
+        "play_circle" to Icons.Default.PlayCircle,
         "sports_esports" to Icons.Default.SportsEsports,
         "flashlight_on" to Icons.Default.FlashlightOn,
         "record_voice_over" to Icons.Default.RecordVoiceOver,

@@ -243,6 +243,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
     fun updateEditorColor(colorHex: String) = editorManager.updateColor(colorHex)
     fun updateEditorIcon(iconKey: String) = editorManager.updateIcon(iconKey)
     fun updateEditorCategory(category: String) = editorManager.updateCategory(category)
+    fun updateEditorTrigger(trigger: String) = editorManager.updateTrigger(trigger)
     fun addActionToEditor(type: ActionType) = editorManager.addAction(type)
     fun removeActionFromEditor(index: Int) = editorManager.removeAction(index)
     fun updateActionInEditor(index: Int, updatedAction: ShortcutAction) = editorManager.updateAction(index, updatedAction)

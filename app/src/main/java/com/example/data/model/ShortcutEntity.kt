@@ -14,6 +14,7 @@ data class ShortcutEntity(
     val category: String = "General",
     val actionsJson: String = "[]",
     val isFavorite: Boolean = false,
+    val trigger: String = "NONE", // NONE, POWER_CONNECTED, POWER_DISCONNECTED, POWER_BOTH
     val runCount: Int = 0,
     val lastRunTimestamp: Long = 0L,
     val createdAt: Long = System.currentTimeMillis()

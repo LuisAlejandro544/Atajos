@@ -77,7 +77,7 @@ fun ShortcutCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(150.dp)
+            .height(158.dp)
             .testTag("shortcut_card_${shortcut.id}")
             .clickable { onRun() },
         shape = RoundedCornerShape(20.dp),
@@ -247,6 +247,30 @@ fun ShortcutCard(
                                     fontWeight = FontWeight.Medium,
                                     color = Color.White.copy(alpha = 0.9f)
                                 )
+                            }
+
+                            val triggerBadge = when (shortcut.trigger) {
+                                "POWER_CONNECTED" -> "⚡ Al conectar"
+                                "POWER_DISCONNECTED" -> "🔌 Al desconectar"
+                                "POWER_BOTH" -> "⚡🔌 Carga"
+                                else -> null
+                            }
+
+                            if (triggerBadge != null) {
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color(0xFFFFD54F).copy(alpha = 0.35f))
+                                        .padding(horizontal = 5.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = triggerBadge,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFFFF9C4)
+                                    )
+                                }
                             }
 
                             if (shortcut.runCount > 0) {
