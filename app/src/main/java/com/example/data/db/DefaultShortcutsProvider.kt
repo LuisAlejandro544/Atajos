@@ -627,7 +627,7 @@ object DefaultShortcutsProvider {
                 triggerValue = "Cargando",
                 shortcutId = 2L,
                 shortcutTitle = "Asistente de Voz: Saludo",
-                isEnabled = false,
+                isEnabled = true,
                 notifyWhenRun = true
             )
         )

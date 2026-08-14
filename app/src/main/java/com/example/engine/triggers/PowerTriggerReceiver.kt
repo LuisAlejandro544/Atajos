@@ -28,10 +28,14 @@ class PowerTriggerReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         val action = intent?.action ?: return
         val (triggerTypeKey, autoTriggerType) = when (action) {
-            Intent.ACTION_POWER_CONNECTED -> Pair(ShortcutTrigger.POWER_CONNECTED.key, TriggerType.CHARGER_CONNECTED)
-            Intent.ACTION_POWER_DISCONNECTED -> Pair(ShortcutTrigger.POWER_DISCONNECTED.key, TriggerType.CHARGER_DISCONNECTED)
-            Intent.ACTION_BATTERY_LOW -> Pair(ShortcutTrigger.BATTERY_LOW.key, TriggerType.BATTERY_LOW)
-            Intent.ACTION_BATTERY_OKAY -> Pair(ShortcutTrigger.BATTERY_OK.key, TriggerType.BATTERY_OK)
+            Intent.ACTION_POWER_CONNECTED, "android.intent.action.POWER_CONNECTED" ->
+                Pair(ShortcutTrigger.POWER_CONNECTED.key, TriggerType.CHARGER_CONNECTED)
+            Intent.ACTION_POWER_DISCONNECTED, "android.intent.action.POWER_DISCONNECTED" ->
+                Pair(ShortcutTrigger.POWER_DISCONNECTED.key, TriggerType.CHARGER_DISCONNECTED)
+            Intent.ACTION_BATTERY_LOW ->
+                Pair(ShortcutTrigger.BATTERY_LOW.key, TriggerType.BATTERY_LOW)
+            Intent.ACTION_BATTERY_OKAY ->
+                Pair(ShortcutTrigger.BATTERY_OK.key, TriggerType.BATTERY_OK)
             Intent.ACTION_BATTERY_CHANGED -> {
                 val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
                 val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)

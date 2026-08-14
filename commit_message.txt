@@ -1,10 +1,8 @@
-fix(engine): corregir ejecución de atajos y automatizaciones por eventos de energía y batería
+fix(engine): solucionar inicialización de TextToSpeech en hilo principal y compatibilidad de eventos de carga
 
-- Unificar la ejecución en `PowerTriggerReceiver` para consultar tanto atajos con disparador directo como automatizaciones activas (`TriggerType.CHARGER_CONNECTED`, `CHARGER_DISCONNECTED`, etc.).
-- Añadir los tipos de disparador faltantes (`CHARGER_DISCONNECTED`, `BATTERY_OK`, `BATTERY_FULL`) en `TriggerType` y `AutomationDao`.
-- Resolver el cierre prematuro de `goAsync().finish()` asegurando que la ejecución de acciones, la síntesis de voz (TTS) y el guardado de registros en Room se completen de manera síncrona dentro de la corrutina.
-- Garantizar la liberación segura de recursos de hardware mediante `ActionExecutor.release()`.
-- Agregar iconos y soporte visual para todos los tipos de disparadores en `AutomationCard`.
-- Rediseñar y compactar el banner de estado de ejecución (`ExecutionStatusBanner`) haciéndolo más discreto, elegante y con proporciones ajustadas.
-- Limitar el historial de ejecuciones a un máximo de 20 elementos recientes y purgar automáticamente los registros antiguos en la base de datos Room (`ExecutionLogDao`).
-
+- Corregir la inicialización de `TextToSpeech` forzando su creación en el `Main Looper` (`Dispatchers.Main`) para garantizar el enlace IPC con el servicio de voz del sistema en segundo plano.
+- Implementar fallback sonoro con `RingtoneManager` y notificación del sistema ante posibles retardos en el motor TTS durante la pantalla bloqueada o segundo plano.
+- Agregar soporte a variantes de acciones de sistema (`POWER_CONNECTED` y `POWER_DISCONNECTED`) en `PowerTriggerReceiver` y en el manifiesto para máxima compatibilidad con capas de personalización OEM.
+- Activar por defecto la regla de automatización de conexión de cargador en `DefaultShortcutsProvider`.
+- Rediseñar el banner de estado de ejecución (`ExecutionStatusBanner`) con proporciones compactas y elegantes.
+- Limitar el historial de ejecuciones a 20 registros con purga automática en SQLite Room (`ExecutionLogDao`).

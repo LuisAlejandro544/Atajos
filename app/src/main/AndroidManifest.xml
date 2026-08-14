@@ -41,10 +41,13 @@
 
         <receiver
             android:name=".engine.triggers.PowerTriggerReceiver"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+                <action android:name="android.intent.action.POWER_CONNECTED" />
+                <action android:name="android.intent.action.POWER_DISCONNECTED" />
                 <action android:name="android.intent.action.BATTERY_LOW" />
                 <action android:name="android.intent.action.BATTERY_OKAY" />
             </intent-filter>
