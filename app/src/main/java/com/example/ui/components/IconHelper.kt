@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Widgets
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 object IconHelper {
     val availableIcons = listOf(
         "flash_on" to Icons.Default.FlashOn,
+        "sports_esports" to Icons.Default.SportsEsports,
         "flashlight_on" to Icons.Default.FlashlightOn,
         "record_voice_over" to Icons.Default.RecordVoiceOver,
         "chat" to Icons.Default.Chat,
@@ -40,6 +43,7 @@ object IconHelper {
         "notifications" to Icons.Default.Notifications,
         "calculate" to Icons.Default.Calculate,
         "hourglass_empty" to Icons.Default.HourglassEmpty,
+        "touch_app" to Icons.Default.TouchApp,
         "lightbulb" to Icons.Default.Lightbulb,
         "warning" to Icons.Default.Warning,
         "widgets" to Icons.Default.Widgets

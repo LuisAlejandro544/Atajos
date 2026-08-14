@@ -17,47 +17,58 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 
 1. **`ShortcutEntity`** (`data/model/ShortcutEntity.kt`):
    - Representa un atajo configurable.
-   - Campos: `id`, `name`, `description`, `iconName`, `colorHex`, `category`, `actionsJson` (lista serializada de `ShortcutAction`), `isFavorite`, `executionCount`, `lastRunTimestamp`.
+   - Campos: `id`, `title`, `description`, `iconKey`, `colorHex`, `category`, `actionsJson` (lista serializada de `ShortcutAction`), `isFavorite`, `runCount`, `lastRunTimestamp`, `createdAt`.
 
-2. **`ShortcutAction`** (`data/model/ActionType.kt`):
+2. **`ShortcutAction`** (`data/model/ShortcutAction.kt`):
    - Paso individual dentro de un atajo.
-   - Campos: `id`, `type` (`ActionType`), `param1`, `param2`, `orderIndex`.
+   - Campos: `id`, `type` (`ActionType`), `title`, `param1`, `param2`, `param3`, `orderIndex`.
 
 3. **`ActionType`** (`data/model/ActionType.kt`):
    - Tipos soportados:
-     - `SPEAK_TEXT`: Síntesis de voz. `param1`: texto a hablar.
+     - `LAUNCH_APP`: Iniciar juego o aplicación instalada. `param1`: `packageName`, `param2`: `appName`.
+     - `SPEAK_TEXT`: Síntesis de voz con soporte para tags dinámicos. `param1`: texto a hablar, `param2`: idioma.
      - `TOGGLE_FLASHLIGHT`: Control de linterna. `param1`: "toggle" / "on" / "off".
-     - `VIBRATE`: Vibración háptica. `param1`: "short" / "double" / "sos" / "custom_ms".
-     - `SHOW_NOTIFICATION`: Notificación local. `param1`: título, `param2`: mensaje.
-     - `COPY_CLIPBOARD`: Copiar al portapapeles. `param1`: texto.
-     - `WAIT_DELAY`: Pausa en milisegundos. `param1`: duración en ms (ej: "1500").
+     - `VIBRATE`: Vibración háptica avanzada. `param1`: duración en ms / "sos", `param2`: patrón ("click", "heavy", "double", "triple", "heartbeat", "sos", "custom").
+     - `SHOW_NOTIFICATION`: Notificación local con tags dinámicos. `param1`: título, `param2`: mensaje.
+     - `COPY_CLIPBOARD`: Copiar al portapapeles con tags dinámicos. `param1`: texto.
+     - `WAIT_DELAY`: Pausa en segundos. `param1`: duración en seg (ej: "2").
      - `OPEN_URL`: Abrir enlace web en navegador. `param1`: URL.
      - `SEARCH_WEB`: Búsqueda en Google. `param1`: término de búsqueda.
-     - `SHARE_TEXT`: Compartir texto mediante Intent chooser. `param1`: contenido.
-     - `SEND_WHATSAPP`: Enviar mensaje por WhatsApp. `param1`: teléfono, `param2`: mensaje.
-     - `SEND_SMS`: Enviar mensaje por SMS vía Intent. `param1`: teléfono, `param2`: mensaje.
-     - `SET_TIMER`: Iniciar temporizador de alarma. `param1`: segundos.
-     - `QUICK_CALC`: Evaluación de expresión matemática simple. `param1`: operación.
+     - `SHARE_TEXT`: Compartir texto mediante Intent chooser con tags dinámicos. `param1`: contenido.
+     - `SEND_WHATSAPP`: Enviar mensaje por WhatsApp con tags dinámicos. `param1`: teléfono, `param2`: mensaje.
+     - `SEND_SMS`: Enviar mensaje por SMS vía Intent con tags dinámicos. `param1`: teléfono, `param2`: mensaje.
+     - `SET_TIMER`: Iniciar temporizador de alarma. `param1`: segundos, `param2`: nombre.
+     - `QUICK_CALCULATOR`: Evaluación de expresión o propina rápida. `param1`: base, `param2`: porcentaje.
 
 4. **`AutomationEntity`** (`data/model/AutomationEntity.kt`):
-   - Disparador de automatización. Campos: `id`, `name`, `triggerType` (HORA, BATERIA, CARGADOR), `triggerCondition`, `shortcutId`, `isEnabled`.
+   - Disparador de automatización. Campos: `id`, `title`, `triggerType`, `triggerValue`, `shortcutId`, `shortcutTitle`, `isEnabled`, `notifyWhenRun`.
 
 5. **`ExecutionLogEntity`** (`data/model/ExecutionLogEntity.kt`):
-   - Registro histórico de ejecuciones. Campos: `id`, `shortcutId`, `shortcutName`, `timestamp`, `durationMs`, `success`, `errorMessage`.
+   - Registro histórico de ejecuciones. Campos: `id`, `shortcutId`, `shortcutTitle`, `timestamp`, `durationMs`, `status`, `summary`.
 
 ---
 
-## ⚙️ Reglas de Implementación para Nuevas Acciones
+## ⚙️ Arquitectura Modular del Motor de Ejecución
 
-Cuando se añada una nueva acción al sistema:
-1. **Definir el enum**: Añadir el nuevo valor a `ActionType` en `data/model/ActionType.kt` con su título, descripción, icono y parámetros esperados.
-2. **Implementar en el motor**: Añadir la rama correspondiente en `ActionExecutor.executeAction()` en `engine/ActionExecutor.kt`.
-3. **Editor UI**: Si requiere campos de configuración especializados, actualizar `ShortcutEditorScreen.kt` en la sección de edición de pasos.
-4. **Verificación**: Comprobar que no rompa la serialización JSON ni cause excepciones no controladas.
+1. **`ActionExecutor`**: Orquestador principal que despacha cada paso a un `ActionHandler` específico según su `ActionType`.
+2. **`VariableResolverHelper`**: Interpola variables del sistema en tiempo real (`{HORA}`, `{FECHA}`, `{DIA_SEMANA}`, `{BATERIA}`, `{ESTADO_BATERIA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}`) para personalizar textos de voz, notificaciones y mensajería.
+3. **`AppShortcutsHelper`**: Sincroniza dinámicamente los atajos favoritos con el launcher de Android mediante `ShortcutManagerCompat` para ejecución directa desde el icono de la app.
+4. **`ActionHandler`** (`engine/handlers/`):
+   - `AppLauncherActionHandler`: Lanza intents de apps instaladas de forma segura.
+   - `TtsActionHandler`: Inicialización y síntesis con `TextToSpeech` y resolución de variables.
+   - `FlashlightActionHandler`: Control de `CameraManager`.
+   - `VibrationActionHandler`: Generación de patrones con `Vibrator` / `VibrationEffect` con fallbacks de API.
+   - `NotificationActionHandler`: Publicación en `NotificationManager` con resolución de variables.
+   - `SystemIntentsActionHandler`: Manejo de intents de navegación, mensajería y portapapeles con resolución de variables.
+   - `UtilityActionHandler`: Pausas no bloqueantes con corrutinas y cálculos.
+
+5. **Escaneo Asíncrono de Aplicaciones**:
+   - `AppScannerHelper` consulta el `PackageManager` en `Dispatchers.IO` y filtra apps no ejecutables para evitar bloqueos del hilo principal.
+   - `AppPickerBottomSheet` presenta buscador en tiempo real y selector con estados de carga.
 
 ---
 
 ## 🚫 Restricciones Críticas
-- **No inventar dependencias**: Utilizar las dependencias ya declaradas en `gradle/libs.versions.toml`.
-- **Compatibilidad Offline**: Las acciones principales deben funcionar sin requerir conexión a internet obligatoria.
-- **Respetar el orden en UI**: Los atajos se ordenan de manera fija y predecible en la vista principal (`ORDER BY id ASC`).
+- **Distribución Independiente**: No asumir la presencia de Google Play Services ni librerías propietarias cerradas.
+- **Manejo Seguro de Excepciones**: Toda interacción con hardware o paquetes del sistema debe estar protegida con `try-catch`.
+- **Compatibilidad Offline**: Las acciones principales deben operar sin requerir conexión a internet obligatoria.

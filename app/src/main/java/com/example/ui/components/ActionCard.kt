@@ -13,24 +13,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FlashlightOn
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.RecordVoiceOver
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -39,13 +30,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ActionType
 import com.example.data.model.ShortcutAction
+import com.example.ui.components.actioninputs.AppLauncherInputSection
+import com.example.ui.components.actioninputs.FlashlightInputSection
+import com.example.ui.components.actioninputs.MessagingInputSection
+import com.example.ui.components.actioninputs.NotificationInputSection
+import com.example.ui.components.actioninputs.TtsInputSection
+import com.example.ui.components.actioninputs.UtilitiesInputSection
+import com.example.ui.components.actioninputs.VibrationInputSection
+import com.example.ui.components.actioninputs.WebUrlInputSection
 import com.example.ui.theme.IndigoPrimary
 
+/**
+ * Tarjeta interactiva para representar y configurar un paso de acción dentro del editor de atajos.
+ * Incluye controles para reordenar, eliminar y delegar la parametrización a submódulos dedicados.
+ */
 @Composable
 fun ActionCard(
     stepIndex: Int,
@@ -72,7 +74,7 @@ fun ActionCard(
                 .fillMaxWidth()
                 .padding(14.dp)
         ) {
-            // Header Row: Step badge, Action Name, Reorder & Delete
+            // Fila superior: Contador de paso, Nombre de la acción, Reordenamiento y Borrado
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -161,235 +163,44 @@ fun ActionCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Action-specific parameter configurations
+            // Submódulos de configuración según el tipo de acción
             when (action.type) {
                 ActionType.SPEAK_TEXT -> {
-                    OutlinedTextField(
-                        value = action.param1,
-                        onValueChange = { onUpdate(action.copy(param1 = it)) },
-                        label = { Text("Texto para leer en voz alta") },
-                        placeholder = { Text("Ej: ¡Hola! Iniciando jornada...") },
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines = 3,
-                        shape = RoundedCornerShape(12.dp)
-                    )
+                    TtsInputSection(action = action, onUpdate = onUpdate)
                 }
 
                 ActionType.TOGGLE_FLASHLIGHT -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        val currentMode = action.param1.ifBlank { "toggle" }
-                        listOf("toggle" to "Alternar", "on" to "Encender", "off" to "Apagar").forEach { (mode, label) ->
-                            FilterChip(
-                                selected = currentMode == mode,
-                                onClick = { onUpdate(action.copy(param1 = mode)) },
-                                label = { Text(label) }
-                            )
-                        }
-                    }
+                    FlashlightInputSection(action = action, onUpdate = onUpdate)
                 }
 
                 ActionType.VIBRATE -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        val currentPattern = action.param2.ifBlank { "single" }
-                        listOf("single" to "Pulso Simple", "double" to "Doble Pulso", "sos" to "Código SOS").forEach { (pattern, label) ->
-                            FilterChip(
-                                selected = currentPattern == pattern,
-                                onClick = { onUpdate(action.copy(param2 = pattern)) },
-                                label = { Text(label) }
-                            )
-                        }
-                    }
+                    VibrationInputSection(action = action, onUpdate = onUpdate)
                 }
 
                 ActionType.SHOW_NOTIFICATION -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(
-                            value = action.param1,
-                            onValueChange = { onUpdate(action.copy(param1 = it)) },
-                            label = { Text("Título de la notificación") },
-                            placeholder = { Text("Atajos") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        OutlinedTextField(
-                            value = action.param2,
-                            onValueChange = { onUpdate(action.copy(param2 = it)) },
-                            label = { Text("Mensaje de la notificación") },
-                            placeholder = { Text("Tarea completada") },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                    }
+                    NotificationInputSection(action = action, onUpdate = onUpdate)
                 }
 
-                ActionType.OPEN_URL -> {
-                    OutlinedTextField(
-                        value = action.param1,
-                        onValueChange = { onUpdate(action.copy(param1 = it)) },
-                        label = { Text("URL del sitio web") },
-                        placeholder = { Text("https://ejemplo.com") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-
+                ActionType.OPEN_URL,
                 ActionType.SEARCH_WEB -> {
-                    OutlinedTextField(
-                        value = action.param1,
-                        onValueChange = { onUpdate(action.copy(param1 = it)) },
-                        label = { Text("Término de búsqueda") },
-                        placeholder = { Text("Ej: el tiempo en Madrid") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
+                    WebUrlInputSection(action = action, onUpdate = onUpdate)
                 }
 
-                ActionType.COPY_CLIPBOARD -> {
-                    OutlinedTextField(
-                        value = action.param1,
-                        onValueChange = { onUpdate(action.copy(param1 = it)) },
-                        label = { Text("Texto para copiar al portapapeles") },
-                        placeholder = { Text("Texto que deseas guardar") },
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines = 3,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-
-                ActionType.SEND_WHATSAPP -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(
-                            value = action.param1,
-                            onValueChange = { onUpdate(action.copy(param1 = it)) },
-                            label = { Text("Número de teléfono (opcional)") },
-                            placeholder = { Text("Ej: +34600000000 o vacío para elegir") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        OutlinedTextField(
-                            value = action.param2,
-                            onValueChange = { onUpdate(action.copy(param2 = it)) },
-                            label = { Text("Mensaje de WhatsApp") },
-                            placeholder = { Text("Mensaje predefinido") },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                    }
-                }
-
-                ActionType.SEND_SMS -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(
-                            value = action.param1,
-                            onValueChange = { onUpdate(action.copy(param1 = it)) },
-                            label = { Text("Número de teléfono") },
-                            placeholder = { Text("Número destinatario") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        OutlinedTextField(
-                            value = action.param2,
-                            onValueChange = { onUpdate(action.copy(param2 = it)) },
-                            label = { Text("Texto del SMS") },
-                            placeholder = { Text("Mensaje SMS") },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                    }
-                }
-
+                ActionType.COPY_CLIPBOARD,
+                ActionType.SEND_WHATSAPP,
+                ActionType.SEND_SMS,
                 ActionType.SHARE_TEXT -> {
-                    OutlinedTextField(
-                        value = action.param1,
-                        onValueChange = { onUpdate(action.copy(param1 = it)) },
-                        label = { Text("Texto a compartir") },
-                        placeholder = { Text("Contenido para enviar a otras apps") },
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines = 3,
-                        shape = RoundedCornerShape(12.dp)
-                    )
+                    MessagingInputSection(action = action, onUpdate = onUpdate)
                 }
 
-                ActionType.SET_TIMER -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = action.param1,
-                            onValueChange = { onUpdate(action.copy(param1 = it)) },
-                            label = { Text("Segundos") },
-                            placeholder = { Text("300") },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        OutlinedTextField(
-                            value = action.param2,
-                            onValueChange = { onUpdate(action.copy(param2 = it)) },
-                            label = { Text("Etiqueta") },
-                            placeholder = { Text("Temporizador") },
-                            modifier = Modifier.weight(1.5f),
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                    }
-                }
-
-                ActionType.WAIT_DELAY -> {
-                    OutlinedTextField(
-                        value = action.param1,
-                        onValueChange = { onUpdate(action.copy(param1 = it)) },
-                        label = { Text("Segundos de espera") },
-                        placeholder = { Text("2") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-
+                ActionType.SET_TIMER,
+                ActionType.WAIT_DELAY,
                 ActionType.QUICK_CALCULATOR -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = action.param1,
-                            onValueChange = { onUpdate(action.copy(param1 = it)) },
-                            label = { Text("Importe (€/$)") },
-                            placeholder = { Text("50") },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        OutlinedTextField(
-                            value = action.param2,
-                            onValueChange = { onUpdate(action.copy(param2 = it)) },
-                            label = { Text("% Porcentaje") },
-                            placeholder = { Text("15") },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                    }
+                    UtilitiesInputSection(action = action, onUpdate = onUpdate)
+                }
+
+                ActionType.LAUNCH_APP -> {
+                    AppLauncherInputSection(action = action, onUpdate = onUpdate)
                 }
             }
         }

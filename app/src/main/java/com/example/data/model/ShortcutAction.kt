@@ -83,6 +83,12 @@ enum class ActionType(
         categoryName = "Utilidades",
         description = "Calcula rápidamente propinas o porcentajes y los muestra",
         iconKey = "calculate"
+    ),
+    LAUNCH_APP(
+        displayName = "Abrir Juego o Aplicación",
+        categoryName = "Aplicaciones y Juegos",
+        description = "Inicia directamente un juego o aplicación instalada en tu teléfono",
+        iconKey = "sports_esports"
     )
 }
 

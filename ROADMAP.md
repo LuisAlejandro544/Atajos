@@ -6,18 +6,23 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
 
 ## 📍 Fase 1: Fundamentos y MVP Funcional (✅ Completada)
 - [x] Arquitectura base MVVM con Jetpack Compose y Material 3.
-- [x] Motor de ejecución de acciones (`ActionExecutor`) con soporte secuencial.
+- [x] Motor de ejecución modular (`ActionExecutor` con patrón Strategy y handlers dedicados).
 - [x] Acciones nativas implementadas:
+  - **Lanzador de Juegos y Apps**: Escaneo asíncrono (`Dispatchers.IO`) con estados de carga y selector visual.
+  - **Vibración Háptica Avanzada**: Patrones enriquecidos (Ligero, Fuerte, Doble, Triple, Latido, SOS y duración libre).
+  - **Variables Dinámicas del Sistema**: Interpolación en vivo de `{HORA}`, `{FECHA}`, `{DIA_SEMANA}`, `{BATERIA}`, `{ESTADO_BATERIA}`, `{PORTAPAPELES}`, `{DISPOSITIVO}` en Texto a Voz, Notificaciones, SMS, WhatsApp y Compartir.
+  - **Selector Visual de Variables**: Chips interactivos `VariablePickerChips` para insertar datos sin memorizar sintaxis.
+  - **App Shortcuts en el Icono**: Accesos directos dinámicos en el launcher del dispositivo sincronizados automáticamente con los atajos favoritos.
   - Síntesis de voz (Text-to-Speech).
   - Control de linterna (Toggle, Encender, Apagar).
-  - Vibración háptica con patrones (Corto, Doble, SOS).
-  - Notificaciones de sistema con canal dedicado.
+  - Notificaciones de sistema con canal dedicado y verificación dinámica de permisos (`POST_NOTIFICATIONS`).
   - Copiado al portapapeles.
   - Delays/Pausas controladas.
   - Intents para compartir texto, enviar WhatsApp/SMS y búsqueda web.
-- [x] Editor visual de atajos con selección de iconos, colores en degradado y reordenación de pasos.
+- [x] Solicitud dinámica de permisos en tiempo de ejecución al iniciar la app con banner configurable.
+- [x] Editor visual de atajos modularizado con selección de iconos, colores en degradado y reordenación de pasos.
 - [x] Persistencia local completa con Room SQLite (Atajos, Automatizaciones, Logs de historial).
-- [x] Catálogo de plantillas preconfiguradas con instalación en 1 clic.
+- [x] Catálogo de plantillas preconfiguradas con instalación en 1 clic (incluyendo Modo Gamer y Reporte Dinámico de Estado).
 - [x] Historial de ejecuciones con tiempos y estados.
 - [x] Pipeline de CI/CD en GitHub Actions para compilación y firma automática de APK Debug.
 
@@ -32,8 +37,6 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
   - Detección de batería baja (`ACTION_BATTERY_LOW`) y nivel porcentual configurable.
   - Detección de cambios de red (Conexión/Desconexión de WiFi).
   - Modo No Molestar automático.
-- [ ] **Variables Dinámicas en Acciones**:
-  - Parámetros dinámicos como `{HORA_ACTUAL}`, `{FECHA}`, `{NIVEL_BATERIA}`, `{PORTAPAPELES}` utilizables dentro del texto a voz o notificaciones.
 
 ---
 

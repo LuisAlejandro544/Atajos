@@ -22,8 +22,8 @@ object DefaultShortcutsProvider {
                     ShortcutAction(
                         type = ActionType.VIBRATE,
                         title = "Vibración de confirmación",
-                        param1 = "150",
-                        param2 = "single"
+                        param1 = "250",
+                        param2 = "heavy"
                     ),
                     ShortcutAction(
                         type = ActionType.TOGGLE_FLASHLIGHT,
@@ -43,8 +43,8 @@ object DefaultShortcutsProvider {
 
         val s2 = ShortcutEntity(
             id = 2L,
-            title = "Asistente de Voz: Saludo",
-            description = "Te da los buenos días y la bienvenida con síntesis de voz",
+            title = "Informe de Estado & Saludo",
+            description = "Dice por voz la hora, fecha y nivel actual de batería",
             colorHex = "#4F46E5", // Indigo
             iconKey = "record_voice_over",
             category = "Sistema",
@@ -53,13 +53,20 @@ object DefaultShortcutsProvider {
                     ShortcutAction(
                         type = ActionType.VIBRATE,
                         title = "Vibración suave",
-                        param1 = "100"
+                        param1 = "100",
+                        param2 = "click"
                     ),
                     ShortcutAction(
                         type = ActionType.SPEAK_TEXT,
-                        title = "Pronunciar saludo",
-                        param1 = "¡Hola! Bienvenido a tu centro de atajos de Android. Todo listo para automatizar.",
+                        title = "Pronunciar informe dinámico",
+                        param1 = "¡Hola! Hoy es {DIA_SEMANA}, son las {HORA} y tu batería está al {BATERIA}.",
                         param2 = "es"
+                    ),
+                    ShortcutAction(
+                        type = ActionType.SHOW_NOTIFICATION,
+                        title = "Notificación de Estado",
+                        param1 = "Reporte {HORA}",
+                        param2 = "Batería: {BATERIA} ({ESTADO_BATERIA}) | {DIA_SEMANA}"
                     )
                 )
             ),
@@ -96,8 +103,9 @@ object DefaultShortcutsProvider {
                 listOf(
                     ShortcutAction(
                         type = ActionType.VIBRATE,
-                        title = "Pulso de salida",
-                        param1 = "100"
+                        title = "Pulso háptico",
+                        param1 = "150",
+                        param2 = "double"
                     ),
                     ShortcutAction(
                         type = ActionType.SEND_WHATSAPP,
@@ -167,6 +175,35 @@ object DefaultShortcutsProvider {
     fun getGalleryTemplates(): List<ShortcutEntity> {
         return listOf(
             ShortcutEntity(
+                title = "🎮 Lanzador de Juego Rápido",
+                description = "Emite doble pulso háptico y abre tu juego favorito directamente",
+                colorHex = "#8B5CF6",
+                iconKey = "sports_esports",
+                category = "Juegos",
+                actionsJson = ActionJsonHelper.toJson(
+                    listOf(
+                        ShortcutAction(
+                            type = ActionType.VIBRATE,
+                            title = "Vibración Gamer",
+                            param1 = "250",
+                            param2 = "double"
+                        ),
+                        ShortcutAction(
+                            type = ActionType.LAUNCH_APP,
+                            title = "Abrir Juego o App",
+                            param1 = "",
+                            param2 = ""
+                        ),
+                        ShortcutAction(
+                            type = ActionType.SHOW_NOTIFICATION,
+                            title = "Modo Juego",
+                            param1 = "Atajos Gamer",
+                            param2 = "¡A jugar! Sesión iniciada."
+                        )
+                    )
+                )
+            ),
+            ShortcutEntity(
                 title = "Alerta SOS con Linterna y Voz",
                 description = "Emite pulso SOS y anuncia alarma sonora",
                 colorHex = "#EF4444",
@@ -177,7 +214,8 @@ object DefaultShortcutsProvider {
                         ShortcutAction(
                             type = ActionType.VIBRATE,
                             title = "Vibración SOS",
-                            param1 = "sos"
+                            param1 = "100",
+                            param2 = "sos"
                         ),
                         ShortcutAction(
                             type = ActionType.TOGGLE_FLASHLIGHT,
@@ -213,8 +251,9 @@ object DefaultShortcutsProvider {
                         ),
                         ShortcutAction(
                             type = ActionType.VIBRATE,
-                            title = "Pulso",
-                            param1 = "80"
+                            title = "Pulso de confirmación",
+                            param1 = "80",
+                            param2 = "click"
                         )
                     )
                 )

@@ -13,6 +13,7 @@ import com.example.data.model.ShortcutAction
 import com.example.data.model.ShortcutEntity
 import com.example.data.repository.ShortcutRepository
 import com.example.engine.ActionExecutor
+import com.example.engine.AppShortcutsHelper
 import com.example.engine.ExecutionStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,19 +23,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class EditorState(
-    val isEditing: Boolean = false,
-    val isNew: Boolean = true,
-    val id: Long = 0L,
-    val title: String = "",
-    val description: String = "",
-    val colorHex: String = "#4F46E5",
-    val iconKey: String = "flash_on",
-    val category: String = "General",
-    val actions: List<ShortcutAction> = emptyList(),
-    val isFavorite: Boolean = false
-)
-
+/**
+ * ViewModel principal que centraliza los flujos de datos reactivos (Room + StateFlow)
+ * y coordina la navegación de pestañas, edición, automatizaciones e historial.
+ */
 class ShortcutsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: ShortcutRepository
@@ -45,7 +37,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
     val recentLogs: StateFlow<List<ExecutionLogEntity>>
     val executionStatus: StateFlow<ExecutionStatus>
 
-    // Navigation & UI State
+    // Control de pestañas y filtros
     private val _selectedTab = MutableStateFlow(0) // 0: Atajos, 1: Automatizaciones, 2: Galería, 3: Historial
     val selectedTab: StateFlow<Int> = _selectedTab.asStateFlow()
 
@@ -55,9 +47,11 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    // Estado del editor
     private val _editorState = MutableStateFlow(EditorState())
     val editorState: StateFlow<EditorState> = _editorState.asStateFlow()
 
+    // Diálogos de automatizaciones
     private val _showAutomationDialog = MutableStateFlow(false)
     val showAutomationDialog: StateFlow<Boolean> = _showAutomationDialog.asStateFlow()
 
@@ -91,6 +85,15 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             repository.checkAndSeedDefaults()
         }
+
+        // Sincronizar App Shortcuts en el launcher del dispositivo cuando cambien los atajos
+        viewModelScope.launch {
+            allShortcuts.collect { shortcuts ->
+                if (shortcuts.isNotEmpty()) {
+                    AppShortcutsHelper.updateDynamicShortcuts(getApplication(), shortcuts)
+                }
+            }
+        }
     }
 
     val filteredShortcuts: StateFlow<List<ShortcutEntity>> = combine(
@@ -115,6 +118,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
 
     val galleryTemplates: List<ShortcutEntity> = DefaultShortcutsProvider.getGalleryTemplates()
 
+    // ── Navegación & Filtros ──────────────────────────────────────────────────
     fun setSelectedTab(tab: Int) {
         _selectedTab.value = tab
     }
@@ -127,6 +131,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
         _searchQuery.value = query
     }
 
+    // ── Operaciones con Atajos ────────────────────────────────────────────────
     fun runShortcut(shortcut: ShortcutEntity) {
         viewModelScope.launch {
             val actions = ActionJsonHelper.fromJson(shortcut.actionsJson)
@@ -155,6 +160,15 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    fun runShortcutById(shortcutId: Long) {
+        viewModelScope.launch {
+            val shortcut = repository.getShortcutById(shortcutId)
+            if (shortcut != null) {
+                runShortcut(shortcut)
+            }
+        }
+    }
+
     fun toggleFavorite(shortcut: ShortcutEntity) {
         viewModelScope.launch {
             repository.toggleFavorite(shortcut.id, shortcut.isFavorite)
@@ -176,7 +190,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
                 lastRunTimestamp = 0L
             )
             repository.saveShortcut(newShortcut)
-            _selectedTab.value = 0 // Switch to shortcuts list
+            _selectedTab.value = 0
         }
     }
 
@@ -193,7 +207,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    // Editor Actions
+    // ── Gestión del Editor de Atajos ──────────────────────────────────────────
     fun openNewShortcutEditor() {
         _editorState.value = EditorState(
             isEditing = true,
@@ -255,79 +269,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun addActionToEditor(type: ActionType) {
-        val defaultAction = when (type) {
-            ActionType.SPEAK_TEXT -> ShortcutAction(
-                type = type,
-                title = "Pronunciar mensaje",
-                param1 = "¡Acción ejecutada con éxito!"
-            )
-            ActionType.TOGGLE_FLASHLIGHT -> ShortcutAction(
-                type = type,
-                title = "Alternar Linterna",
-                param1 = "toggle"
-            )
-            ActionType.VIBRATE -> ShortcutAction(
-                type = type,
-                title = "Vibración háptica",
-                param1 = "150",
-                param2 = "single"
-            )
-            ActionType.SHOW_NOTIFICATION -> ShortcutAction(
-                type = type,
-                title = "Mostrar Notificación",
-                param1 = "Atajos",
-                param2 = "Tarea automatizada completada"
-            )
-            ActionType.OPEN_URL -> ShortcutAction(
-                type = type,
-                title = "Abrir Enlace Web",
-                param1 = "https://google.com"
-            )
-            ActionType.SEARCH_WEB -> ShortcutAction(
-                type = type,
-                title = "Buscar en la Web",
-                param1 = "Noticias del día"
-            )
-            ActionType.COPY_CLIPBOARD -> ShortcutAction(
-                type = type,
-                title = "Copiar al Portapapeles",
-                param1 = "Texto copiado"
-            )
-            ActionType.SEND_WHATSAPP -> ShortcutAction(
-                type = type,
-                title = "Enviar por WhatsApp",
-                param1 = "",
-                param2 = "¡Hola! Te escribo desde un atajo."
-            )
-            ActionType.SEND_SMS -> ShortcutAction(
-                type = type,
-                title = "Enviar SMS",
-                param1 = "",
-                param2 = "Mensaje automático"
-            )
-            ActionType.SHARE_TEXT -> ShortcutAction(
-                type = type,
-                title = "Compartir texto",
-                param1 = "Compartido desde Atajos"
-            )
-            ActionType.SET_TIMER -> ShortcutAction(
-                type = type,
-                title = "Iniciar Temporizador",
-                param1 = "300",
-                param2 = "Mi Temporizador"
-            )
-            ActionType.WAIT_DELAY -> ShortcutAction(
-                type = type,
-                title = "Pausa / Esperar",
-                param1 = "2"
-            )
-            ActionType.QUICK_CALCULATOR -> ShortcutAction(
-                type = type,
-                title = "Calcular Propina",
-                param1 = "50",
-                param2 = "15"
-            )
-        }
+        val defaultAction = DefaultActionFactory.createDefaultAction(type)
         val current = _editorState.value.actions.toMutableList()
         current.add(defaultAction)
         _editorState.value = _editorState.value.copy(actions = current)
@@ -399,7 +341,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    // Automations
+    // ── Automatizaciones ──────────────────────────────────────────────────────
     fun openNewAutomationDialog() {
         _editingAutomation.value = null
         _showAutomationDialog.value = true
@@ -443,6 +385,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    // ── Historial & Auditoría ─────────────────────────────────────────────────
     fun clearLogs() {
         viewModelScope.launch {
             repository.clearLogs()

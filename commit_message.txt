@@ -1,1 +1,21 @@
-Actualización de código desde archivo comprimido en /zip
+refactor: modularizar ActionExecutor, ActionCard y ShortcutsViewModel
+
+- Implementar patrón Strategy/Command en el motor de ejecución creando la interfaz ActionHandler y manejadores especializados en engine/handlers/ (TtsActionHandler, FlashlightActionHandler, VibrationActionHandler, NotificationActionHandler, SystemIntentsActionHandler, UtilityActionHandler).
+- Modularizar ActionCard dividiendo las secciones de entrada en componentes dedicados dentro de ui/components/actioninputs/ (Tts, Flashlight, Vibration, Notification, WebUrl, Messaging, Utilities).
+- Modularizar ShortcutsViewModel desacoplando EditorState y DefaultActionFactory en archivos dedicados para mejorar legibilidad y mantenimiento.
+- Actualizar STRUCTURE.md con el árbol de componentes y patrones arquitectónicos renovados.
+
+feat: agregar permisos dinámicos al inicio, vibración háptica avanzada y acción para abrir juegos/apps
+
+- Implementar flujo automático de solicitud de permisos en tiempo de ejecución al entrar a la app (POST_NOTIFICATIONS, CAMERA) con banner de aviso configurable.
+- Crear motor de vibración háptica enriquecido con patrones avanzados (Ligero, Fuerte, Doble, Triple, Pulso cardíaco, Alerta SOS y Duración personalizada) con soporte multiplataforma para Android 8.0, 10.0 y 12.0+.
+- Implementar la acción LAUNCH_APP con escaneo asíncrono de juegos y aplicaciones en hilo secundario (Dispatchers.IO) mediante AppScannerHelper y selector visual AppPickerBottomSheet con estados de carga.
+- Diseñar componente AppLauncherInputSection y manejador AppLauncherActionHandler para ejecutar intents directos de aplicaciones.
+- Integrar plantilla predefinida 'Lanzador de Juego Rápido' en la Galería.
+
+feat: soporte de variables dinámicas del sistema con selector visual y App Shortcuts en el launcher
+
+- Crear motor de interpolación de variables del sistema en tiempo real mediante VariableResolverHelper ({HORA}, {FECHA}, {DIA_SEMANA}, {BATERIA}, {ESTADO_BATERIA}, {PORTAPAPELES}, {DISPOSITIVO}).
+- Implementar componente visual VariablePickerChips para autocompletar e insertar etiquetas dinámicas con un toque en Texto a Voz, Notificaciones, WhatsApp, SMS y Compartir, sin necesidad de memorizar comandos.
+- Implementar AppShortcutsHelper para registrar y sincronizar accesos directos dinámicos en el icono del launcher (App Shortcuts) para ejecutar los atajos favoritos directamente desde la pantalla de inicio.
+- Configurar manejo de Intent ("com.example.ACTION_RUN_SHORTCUT") en MainActivity para ejecución instantánea sin intermediarios.
