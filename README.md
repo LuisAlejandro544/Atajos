@@ -33,7 +33,16 @@ Una aplicación nativa para Android construida con **Kotlin** y **Jetpack Compos
 | **Base de Datos** | AndroidX Room (SQLite) con Kotlin Symbol Processing (KSP) |
 | **Concurrencia** | Kotlin Coroutines & Reactive Flow (`Dispatchers.IO`, `Dispatchers.Main`) |
 | **Build System** | Gradle Kotlin DSL (`build.gradle.kts`) |
-| **CI / CD** | GitHub Actions (Compilación y firma automática de Debug APK) |
+| **CI / CD & Auditoría** | GitHub Actions (Compilación de APK, Limpieza de archivos zip, Informe de peso del repositorio) |
+
+---
+
+## 🤖 Automatización y Workflows de GitHub Actions
+
+El repositorio cuenta con 3 flujos de trabajo optimizados:
+1. **`Build Android Debug APK`** (`build-apk.yml`): Compila y firma automáticamente el APK listo para descargar e instalar en dispositivos o emuladores.
+2. **`Sync Code from Zip Archive`** (`sync-from-zip.yml`): Se activa automáticamente al subir cualquier archivo comprimido (`.zip`, `.7z`, `.tar.gz`, etc.) a la carpeta `zip/`, descomprime, sincroniza cambios preservando el control de versiones y **elimina automáticamente los archivos comprimidos** procesados para mantener el repositorio limpio sin basura.
+3. **`Repository Size & Metrics Report`** (`repo-size-report.yml`): Calcula métricas de almacenamiento, peso de `.git`, líneas de código y genera reportes detallados en `REPO_SIZE_REPORT.md` y en el Step Summary de GitHub Actions.
 
 ---
 

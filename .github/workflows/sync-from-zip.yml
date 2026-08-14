@@ -2,6 +2,21 @@ name: Sync Code from Zip Archive
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'zip/*.zip'
+      - 'zip/*.7z'
+      - 'zip/*.tar.gz'
+      - 'zip/*.tar'
+      - 'zip/*.tgz'
+      - 'zip/**.zip'
+      - 'zip/**.7z'
+      - 'zip/**.tar.gz'
+      - 'zip/**.tar'
+      - 'zip/**.tgz'
+      - 'zip/**'
+    paths-ignore:
+      - 'zip/.gitkeep'
 
 concurrency:
   group: sync-from-zip-${{ github.ref }}
@@ -107,6 +122,18 @@ jobs:
             "$SOURCE_DIR/" ./
 
           echo "Sync completed successfully."
+
+      - name: Cleanup Processed Archive and Temp Files
+        if: steps.find-archive.outputs.found == 'true'
+        run: |
+          echo "Removing processed archive to prevent repository bloat..."
+          ARCHIVE_PATH="${{ steps.find-archive.outputs.file }}"
+          rm -f "$ARCHIVE_PATH"
+          rm -rf /tmp/unpacked_project
+          # Ensure zip directory remains clean with a .gitkeep
+          mkdir -p zip
+          touch zip/.gitkeep
+          echo "Archive cleanup completed successfully."
 
       - name: Read Custom Commit Message
         if: steps.find-archive.outputs.found == 'true'

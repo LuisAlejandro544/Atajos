@@ -19,3 +19,14 @@ feat: soporte de variables dinámicas del sistema con selector visual y App Shor
 - Implementar componente visual VariablePickerChips para autocompletar e insertar etiquetas dinámicas con un toque en Texto a Voz, Notificaciones, WhatsApp, SMS y Compartir, sin necesidad de memorizar comandos.
 - Implementar AppShortcutsHelper para registrar y sincronizar accesos directos dinámicos en el icono del launcher (App Shortcuts) para ejecutar los atajos favoritos directamente desde la pantalla de inicio.
 - Configurar manejo de Intent ("com.example.ACTION_RUN_SHORTCUT") en MainActivity para ejecución instantánea sin intermediarios.
+
+ci: limpieza automática de archivos zip procesados y GitHub Action para informe de métricas y peso del repositorio
+
+- Añadir paso de limpieza en sync-from-zip.yml para eliminar el archivo comprimido procesado y los directorios temporales de extracción, evitando dejar residuos o inflar el tamaño de Git.
+- Crear workflow repo-size-report.yml para generar automáticamente un informe detallado en Markdown (REPO_SIZE_REPORT.md) y texto plano (REPO_SIZE_REPORT.txt) con el peso del workspace, tamaño de .git, conteo de líneas de código, desglose por carpetas y extensiones, y el Top 10 de archivos más pesados.
+- Publicar las métricas de peso directamente en el Step Summary de GitHub Actions y en los artefactos descargables del workflow.
+
+ci: disparo automático del workflow de sincronización al subir o detectar archivos comprimidos en zip/
+
+- Configurar trigger push.paths en sync-from-zip.yml para detectar automáticamente archivos .zip, .7z, .tar.gz, .tar y .tgz en la carpeta zip/, iniciando la sincronización, extracción y limpieza de forma 100% desatendida.
+

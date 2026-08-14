@@ -24,7 +24,10 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
 - [x] Persistencia local completa con Room SQLite (Atajos, Automatizaciones, Logs de historial).
 - [x] Catálogo de plantillas preconfiguradas con instalación en 1 clic (incluyendo Modo Gamer y Reporte Dinámico de Estado).
 - [x] Historial de ejecuciones con tiempos y estados.
-- [x] Pipeline de CI/CD en GitHub Actions para compilación y firma automática de APK Debug.
+- [x] Pipeline de CI/CD en GitHub Actions:
+  - Compilación y firma automática de APK Debug (`build-apk.yml`).
+  - Sincronización limpia de código desde zip con disparo automático por push y auto-eliminación de residuos (`sync-from-zip.yml`).
+  - Análisis y reporte de peso/métricas del repositorio en Markdown y Step Summary (`repo-size-report.yml`).
 
 ---
 

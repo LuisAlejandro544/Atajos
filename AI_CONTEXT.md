@@ -66,6 +66,11 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
    - `AppScannerHelper` consulta el `PackageManager` en `Dispatchers.IO` y filtra apps no ejecutables para evitar bloqueos del hilo principal.
    - `AppPickerBottomSheet` presenta buscador en tiempo real y selector con estados de carga.
 
+6. **Automatización en CI/CD (GitHub Actions)**:
+   - `build-apk.yml`: Compilación y empaquetado del APK de desarrollo.
+   - `sync-from-zip.yml`: Extracción y sincronización desde zip con activación automática ante push en `zip/`, y eliminación automática de archivos comprimidos y carpetas temporales.
+   - `repo-size-report.yml`: Auditoría automática del peso del proyecto, desglose por directorios, extensiones y generación de `REPO_SIZE_REPORT.md`.
+
 ---
 
 ## 🚫 Restricciones Críticas
