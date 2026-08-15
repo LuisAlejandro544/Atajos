@@ -200,6 +200,15 @@ website/
 
 ---
 
+## 🤖 Workflows de Integración Continua (`.github/workflows/`)
+
+- `build-apk.yml`: Compilación y empaquetado de APK Debug.
+- `android-device-simulation.yml`: Simulación en emulador oficial de Android (KVM / API 34), inyección de eventos de hardware (`adb shell cmd battery`) y auditoría de excepciones fatales en runtime con caché de AVD y Gradle.
+- `sync-from-zip.yml`: Sincronización automática de código desde archivos comprimidos y auto-limpieza.
+- `repo-size-report.yml`: Auditoría y reporte del peso del repositorio y métricas.
+
+---
+
 ## ⚡ Flujo de Ejecución de un Atajo
 
 1. **Usuario presiona "Ejecutar" o toca un App Shortcut en el launcher**: Inicia la invocación en `ShortcutsViewModel`.

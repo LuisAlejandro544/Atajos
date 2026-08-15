@@ -43,16 +43,17 @@ Una aplicación nativa para Android construida con **Kotlin** y **Jetpack Compos
 | **Base de Datos** | AndroidX Room (SQLite) con Kotlin Symbol Processing (KSP) |
 | **Concurrencia** | Kotlin Coroutines & Reactive Flow (`Dispatchers.IO`, `Dispatchers.Main`) |
 | **Build System** | Gradle Kotlin DSL (`build.gradle.kts`) |
-| **CI / CD & Auditoría** | GitHub Actions (Compilación de APK, Limpieza de archivos zip, Informe de peso del repositorio) |
+| **CI / CD & Auditoría** | GitHub Actions (Compilación de APK, Simulación de Hardware en Emulador Real, Limpieza de archivos zip, Informe de peso del repositorio) |
 
 ---
 
 ## 🤖 Automatización y Workflows de GitHub Actions
 
-El repositorio cuenta con 3 flujos de trabajo optimizados:
+El repositorio cuenta con 4 flujos de trabajo optimizados:
 1. **`Build Android Debug APK`** (`build-apk.yml`): Compila y firma automáticamente el APK listo para descargar e instalar en dispositivos o emuladores.
-2. **`Sync Code from Zip Archive`** (`sync-from-zip.yml`): Se activa automáticamente al subir cualquier archivo comprimido (`.zip`, `.7z`, `.tar.gz`, etc.) a la carpeta `zip/`, descomprime, sincroniza cambios preservando el control de versiones y **elimina automáticamente los archivos comprimidos** procesados para mantener el repositorio limpio sin basura.
-3. **`Repository Size & Metrics Report`** (`repo-size-report.yml`): Calcula métricas de almacenamiento, peso de `.git`, líneas de código y genera reportes detallados en `REPO_SIZE_REPORT.md` y en el Step Summary de GitHub Actions.
+2. **`Android Device Hardware Simulation & Test`** (`android-device-simulation.yml`): Simulación completa en emulador oficial de Android (KVM / API 34) bajo demanda (`workflow_dispatch`) con caché acelerado de AVD y Gradle; inyecta eventos de hardware reales (conexión de cargador, desenchufe, niveles de batería al 15%, 80%, 100%) e inspecciona logs de ejecución para detectar fallos o excepciones en segundo plano.
+3. **`Sync Code from Zip Archive`** (`sync-from-zip.yml`): Se activa automáticamente al subir cualquier archivo comprimido (`.zip`, `.7z`, `.tar.gz`, etc.) a la carpeta `zip/`, descomprime, sincroniza cambios preservando el control de versiones y **elimina automáticamente los archivos comprimidos** procesados para mantener el repositorio limpio sin basura.
+4. **`Repository Size & Metrics Report`** (`repo-size-report.yml`): Calcula métricas de almacenamiento, peso de `.git`, líneas de código y genera reportes detallados en `REPO_SIZE_REPORT.md` y en el Step Summary de GitHub Actions.
 
 ---
 

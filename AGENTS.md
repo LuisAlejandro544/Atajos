@@ -48,6 +48,7 @@ Este archivo contiene las directivas, roles y protocolos de razonamiento que cua
 
 ### 6. 🛡️ El Escudo (Testing y Verificación)
 - Ejecuta compilaciones (`compile_applet`) y tests unitarios locales con Robolectric (`gradle :app:testDebugUnitTest`) tras cambios estructurales.
+- Utiliza la GitHub Action de simulación de dispositivo (`android-device-simulation.yml`) para verificar la respuesta del sistema ante eventos de hardware (energía, batería) en un entorno emulado real sin crashes.
 
 ### 7. 📖 El Narrador (Documentación)
 - Mantén actualizados los archivos `README.md`, `ROADMAP.md`, `STRUCTURE.md`, `AI_CONTEXT.md` y este archivo `AGENTS.md` cuando la arquitectura o funcionalidades clave evolucionen.

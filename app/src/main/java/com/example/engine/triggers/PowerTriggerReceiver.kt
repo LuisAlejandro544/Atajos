@@ -69,15 +69,25 @@ class PowerTriggerReceiver : BroadcastReceiver() {
         }
 
         // Debounce para porcentaje de batería idéntico
+        val now = System.currentTimeMillis()
         if (exactBatteryPct != null) {
             val lastPct = lastProcessedBatteryPct
-            val now = System.currentTimeMillis()
             if (lastPct == exactBatteryPct && (now - lastProcessedTimestamp) < 30000L) {
                 // Mismo porcentaje recibido en menos de 30s, evitar duplicados innecesarios
                 return
             }
             lastProcessedBatteryPct = exactBatteryPct
             lastProcessedTimestamp = now
+        } else if (action == Intent.ACTION_POWER_CONNECTED || action == Intent.ACTION_POWER_DISCONNECTED ||
+            action == "android.intent.action.POWER_CONNECTED" || action == "android.intent.action.POWER_DISCONNECTED"
+        ) {
+            val normalizedAction = if (action.contains("DISCONNECTED", ignoreCase = true)) "DISCONNECTED" else "CONNECTED"
+            if (lastProcessedPowerAction == normalizedAction && (now - lastProcessedPowerTimestamp) < 1500L) {
+                Log.d(TAG, "Debounce: Ignorando evento duplicado de energía recibido en <1.5s")
+                return
+            }
+            lastProcessedPowerAction = normalizedAction
+            lastProcessedPowerTimestamp = now
         }
 
         val pendingResult = goAsync()
@@ -85,7 +95,7 @@ class PowerTriggerReceiver : BroadcastReceiver() {
         val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
         scope.launch {
-            val actionExecutor = ActionExecutor(appContext)
+            val actionExecutor = ActionExecutor.getInstance(appContext)
             try {
                 val database = AppDatabase.getInstance(appContext)
                 val repository = ShortcutRepository(database)
@@ -93,9 +103,13 @@ class PowerTriggerReceiver : BroadcastReceiver() {
                 val shortcutsToRun = mutableListOf<Pair<ShortcutEntity, String>>()
                 val seenShortcutIds = mutableSetOf<Long>()
 
-                // 1. Atajos por evento estándar (Cargador conectado/desconectado, Batería baja, etc.)
+                // 1. Atajos por evento estándar (Cargador conectado/desconectado incluye POWER_BOTH, Batería baja, etc.)
                 if (triggerTypeKey != null) {
-                    val directShortcuts = repository.getShortcutsForTrigger(triggerTypeKey)
+                    val directShortcuts = if (triggerTypeKey == ShortcutTrigger.POWER_CONNECTED.key || triggerTypeKey == ShortcutTrigger.POWER_DISCONNECTED.key) {
+                        repository.getShortcutsForPowerTrigger(triggerTypeKey)
+                    } else {
+                        repository.getShortcutsForTrigger(triggerTypeKey)
+                    }
                     for (s in directShortcuts) {
                         if (seenShortcutIds.add(s.id)) {
                             shortcutsToRun.add(Pair(s, "Atajo Directo"))
@@ -118,7 +132,11 @@ class PowerTriggerReceiver : BroadcastReceiver() {
 
                 // 3. Automatizaciones activas configuradas para este evento
                 if (autoTriggerType != null) {
-                    val activeAutomations = repository.getActiveAutomationsByTriggerType(autoTriggerType)
+                    val activeAutomations = if (autoTriggerType == TriggerType.CHARGER_CONNECTED || autoTriggerType == TriggerType.CHARGER_DISCONNECTED) {
+                        repository.getActiveAutomationsForPowerTrigger(autoTriggerType)
+                    } else {
+                        repository.getActiveAutomationsByTriggerType(autoTriggerType)
+                    }
                     for (automation in activeAutomations) {
                         val shortcut = repository.getShortcutById(automation.shortcutId)
                         if (shortcut != null && seenShortcutIds.add(shortcut.id)) {
@@ -128,6 +146,7 @@ class PowerTriggerReceiver : BroadcastReceiver() {
                 }
 
                 if (shortcutsToRun.isEmpty()) {
+                    Log.d(TAG, "No hay atajos ni automatizaciones configuradas para el evento $action")
                     return@launch
                 }
 
@@ -151,7 +170,7 @@ class PowerTriggerReceiver : BroadcastReceiver() {
 
                     actionExecutor.executeShortcut(
                         shortcutId = shortcut.id,
-                        shortcutTitle = shortcut.title,
+                        shortcutTitle = "${shortcut.title} (⚡ $triggerLabel)",
                         actions = actions
                     ) { success, resultMessage, durationMs ->
                         execSuccess = success
@@ -184,11 +203,6 @@ class PowerTriggerReceiver : BroadcastReceiver() {
             } catch (e: Exception) {
                 Log.e(TAG, "Error ejecutando atajo disparado por evento de energía/batería", e)
             } finally {
-                try {
-                    actionExecutor.release()
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error liberando ActionExecutor", e)
-                }
                 pendingResult.finish()
             }
         }
@@ -198,5 +212,7 @@ class PowerTriggerReceiver : BroadcastReceiver() {
         private const val TAG = "PowerTriggerReceiver"
         private var lastProcessedBatteryPct: Int? = null
         private var lastProcessedTimestamp: Long = 0L
+        private var lastProcessedPowerAction: String? = null
+        private var lastProcessedPowerTimestamp: Long = 0L
     }
 }

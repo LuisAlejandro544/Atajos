@@ -1,12 +1,20 @@
-feat(triggers): implementar disparadores configurables por porcentaje exacto de batería y hora exacta programada
+fix(engine): solucionar ejecucion de disparadores de cargador y unificar estado global
 
-- Agregar soporte para disparador de batería con porcentaje exacto personalizado (`BATTERY_LEVEL:XX`):
-  - Integrar panel interactivo en `ShortcutTriggerSection` con Slider dinámico (5% a 100%), visor numérico destacado y chips rápidos (15%, 20%, 50%, 80%, 90%, 100%).
-  - Procesar broadcasts de `ACTION_BATTERY_CHANGED` en `PowerTriggerReceiver` con filtrado inteligente, mapeo de atajos por porcentaje y debounce para evitar ejecuciones repetidas.
-- Agregar soporte para disparador de hora exacta programada (`TIME_EXACT:HH:mm`):
-  - Integrar panel interactivo en `ShortcutTriggerSection` con visor visual de hora, integración nativa con `TimePickerDialog` de Android y chips rápidos de horas habituales (07:00, 08:30, 14:00, 20:00, 22:30).
-  - Programar y cancelar alarmas exactas vía `AlarmManager` en `TimeSchedulerHelper` al guardar/editar atajos desde `ShortcutEditorManager`.
-  - Ejecutar y reprogramar diariamente los atajos directos en `TimeTriggerReceiver`.
-  - Reprogramar automáticamente las alarmas de atajos y automatizaciones tras el reinicio del sistema en `BootReceiver`.
-- Actualizar badges contextuales en las tarjetas de atajos (`ShortcutCard`) para reflejar `⏰ HH:mm` y `🔋 XX%`.
-- Mejorar el diálogo de nueva automatización (`NewAutomationDialog`) con integración de `TimePickerDialog`.
+- Unificar `ActionExecutor` como Singleton (`ActionExecutor.getInstance()`):
+  - Conectar las ejecuciones en segundo plano (`PowerTriggerReceiver`, `TimeTriggerReceiver`, `ShortcutTileService`) con el estado reactivo (`executionStatus`) de `ShortcutsViewModel` para que la UI refleje el progreso en tiempo real.
+  - Eliminar el cierre prematuro (`release()`) de handlers en los receptores broadcast, garantizando que síntesis de voz (TTS), vibración y acciones asíncronas se completen sin interrupciones.
+- Corregir detección y disparo por conexión/desconexión de energía:
+  - Añadir soporte para eventos combinados (`POWER_BOTH` / `CHARGER_BOTH`) en consultas de Room y modelos de datos.
+  - Implementar debounce inteligente de 1.5s para evitar eventos duplicados entre broadcasts implícitos y dinámicos del sistema.
+  - Optimizar la consulta a Room mediante `getActiveAutomationsForPowerTrigger` y `getShortcutsForPowerTrigger`.
+- Fortalecer el ciclo de vida del servicio de automatizaciones:
+  - Iniciar y mantener activo `AutomationService` en `MainActivity.onResume()` y tras la concesión de permisos en tiempo de ejecución.
+  - Añadir reprogramación automática global de alarmas (`TimeSchedulerHelper.rescheduleAll()`).
+- Soporte completo de disparadores avanzados:
+  - Batería por porcentaje exacto (`BATTERY_LEVEL:XX`) con slider dinámico y chips rápidos.
+  - Hora programada exacta (`TIME_EXACT:HH:mm`) integrada con `AlarmManager` y `TimePickerDialog`.
+- Integrar GitHub Action de simulación de hardware y dispositivo Android (`android-device-simulation.yml`):
+  - Ejecución bajo demanda (`workflow_dispatch`) con soporte para selección de versión de API de Android (API 34/33/31) y aceleración KVM.
+  - Inyección de eventos reales de hardware mediante `adb shell cmd battery` (conexión de cargador, desconexión, niveles al 15%, 80%, 100%) y verificación de respuesta del servicio en segundo plano.
+  - Auditoría de logs de ejecución con `logcat` e inspección automática de excepciones fatales (`FATAL EXCEPTION`) para prevenir crashes en runtime.
+  - Optimización de rendimiento con sistema de caché multicapa para artefactos Gradle (`setup-gradle`) y snapshots de imágenes AVD del emulador (`actions/cache`).

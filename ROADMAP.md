@@ -33,6 +33,7 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
 - [x] Historial de ejecuciones con tiempos y estados.
 - [x] Pipeline de CI/CD en GitHub Actions:
   - Compilación y firma automática de APK Debug (`build-apk.yml`).
+  - Simulación de hardware en emulador Android oficial con inyección de eventos de batería/energía y detección de crashes en runtime (`android-device-simulation.yml`).
   - Sincronización limpia de código desde zip con disparo automático por push y auto-eliminación de residuos (`sync-from-zip.yml`).
   - Análisis y reporte de peso/métricas del repositorio en Markdown y Step Summary (`repo-size-report.yml`).
 

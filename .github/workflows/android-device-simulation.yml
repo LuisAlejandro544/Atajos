@@ -1,0 +1,204 @@
+name: Android Device Hardware Simulation & Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_level:
+        description: 'Nivel de API de Android para el emulador'
+        required: false
+        default: '34'
+        type: choice
+        options:
+          - '34'
+          - '33'
+          - '31'
+      test_battery_events:
+        description: 'Simular eventos de energía y batería (Cargador, 15%, 80%, 100%)'
+        required: false
+        default: true
+        type: boolean
+      verify_no_crashes:
+        description: 'Verificar ausencia de excepciones fatales en Logcat'
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  device-simulation:
+    name: Simulate Android Device & Trigger Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Enable KVM Hardware Acceleration
+        run: |
+          echo "Verificando soporte de aceleración KVM en el runner..."
+          if [ -e /dev/kvm ]; then
+            sudo chmod 777 /dev/kvm
+            echo "KVM habilitado y accesible para el emulador."
+          else
+            echo "Aviso: /dev/kvm no encontrado. El emulador usará modo emulado."
+          fi
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle with Cache
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+
+      - name: Ensure Debug Keystore is present
+        run: |
+          if [ -f "debug.keystore.base64" ]; then
+            echo "Decodificando debug.keystore desde base64..."
+            base64 -d debug.keystore.base64 > debug.keystore
+          elif [ ! -f "debug.keystore" ]; then
+            echo "Generando debug.keystore temporal..."
+            keytool -genkey -v \
+              -keystore debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Grant execute permission for gradlew
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+          else
+            gradle wrapper
+            chmod +x ./gradlew
+          fi
+
+      - name: Build Debug APK
+        run: |
+          echo "Compilando APK de depuración para la simulación en dispositivo..."
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Cache Android AVD (Emulator Snapshot)
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ runner.os }}-${{ inputs.api_level || '34' }}-x86_64-v1
+
+      - name: Run Android Device Simulation
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ inputs.api_level || '34' }}
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-audio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            set -e
+            echo "=== INICIANDO SIMULACIÓN DE DISPOSITIVO ANDROID ==="
+            adb devices
+            
+            # Obtener paquete de la aplicación
+            PACKAGE_NAME="com.aistudio.atajos.app"
+            if ! ./gradlew -q printPackageName 2>/dev/null; then
+              # Alternativa: leer namespace/applicationId
+              PACKAGE_NAME=$(grep -o 'applicationId = "[^"]*"' app/build.gradle.kts | cut -d'"' -f2 || echo "com.example")
+            fi
+            echo "Target Package: $PACKAGE_NAME"
+
+            # 1. Instalar el APK en el emulador
+            echo "Instalando APK en el emulador..."
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+
+            # 2. Conceder permisos de notificaciones si aplica
+            echo "Configurando permisos iniciales..."
+            adb shell pm grant $PACKAGE_NAME android.permission.POST_NOTIFICATIONS 2>/dev/null || true
+
+            # 3. Limpiar logcat para capturar solo la sesión de simulación
+            adb logcat -c
+
+            # 4. Lanzar la aplicación para inicializar Room y servicios en background
+            echo "Lanzando MainActivity en el emulador..."
+            adb shell am start -n $PACKAGE_NAME/com.example.MainActivity
+            sleep 5
+
+            SIMULATION_SUMMARY="### 📱 Reporte de Simulación de Hardware Android\n\n"
+            SIMULATION_SUMMARY+="- **Nivel de API:** ${{ inputs.api_level || '34' }}\n"
+            SIMULATION_SUMMARY+="- **Paquete verificado:** \`$PACKAGE_NAME\`\n\n"
+            SIMULATION_SUMMARY+="| Evento de Hardware Simulado | Comando Inyectado | Resultado |\n"
+            SIMULATION_SUMMARY+="| :--- | :--- | :--- |\n"
+
+            # 5. Simulación de eventos de energía y batería
+            if [ "${{ inputs.test_battery_events }}" != "false" ]; then
+              echo ">>> Simulación 1: Conexión de cargador (AC ON)..."
+              adb shell cmd battery set ac 1
+              adb shell cmd battery unplug false 2>/dev/null || true
+              sleep 3
+              SIMULATION_SUMMARY+="| 🔌 Conexión de cargador | \`cmd battery set ac 1\` | ✅ Inyectado correctamente |\n"
+
+              echo ">>> Simulación 2: Desconexión de cargador (AC OFF)..."
+              adb shell cmd battery unplug
+              sleep 3
+              SIMULATION_SUMMARY+="| 🔋 Desconexión de cargador | \`cmd battery unplug\` | ✅ Inyectado correctamente |\n"
+
+              echo ">>> Simulación 3: Nivel de batería al 15% (Batería baja)..."
+              adb shell cmd battery set level 15
+              sleep 3
+              SIMULATION_SUMMARY+="| ⚠️ Batería crítica (15%) | \`cmd battery set level 15\` | ✅ Inyectado correctamente |\n"
+
+              echo ">>> Simulación 4: Nivel de batería al 80%..."
+              adb shell cmd battery set level 80
+              sleep 3
+              SIMULATION_SUMMARY+="| ⚡ Batería al 80% | \`cmd battery set level 80\` | ✅ Inyectado correctamente |\n"
+
+              echo ">>> Simulación 5: Nivel de batería al 100% (Carga completa)..."
+              adb shell cmd battery set level 100
+              sleep 3
+              SIMULATION_SUMMARY+="| 🔋 Batería al 100% | \`cmd battery set level 100\` | ✅ Inyectado correctamente |\n"
+
+              echo ">>> Restableciendo estado de batería del dispositivo..."
+              adb shell cmd battery reset
+            fi
+
+            # 6. Captura de Logs e inspección de errores de ejecución
+            echo "Recopilando logs de la sesión..."
+            adb logcat -d -s PowerTriggerReceiver:V ActionExecutor:V AutomationService:V AndroidRuntime:E > simulation_logs.txt
+
+            CRASH_COUNT=$(grep -c "FATAL EXCEPTION" simulation_logs.txt || true)
+            echo "Excepciones fatales encontradas: $CRASH_COUNT"
+
+            if [ "$CRASH_COUNT" -gt 0 ]; then
+              echo "❌ SE DETECTARON CRASHES DURANTE LA SIMULACIÓN:"
+              grep -A 10 "FATAL EXCEPTION" simulation_logs.txt
+              SIMULATION_SUMMARY+="\n\n> ❌ **Fallo detectado:** Se encontraron $CRASH_COUNT excepciones fatales en runtime."
+              echo -e "$SIMULATION_SUMMARY" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            else
+              echo "✅ No se detectaron excepciones fatales en tiempo de ejecución."
+              SIMULATION_SUMMARY+="\n\n> ✅ **Simulación exitosa:** Ningún crash detectado en runtime durante los eventos de hardware."
+              echo -e "$SIMULATION_SUMMARY" >> $GITHUB_STEP_SUMMARY
+            fi
+
+      - name: Upload Simulation Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-device-simulation-logs
+          path: simulation_logs.txt
+          retention-days: 7

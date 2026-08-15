@@ -59,12 +59,20 @@ fun AutomationCard(
 ) {
     val triggerIcon: ImageVector = when (automation.triggerType) {
         TriggerType.TIME_OF_DAY -> Icons.Default.Schedule
+        TriggerType.BATTERY_EXACT -> Icons.Default.BatteryChargingFull
         TriggerType.CHARGER_CONNECTED -> Icons.Default.BatteryChargingFull
         TriggerType.CHARGER_DISCONNECTED -> Icons.Default.PowerOff
+        TriggerType.CHARGER_BOTH -> Icons.Default.BatteryChargingFull
         TriggerType.BATTERY_LOW -> Icons.Default.BatteryAlert
         TriggerType.BATTERY_OK -> Icons.Default.BatterySaver
         TriggerType.BATTERY_FULL -> Icons.Default.BatteryFull
         TriggerType.APP_OPENED -> Icons.Default.PlayCircle
+    }
+
+    val triggerSubtitle = when (automation.triggerType) {
+        TriggerType.BATTERY_EXACT -> "Batería al ${automation.triggerValue.ifBlank { "80" }}%"
+        TriggerType.TIME_OF_DAY -> "A las ${automation.triggerValue.ifBlank { "08:30" }}"
+        else -> automation.triggerType.label
     }
 
     Card(
@@ -119,7 +127,7 @@ fun AutomationCard(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Disparador: ${automation.triggerType.label}",
+                            text = "Disparador: $triggerSubtitle",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

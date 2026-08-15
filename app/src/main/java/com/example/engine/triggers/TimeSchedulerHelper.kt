@@ -8,6 +8,9 @@ import android.os.Build
 import android.util.Log
 import com.example.data.model.AutomationEntity
 import com.example.data.model.ShortcutEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 /**
@@ -18,6 +21,20 @@ object TimeSchedulerHelper {
 
     private const val TAG = "TimeSchedulerHelper"
     private const val SHORTCUT_REQUEST_CODE_OFFSET = 100000
+
+    fun parseHourMinute(timeStr: String): Pair<Int, Int>? {
+        if (!timeStr.contains(":")) return null
+        val parts = timeStr.split(":")
+        if (parts.size < 2) return null
+        val hour = parts[0].trim().toIntOrNull() ?: return null
+        val minute = parts[1].trim().toIntOrNull() ?: return null
+        if (hour !in 0..23 || minute !in 0..59) return null
+        return Pair(hour, minute)
+    }
+
+    fun formatTimeString(hour: Int, minute: Int): String {
+        return String.format("%02d:%02d", hour, minute)
+    }
 
     fun scheduleShortcutAlarm(context: Context, shortcut: ShortcutEntity) {
         if (!shortcut.trigger.startsWith("TIME_EXACT:")) return
@@ -180,6 +197,31 @@ object TimeSchedulerHelper {
             alarmManager.cancel(pendingIntent)
             pendingIntent.cancel()
             Log.d(TAG, "Alarma cancelada para la automatización $automationId")
+        }
+    }
+
+    fun rescheduleAll(context: Context) {
+        val appContext = context.applicationContext
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                val db = com.example.data.db.AppDatabase.getInstance(appContext)
+                val automations = db.automationDao().getAllAutomationsSync()
+                for (automation in automations) {
+                    if (automation.isEnabled && automation.triggerType == com.example.data.model.TriggerType.TIME_OF_DAY) {
+                        scheduleAutomationAlarm(appContext, automation)
+                    }
+                }
+
+                val shortcuts = db.shortcutDao().getAllShortcutsSync()
+                for (shortcut in shortcuts) {
+                    if (shortcut.trigger.startsWith("TIME_EXACT:")) {
+                        scheduleShortcutAlarm(appContext, shortcut)
+                    }
+                }
+                Log.d(TAG, "Todas las alarmas y temporizadores se han reprogramado correctamente")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error reprogramando todas las alarmas", e)
+            }
         }
     }
 }

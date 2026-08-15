@@ -216,4 +216,17 @@ class ActionExecutor(context: Context) {
             }
         }
     }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: ActionExecutor? = null
+
+        fun getInstance(context: Context): ActionExecutor {
+            return INSTANCE ?: synchronized(this) {
+                val instance = ActionExecutor(context.applicationContext)
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
 }

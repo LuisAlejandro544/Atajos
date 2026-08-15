@@ -65,7 +65,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
     init {
         val database = AppDatabase.getInstance(application)
         repository = ShortcutRepository(database)
-        actionExecutor = ActionExecutor(application)
+        actionExecutor = ActionExecutor.getInstance(application)
         executionStatus = actionExecutor.status
 
         executionManager = ShortcutExecutionManager(repository, actionExecutor, viewModelScope)

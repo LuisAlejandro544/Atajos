@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         AutomationService.start(this)
+        com.example.engine.triggers.TimeSchedulerHelper.rescheduleAll(this)
         setContent {
             MyApplicationTheme {
                 val viewModel: ShortcutsViewModel = viewModel()
@@ -48,6 +49,11 @@ class MainActivity : ComponentActivity() {
                 ShortcutsApp(viewModel = viewModel)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AutomationService.start(this)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -99,6 +105,7 @@ fun ShortcutsApp(
     ) { results ->
         val hasMissingPermission = results.values.any { !it }
         showPermissionBanner = hasMissingPermission
+        AutomationService.start(context)
     }
 
     LaunchedEffect(Unit) {

@@ -65,8 +65,11 @@ enum class ShortcutTrigger(
     );
 
     companion object {
+        val BATTERY_EXACT = BATTERY_LEVEL
+
         fun fromKey(rawKey: String): ShortcutTrigger {
             val baseKey = rawKey.substringBefore(":")
+            if (baseKey.equals("BATTERY_EXACT", ignoreCase = true)) return BATTERY_LEVEL
             return entries.firstOrNull { it.key.equals(baseKey, ignoreCase = true) } ?: NONE
         }
 
@@ -77,6 +80,14 @@ enum class ShortcutTrigger(
                 defaultValue
             }
         }
+
+        fun buildBatteryExactKey(level: Int): String = "BATTERY_LEVEL:$level"
+
+        fun getBatteryExactLevel(key: String): Int = extractValue(key, "80").toIntOrNull() ?: 80
+
+        fun buildTimeExactKey(time: String): String = "TIME_EXACT:$time"
+
+        fun getTimeExactValue(key: String): String = extractValue(key, "08:00")
     }
 }
 

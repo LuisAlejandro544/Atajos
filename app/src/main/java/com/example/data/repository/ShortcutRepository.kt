@@ -22,6 +22,9 @@ class ShortcutRepository(private val database: AppDatabase) {
     suspend fun getActiveAutomationsByTriggerType(triggerType: com.example.data.model.TriggerType): List<AutomationEntity> =
         automationDao.getActiveAutomationsByTriggerType(triggerType)
 
+    suspend fun getActiveAutomationsForPowerTrigger(triggerType: com.example.data.model.TriggerType): List<AutomationEntity> =
+        automationDao.getActiveAutomationsForPowerTrigger(triggerType)
+
     suspend fun checkAndSeedDefaults() {
         val count = shortcutDao.getCount()
         if (count == 0) {

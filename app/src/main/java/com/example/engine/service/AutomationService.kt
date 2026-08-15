@@ -30,6 +30,7 @@ class AutomationService : Service() {
         createNotificationChannel()
         startForegroundServiceNotification()
         registerHardwareReceivers()
+        com.example.engine.triggers.TimeSchedulerHelper.rescheduleAll(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

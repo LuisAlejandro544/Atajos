@@ -95,7 +95,7 @@ class ShortcutTileService : TileService() {
                 }
 
                 val actions = ActionJsonHelper.fromJson(targetShortcut.actionsJson)
-                val actionExecutor = ActionExecutor(applicationContext)
+                val actionExecutor = ActionExecutor.getInstance(applicationContext)
 
                 actionExecutor.executeShortcut(
                     shortcutId = targetShortcut.id,

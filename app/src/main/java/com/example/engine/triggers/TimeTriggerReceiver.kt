@@ -47,7 +47,7 @@ class TimeTriggerReceiver : BroadcastReceiver() {
 
                 if (shortcut != null) {
                     val actions = ActionJsonHelper.fromJson(shortcut.actionsJson)
-                    val executor = ActionExecutor(appContext)
+                    val executor = ActionExecutor.getInstance(appContext)
 
                     executor.executeShortcut(
                         shortcutId = shortcut.id,
@@ -71,7 +71,6 @@ class TimeTriggerReceiver : BroadcastReceiver() {
                                     summary = "Disparado por horario: $automationTitle. $resultMessage"
                                 )
                             )
-                            executor.release()
                         }
                     }
 
