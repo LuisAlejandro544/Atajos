@@ -1,6 +1,17 @@
-# Atajos para Android ⚡
+# Flurix para Android ⚡
 
 > **Automatización rápida y potente de tareas en Android sin complicaciones.**
+> **Versión Actual:** `0.1.0-E` (Estable)
+
+---
+
+## 🏷️ Canales y Esquema de Versiones
+
+Flurix utiliza una nomenclatura de sufijos clara para distinguir la estabilidad de cada compilación:
+
+- **`-E` (Estable)**: Versiones consolidadas, listas para uso diario y distribución principal (ej. `0.1.0-E`).
+- **`-DEV` (Desarrollo)**: Funciones puras en desarrollo que pueden contener errores, inestabilidad, y donde las funcionalidades pueden aparecer y desaparecer.
+- **`-B` (Beta)**: Funciones que llegarán a la versión estable, pero que se encuentran en fase de prueba y pueden presentar inestabilidad puntual.
 
 Una aplicación nativa para Android construida con **Kotlin** y **Jetpack Compose (Material Design 3)** que permite crear, editar, organizar y ejecutar flujos de acciones automatizadas en el dispositivo. Diseñada para ser rápida, ligera y totalmente funcional sin depender de servicios externos obligatorios ni tiendas cerradas (optimizada para distribución directa como APK o en tiendas de terceros como Uptodown).
 

@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Atajos"
+rootProject.name = "Flurix"
 
 include(":app")

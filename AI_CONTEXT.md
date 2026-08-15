@@ -6,7 +6,12 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 
 ## 📌 Resumen del Proyecto
 
-- **Nombre**: Atajos (Shortcuts) para Android
+- **Nombre**: Flurix para Android
+- **Versión Actual**: `0.1.0-E` (Canal Estable)
+- **Esquema de Prefijos de Versión**:
+  - `-E` (Estable): Versiones consolidadas y verificadas para uso general.
+  - `-DEV` (Desarrollo): Funciones puras en desarrollo que pueden contener errores, inestabilidad y características experimentales que pueden aparecer o desaparecer.
+  - `-B` (Beta): Funciones que llegarán a la versión estable pero que aún pueden presentar inestabilidad.
 - **Propósito**: Automatización local y secuencial de tareas en el dispositivo Android mediante disparadores y acciones encadenadas.
 - **Licencia y Modelo**: Source-Available bajo **PolyForm Noncommercial License 1.0.0** (Licensor / Autor: Luis Alejandro Sosa Camacho). Código visible para inspección y uso personal no comercial; redistribución y republicación por terceros estrictamente prohibida.
 - **Enfoque de Distribución**: Sin ataduras a Google Play. Diseñado para funcionar de manera independiente, compatible con distribución directa (APK sideloading) o tiendas de terceros (Uptodown).

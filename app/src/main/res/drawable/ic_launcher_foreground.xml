@@ -3,6 +3,6 @@
     <item
         android:width="66dp"
         android:height="66dp"
-        android:drawable="@drawable/ic_shortcuts_app"
+        android:drawable="@drawable/flurix_logo"
         android:gravity="center" />
 </layer-list>

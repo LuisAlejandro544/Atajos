@@ -1,6 +1,13 @@
-# 🗺️ Roadmap del Proyecto — Atajos para Android
+# 🗺️ Roadmap del Proyecto — Flurix para Android
 
 Plan de evolución técnica y funcional para el desarrollo progresivo de la aplicación.
+
+**Versión Actual:** `0.1.0-E` (Estable)
+
+### 🏷️ Convención de Sufijos de Versión
+- **`-E` (Estable)**: Versión de producción y uso diario, verificada y libre de errores críticos conocidos (ej. `0.1.0-E`).
+- **`-DEV` (Desarrollo)**: Funciones puras en desarrollo que pueden contener errores y ser inestables. Las funciones pueden aparecer y desaparecer.
+- **`-B` (Beta)**: Funciones que llegarán a la versión estable, pero aún en periodo de validación y propensas a inestabilidad temporal.
 
 ---
 

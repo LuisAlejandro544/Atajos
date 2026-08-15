@@ -1,4 +1,4 @@
-# 🤖 Guía de Operación para Agentes de IA — Proyecto Atajos
+# 🤖 Guía de Operación para Agentes de IA — Proyecto Flurix
 
 Este archivo contiene las directivas, roles y protocolos de razonamiento que cualquier agente de IA o asistente de desarrollo debe seguir al modificar o expandir esta base de código.
 
@@ -18,6 +18,11 @@ Este archivo contiene las directivas, roles y protocolos de razonamiento que cua
 3. **Inmutabilidad de lo Funcional**:
    - No reviertas cambios previamente aprobados por el usuario.
    - Mantén la persistencia con Room y el flujo reactivo con `StateFlow` y `Flow`.
+
+4. **Esquema de Canales y Prefijos de Versiones**:
+   - **`-E` (Estable)**: Versiones verificadas, listas para producción y uso diario sin inestabilidades conocidas (ej. `0.1.0-E`).
+   - **`-DEV` (Desarrollo)**: Funciones puras en desarrollo que pueden contener errores y ser inestables. Las funciones pueden aparecer y desaparecer.
+   - **`-B` (Beta / Testing)**: Funciones destinadas a llegar a la versión estable, pero que aún se encuentran en fase de prueba y pueden presentar inestabilidad.
 
 ---
 

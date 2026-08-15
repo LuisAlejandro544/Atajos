@@ -1,24 +1,9 @@
-fix(engine): asegurar ejecucion continua y reproduccion de voz con pantalla bloqueada
+chore: renombrar aplicación a Flurix y diseñar nuevo logo
 
-- Implementar `WakeLock` (`PowerManager.PARTIAL_WAKE_LOCK`) en `PowerTriggerReceiver`:
-  - Garantizar que la CPU no se suspenda durante eventos de hardware (conexión/desconexión de corriente y cambios de nivel de batería) con la pantalla apagada o bloqueada.
-  - Timeout de seguridad de 15s y liberación determinista en bloque `finally`.
-- Reforzar el motor de síntesis de voz (`TtsActionHandler`) para segundo plano y pantalla bloqueada:
-  - Inicialización y reconexión resiliente bajo demanda si el enlace IPC con el servicio TTS del sistema se desconecta por inactividad.
-  - Configuración de `AudioAttributes` (`USAGE_ASSISTANCE_SONIFICATION`, `CONTENT_TYPE_SPEECH`) y flujo `STREAM_NOTIFICATION` para garantizar audibilidad con volumen completo a través del altavoz incluso con el dispositivo bloqueado.
-  - Validación del código de retorno de `tts.speak()` y mecanismo de fallback sonoro/notificación sin bloqueos.
-- Fortalecer persistencia de `AutomationService`:
-  - Añadir `onTaskRemoved` para mantener activo el Foreground Service tras deslizar la aplicación de la vista de recientes.
-  - Retorno `START_STICKY` garantizado y auto-refresco del registro dinámico de receptores de hardware.
-- docs(website): integrar explicacion de ejecucion en segundo plano y optimizacion de bateria:
-  - Añadir sección "Segundo plano consciente" en la landing principal (`index.astro`) detallando ausencia de procesos fantasma y uso efímero de WakeLocks.
-  - Integrar nueva entrada en las Preguntas Frecuentes (FAQ) justificando el acceso a segundo plano sin recolección de telemetría.
-  - Extender `/docs` con guía técnica y recomendaciones para capas de personalización (MIUI, HyperOS, One UI).
-- ui(editor): optimizar diseño de pastillas y formato a.m. / p.m. en disparadores:
-  - Rediseñar los selectores rápidos de porcentaje de batería (15%, 20%, 50%, 80%, 90%, 100%) con pastillas compactas sin saltos de línea ni desbordamientos de texto.
-  - Integrar soporte completo de formato 12 horas con indicador `a. m.` / `p. m.` y `AM` / `PM` en el selector de hora programada, previsualización de atajo y horas habituales.
-  - Habilitar el diálogo nativo de selección horaria `TimePickerDialog` en modo 12 horas con selector AM/PM.
-- feat(battery): integrar modal de optimización de batería al inicio:
-  - Añadir diálogo educativo no intrusivo (`BatteryOptimizationDialog`) en el primer inicio que explica por qué excluir la app del Doze Mode garantiza disparadores en tiempo real.
-  - Enlace directo a `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` con fallbacks seguros a la configuración de aplicaciones del sistema.
-  - Dejar claro al usuario que es una configuración recomendada pero opcional, con persistencia de elección en `SharedPreferences`.
+- Actualiza el nombre oficial de la app a Flurix en strings.xml, metadata.json y settings.gradle.kts.
+- Actualiza la documentación técnica (README.md, ROADMAP.md, STRUCTURE.md, AI_CONTEXT.md, AGENTS.md) reflejando la nueva identidad libre de conflictos de marca.
+- Diseña y genera el nuevo icono/logo para Flurix con estética moderna de flujo y nodos superpuestos.
+- Configura el icono adaptativo en drawable/ic_launcher_foreground.xml e ic_launcher_background.xml.
+- Exporta y guarda el logo en formato WebP (/flurix_logo.webp y en res/drawable/flurix_logo.webp) listo para descarga y previsualización.
+- Establece la versión inicial de la aplicación en 0.1.0-E en app/build.gradle.kts.
+- Define el esquema oficial de prefijos de estabilidad en la documentación: -E (Estable), -DEV (Desarrollo activo/inestable con funciones volátiles) y -B (Beta previa a estable).

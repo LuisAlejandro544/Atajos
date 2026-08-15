@@ -1,5 +1,5 @@
 {
-  "name": "Atajos",
+  "name": "Flurix",
   "description": "Automatización de tareas y atajos rápidos para Android",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

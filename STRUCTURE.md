@@ -1,4 +1,4 @@
-# 🏛️ Arquitectura y Estructura del Código — Atajos
+# 🏛️ Arquitectura y Estructura del Código — Flurix
 
 Este documento detalla la organización de capas, responsabilidades y el flujo de datos dentro de la aplicación.
 
@@ -197,6 +197,15 @@ website/
 ├── tailwind.config.mjs           # Tema de colores oscuros y brand
 └── package.json                  # Dependencias de Astro v4 y Tailwind CSS
 ```
+
+---
+
+## 🏷️ Esquema de Versiones y Canales de Publicación
+
+Flurix sigue la convención de sufijos:
+- **`-E` (Estable)**: Canal de producción principal (versión actual: `0.1.0-E`).
+- **`-DEV` (Desarrollo)**: Canal experimental donde funciones pueden agregarse, modificarse o eliminarse.
+- **`-B` (Beta)**: Canal de pruebas antes del paso a estable.
 
 ---
 
