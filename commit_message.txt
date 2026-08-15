@@ -1,20 +1,9 @@
-fix(engine): solucionar ejecucion de disparadores de cargador y unificar estado global
+fix(ci): corregir error de sintaxis sh en action de simulacion de dispositivo
 
-- Unificar `ActionExecutor` como Singleton (`ActionExecutor.getInstance()`):
-  - Conectar las ejecuciones en segundo plano (`PowerTriggerReceiver`, `TimeTriggerReceiver`, `ShortcutTileService`) con el estado reactivo (`executionStatus`) de `ShortcutsViewModel` para que la UI refleje el progreso en tiempo real.
-  - Eliminar el cierre prematuro (`release()`) de handlers en los receptores broadcast, garantizando que síntesis de voz (TTS), vibración y acciones asíncronas se completen sin interrupciones.
-- Corregir detección y disparo por conexión/desconexión de energía:
-  - Añadir soporte para eventos combinados (`POWER_BOTH` / `CHARGER_BOTH`) en consultas de Room y modelos de datos.
-  - Implementar debounce inteligente de 1.5s para evitar eventos duplicados entre broadcasts implícitos y dinámicos del sistema.
-  - Optimizar la consulta a Room mediante `getActiveAutomationsForPowerTrigger` y `getShortcutsForPowerTrigger`.
-- Fortalecer el ciclo de vida del servicio de automatizaciones:
-  - Iniciar y mantener activo `AutomationService` en `MainActivity.onResume()` y tras la concesión de permisos en tiempo de ejecución.
-  - Añadir reprogramación automática global de alarmas (`TimeSchedulerHelper.rescheduleAll()`).
-- Soporte completo de disparadores avanzados:
-  - Batería por porcentaje exacto (`BATTERY_LEVEL:XX`) con slider dinámico y chips rápidos.
-  - Hora programada exacta (`TIME_EXACT:HH:mm`) integrada con `AlarmManager` y `TimePickerDialog`.
-- Integrar GitHub Action de simulación de hardware y dispositivo Android (`android-device-simulation.yml`):
-  - Ejecución bajo demanda (`workflow_dispatch`) con soporte para selección de versión de API de Android (API 34/33/31) y aceleración KVM.
-  - Inyección de eventos reales de hardware mediante `adb shell cmd battery` (conexión de cargador, desconexión, niveles al 15%, 80%, 100%) y verificación de respuesta del servicio en segundo plano.
-  - Auditoría de logs de ejecución con `logcat` e inspección automática de excepciones fatales (`FATAL EXCEPTION`) para prevenir crashes en runtime.
-  - Optimización de rendimiento con sistema de caché multicapa para artefactos Gradle (`setup-gradle`) y snapshots de imágenes AVD del emulador (`actions/cache`).
+- Extraer script de pruebas de hardware y emulación a un archivo ejecutable Bash dedicado (`.github/scripts/simulate_device.sh`):
+  - Solucionar error `/usr/bin/sh: 1: Syntax error: end of file unexpected (expecting "fi")` originado por la incompatibilidad de operadores de concatenación `+=` y escapes de cadenas multilínea en el shell POSIX (`dash`/`sh`) utilizado por `reactivecircus/android-emulator-runner`.
+  - Asegurar ejecución limpia en entorno `bash` con control estricto de errores (`set -e`) y manejo de argumentos de entrada (`API_LEVEL`, `TEST_BATTERY`).
+- Optimizar el flujo `.github/workflows/android-device-simulation.yml`:
+  - Añadir paso de preparación con permisos de ejecución (`chmod +x .github/scripts/simulate_device.sh`).
+  - Simplificar la invocación dentro del emulador pasando parámetros dinámicos directos.
+  - Mantener la generación de resúmenes en Markdown (`$GITHUB_STEP_SUMMARY`) y preservación de logs como artefacto descargable (`android-device-simulation-logs`).
