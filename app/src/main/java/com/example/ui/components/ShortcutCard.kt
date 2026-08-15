@@ -250,7 +250,20 @@ fun ShortcutCard(
                             }
 
                             val triggerBadge = when {
-                                shortcut.trigger.startsWith("TIME_EXACT:") -> "⏰ " + shortcut.trigger.substringAfter("TIME_EXACT:")
+                                shortcut.trigger.startsWith("TIME_EXACT:") -> {
+                                    val rawTime = shortcut.trigger.substringAfter("TIME_EXACT:")
+                                    val parts = rawTime.split(":")
+                                    val hour = parts.getOrNull(0)?.toIntOrNull() ?: 8
+                                    val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                                    val isPm = hour >= 12
+                                    val amPm = if (isPm) "PM" else "AM"
+                                    val displayHour = when {
+                                        hour == 0 -> 12
+                                        hour > 12 -> hour - 12
+                                        else -> hour
+                                    }
+                                    "⏰ " + String.format("%d:%02d %s", displayHour, minute, amPm)
+                                }
                                 shortcut.trigger.startsWith("BATTERY_LEVEL:") -> "🔋 " + shortcut.trigger.substringAfter("BATTERY_LEVEL:") + "%"
                                 shortcut.trigger == "POWER_CONNECTED" -> "⚡ Al conectar"
                                 shortcut.trigger == "POWER_DISCONNECTED" -> "🔌 Al desconectar"

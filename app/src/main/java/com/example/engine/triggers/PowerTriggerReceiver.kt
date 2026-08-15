@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.BatteryManager
+import android.os.PowerManager
 import android.util.Log
 import com.example.data.db.AppDatabase
 import com.example.data.model.ActionJsonHelper
@@ -13,6 +14,7 @@ import com.example.data.model.ShortcutTrigger
 import com.example.data.model.TriggerType
 import com.example.data.repository.ShortcutRepository
 import com.example.engine.ActionExecutor
+import com.example.engine.service.AutomationService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,6 +24,8 @@ import kotlinx.coroutines.launch
  * BroadcastReceiver nativo del sistema para capturar eventos de alimentación y estado de batería
  * (conexión/desconexión de corriente, porcentaje exacto de batería, batería baja, batería restablecida o carga completa al 100%)
  * y ejecutar automáticamente tanto los atajos con disparador directo como las automatizaciones activas en segundo plano.
+ *
+ * Utiliza WakeLock temporal para asegurar que la CPU permanezca activa con la pantalla bloqueada o apagada.
  */
 class PowerTriggerReceiver : BroadcastReceiver() {
 
@@ -90,8 +94,29 @@ class PowerTriggerReceiver : BroadcastReceiver() {
             lastProcessedPowerTimestamp = now
         }
 
-        val pendingResult = goAsync()
+        // Adquirir WakeLock temporal de 15s para garantizar que la CPU no se duerma con la pantalla bloqueada
         val appContext = context.applicationContext
+        val powerManager = appContext.getSystemService(Context.POWER_SERVICE) as? PowerManager
+        val wakeLock = powerManager?.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "Atajos:PowerTriggerWakeLock"
+        )?.apply {
+            setReferenceCounted(false)
+            try {
+                acquire(15000L) // 15 segundos de timeout máximo de seguridad
+            } catch (e: Exception) {
+                Log.e(TAG, "Error adquiriendo WakeLock", e)
+            }
+        }
+
+        // Asegurar que el servicio en segundo plano esté activo
+        try {
+            AutomationService.start(appContext)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error asegurando AutomationService", e)
+        }
+
+        val pendingResult = goAsync()
         val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
         scope.launch {
@@ -203,6 +228,13 @@ class PowerTriggerReceiver : BroadcastReceiver() {
             } catch (e: Exception) {
                 Log.e(TAG, "Error ejecutando atajo disparado por evento de energía/batería", e)
             } finally {
+                try {
+                    if (wakeLock != null && wakeLock.isHeld) {
+                        wakeLock.release()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error liberando WakeLock", e)
+                }
                 pendingResult.finish()
             }
         }

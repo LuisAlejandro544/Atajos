@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,8 +35,6 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -58,6 +57,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ShortcutTrigger
@@ -65,7 +65,7 @@ import java.util.Calendar
 
 /**
  * Componente modular para configurar el disparador automático nativo del atajo
- * (disparadores de batería personalizada con selector de porcentaje exacto, hora programada, eventos de carga).
+ * (disparadores de batería personalizada con selector de porcentaje exacto, hora programada con soporte AM/PM, eventos de carga).
  */
 @Composable
 fun ShortcutTriggerSection(
@@ -318,38 +318,51 @@ fun ShortcutTriggerSection(
 
                                 Spacer(modifier = Modifier.height(4.dp))
 
-                                // Chips rápidos para seleccionar porcentaje
+                                // Pastillas compactas optimizadas para selección rápida de porcentaje
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
                                     listOf(15, 20, 50, 80, 90, 100).forEach { pct ->
                                         val isCurrentPct = customBatteryPct.toInt() == pct
-                                        FilterChip(
-                                            selected = isCurrentPct,
-                                            onClick = {
-                                                customBatteryPct = pct.toFloat()
-                                                onTriggerSelected("BATTERY_LEVEL:$pct")
-                                            },
-                                            label = {
-                                                Text(
-                                                    text = "$pct%",
-                                                    fontSize = 11.sp,
-                                                    fontWeight = if (isCurrentPct) FontWeight.Bold else FontWeight.Normal
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(
+                                                    if (isCurrentPct) MaterialTheme.colorScheme.primary
+                                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                                 )
-                                            },
-                                            modifier = Modifier.weight(1f),
-                                            colors = FilterChipDefaults.filterChipColors(
-                                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                                selectedLabelColor = Color.White
+                                                .border(
+                                                    width = if (isCurrentPct) 1.2.dp else 0.5.dp,
+                                                    color = if (isCurrentPct) MaterialTheme.colorScheme.primary
+                                                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                                                    shape = RoundedCornerShape(8.dp)
+                                                )
+                                                .clickable {
+                                                    customBatteryPct = pct.toFloat()
+                                                    onTriggerSelected("BATTERY_LEVEL:$pct")
+                                                }
+                                                .padding(vertical = 7.dp, horizontal = 1.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "$pct%",
+                                                fontSize = 11.sp,
+                                                fontWeight = if (isCurrentPct) FontWeight.Bold else FontWeight.Medium,
+                                                color = if (isCurrentPct) MaterialTheme.colorScheme.onPrimary
+                                                else MaterialTheme.colorScheme.onSurface,
+                                                maxLines = 1,
+                                                softWrap = false,
+                                                textAlign = TextAlign.Center
                                             )
-                                        )
+                                        }
                                     }
                                 }
                             }
                         }
 
-                        // ── Sub-panel: Selector interactivo de Hora Exacta ──────────────────────────────
+                        // ── Sub-panel: Selector interactivo de Hora Exacta con AM / PM ──────────────────────────────
                         AnimatedVisibility(
                             visible = isSelected && option.trigger == ShortcutTrigger.TIME_EXACT,
                             enter = fadeIn() + expandVertically(),
@@ -392,12 +405,20 @@ fun ShortcutTriggerSection(
                                                 fontSize = 12.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
-                                            Text(
-                                                text = customTimeStr,
-                                                fontSize = 18.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = formatTimeWithAmPm(customTimeStr),
+                                                    fontSize = 17.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Spacer(modifier = Modifier.width(5.dp))
+                                                Text(
+                                                    text = "($customTimeStr)",
+                                                    fontSize = 11.sp,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                                )
+                                            }
                                         }
                                     }
 
@@ -416,7 +437,7 @@ fun ShortcutTriggerSection(
                                                 },
                                                 currentHour,
                                                 currentMinute,
-                                                true // Formato 24 horas
+                                                false // Diálogo con selector de AM / PM
                                             )
                                             timePicker.show()
                                         },
@@ -442,33 +463,47 @@ fun ShortcutTriggerSection(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
 
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(5.dp))
 
+                                // Pastillas compactas con formato AM/PM para horas frecuentes
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
-                                    listOf("07:00", "08:30", "14:00", "20:00", "22:30").forEach { time ->
-                                        val isCurrent = customTimeStr == time
-                                        FilterChip(
-                                            selected = isCurrent,
-                                            onClick = {
-                                                customTimeStr = time
-                                                onTriggerSelected("TIME_EXACT:$time")
-                                            },
-                                            label = {
-                                                Text(
-                                                    text = time,
-                                                    fontSize = 11.sp,
-                                                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal
+                                    timePresetsList.forEach { preset ->
+                                        val isCurrent = customTimeStr == preset.time24
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(
+                                                    if (isCurrent) MaterialTheme.colorScheme.primary
+                                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                                 )
-                                            },
-                                            modifier = Modifier.weight(1f),
-                                            colors = FilterChipDefaults.filterChipColors(
-                                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                                selectedLabelColor = Color.White
+                                                .border(
+                                                    width = if (isCurrent) 1.2.dp else 0.5.dp,
+                                                    color = if (isCurrent) MaterialTheme.colorScheme.primary
+                                                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                                                    shape = RoundedCornerShape(8.dp)
+                                                )
+                                                .clickable {
+                                                    customTimeStr = preset.time24
+                                                    onTriggerSelected("TIME_EXACT:${preset.time24}")
+                                                }
+                                                .padding(vertical = 7.dp, horizontal = 1.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = preset.displayLabel,
+                                                fontSize = 10.5.sp,
+                                                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                                                color = if (isCurrent) MaterialTheme.colorScheme.onPrimary
+                                                else MaterialTheme.colorScheme.onSurface,
+                                                maxLines = 1,
+                                                softWrap = false,
+                                                textAlign = TextAlign.Center
                                             )
-                                        )
+                                        }
                                     }
                                 }
                             }
@@ -486,3 +521,33 @@ private data class TriggerOption(
     val title: String,
     val subtitle: String
 )
+
+private data class TimePresetItem(
+    val time24: String,
+    val displayLabel: String
+)
+
+private val timePresetsList = listOf(
+    TimePresetItem("07:00", "7:00 AM"),
+    TimePresetItem("08:30", "8:30 AM"),
+    TimePresetItem("14:00", "2:00 PM"),
+    TimePresetItem("20:00", "8:00 PM"),
+    TimePresetItem("22:30", "10:30 PM")
+)
+
+/**
+ * Convierte un formato de hora HH:mm a formato amigable con a. m. / p. m.
+ */
+fun formatTimeWithAmPm(timeStr: String): String {
+    val parts = timeStr.split(":")
+    val hour = parts.getOrNull(0)?.toIntOrNull() ?: 8
+    val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+    val isPm = hour >= 12
+    val amPm = if (isPm) "p. m." else "a. m."
+    val displayHour = when {
+        hour == 0 -> 12
+        hour > 12 -> hour - 12
+        else -> hour
+    }
+    return String.format("%02d:%02d %s", displayHour, minute, amPm)
+}

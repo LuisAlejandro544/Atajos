@@ -105,6 +105,18 @@ fun NewAutomationDialog(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            val parts = triggerValue.split(":")
+                            val hour = parts.getOrNull(0)?.toIntOrNull() ?: 8
+                            val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                            val isPm = hour >= 12
+                            val amPm = if (isPm) "p. m." else "a. m."
+                            val displayHour = when {
+                                hour == 0 -> 12
+                                hour > 12 -> hour - 12
+                                else -> hour
+                            }
+                            val displayStr = String.format("%02d:%02d %s", displayHour, minute, amPm)
+
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.AccessTime,
@@ -113,19 +125,23 @@ fun NewAutomationDialog(
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "Hora: $triggerValue",
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
+                                Column {
+                                    Text(
+                                        text = "Hora: $displayStr",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "($triggerValue)",
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
 
                             OutlinedButton(
                                 onClick = {
-                                    val parts = triggerValue.split(":")
-                                    val hour = parts.getOrNull(0)?.toIntOrNull() ?: 8
-                                    val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
                                     TimePickerDialog(
                                         context,
                                         { _, h, m ->
@@ -133,7 +149,7 @@ fun NewAutomationDialog(
                                         },
                                         hour,
                                         minute,
-                                        true
+                                        false
                                     ).show()
                                 },
                                 shape = RoundedCornerShape(8.dp)

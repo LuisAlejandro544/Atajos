@@ -88,8 +88,9 @@ fun ShortcutsApp(
     val executionStatus by viewModel.executionStatus.collectAsStateWithLifecycle()
     val showAutomationDialog by viewModel.showAutomationDialog.collectAsStateWithLifecycle()
 
-    // Manejo y Solicitud Dinámica de Permisos
+    // Manejo y Solicitud Dinámica de Permisos y Optimización de Batería
     var showPermissionBanner by remember { mutableStateOf(false) }
+    var showBatteryOptimizationDialog by remember { mutableStateOf(false) }
 
     val permissionList = remember {
         val list = mutableListOf<String>()
@@ -115,6 +116,25 @@ fun ShortcutsApp(
         if (missing.isNotEmpty()) {
             permissionLauncher.launch(missing.toTypedArray())
         }
+
+        // Mostrar el modal informativo de optimización de batería en el primer ingreso si está optimizado por defecto
+        if (!com.example.ui.components.BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context) &&
+            !com.example.ui.components.BatteryOptimizationHelper.hasShownPrompt(context)
+        ) {
+            showBatteryOptimizationDialog = true
+        }
+    }
+
+    if (showBatteryOptimizationDialog) {
+        com.example.ui.components.BatteryOptimizationDialog(
+            onDismiss = {
+                com.example.ui.components.BatteryOptimizationHelper.markPromptAsShown(context)
+                showBatteryOptimizationDialog = false
+            },
+            onConfirmed = {
+                showBatteryOptimizationDialog = false
+            }
+        )
     }
 
     if (editorState.isEditing) {

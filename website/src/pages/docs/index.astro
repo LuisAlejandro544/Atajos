@@ -71,11 +71,50 @@ import Layout from '../../layouts/Layout.astro';
         </ul>
       </section>
 
-      <section class="space-y-3">
-        <h2 class="text-2xl font-bold text-white">Disparadores en Segundo Plano</h2>
-        <p class="text-slate-400">
-          Los atajos con disparadores como <code>BATTERY_LOW</code>, <code>BATTERY_FULL</code> o conexión de cargador se ejecutan mediante <code>BroadcastReceivers</code> nativos sin requerir servicios en primer plano persistentes que agoten la batería.
+      <section id="segundo-plano" class="space-y-4">
+        <h2 class="text-2xl font-bold text-white">Ejecución en Segundo Plano y Optimización de Batería</h2>
+        <p class="text-slate-400 leading-relaxed">
+          Para que una aplicación de automatización funcione de forma confiable, debe ser capaz de reaccionar a eventos del sistema incluso cuando la pantalla está apagada o el dispositivo está bloqueado.
         </p>
+
+        <div class="space-y-3">
+          <h3 class="text-lg font-semibold text-indigo-300">¿Por qué Atajos necesita acceso en segundo plano?</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Cuando configuras automatizaciones como <em>"Avisar con voz cuando la batería llegue al 100%"</em> o <em>"Encender linterna al conectar el cargador"</em>, Android debe permitir que el receptor del sistema despierte el hilo de ejecución de la app en el instante exacto del evento.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-2">
+            <div class="font-bold text-white text-sm flex items-center gap-2">
+              <span>🔋</span> Cero Consumo Pasivo
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              No hay bucles infinitos ni servicios pesados ejecutándose continuamente. La CPU del dispositivo se mantiene en suspensión (Deep Sleep) y solo se activa por milisegundos mediante <code>BroadcastReceivers</code> y <code>WakeLock</code> temporales para completar la acción.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-2">
+            <div class="font-bold text-white text-sm flex items-center gap-2">
+              <span>🛡️</span> Cero Telemetría
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              El acceso en segundo plano no se utiliza para enviar analíticas ni monitorear tu actividad. Toda la lógica se resuelve localmente en tu teléfono.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-indigo-950/30 border border-indigo-500/20 space-y-3 mt-4">
+          <h4 class="font-bold text-white text-sm">💡 Recomendación para capas de personalización (MIUI / HyperOS / One UI)</h4>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Muchos fabricantes aplican administradores agresivos que cierran procesos en segundo plano. Para asegurar que tus atajos se ejecuten sin interrupciones:
+          </p>
+          <ol class="list-decimal list-inside text-xs sm:text-sm text-slate-300 space-y-1 pl-1">
+            <li>Ve a <strong>Ajustes &gt; Aplicaciones &gt; Atajos</strong>.</li>
+            <li>En <strong>Batería</strong>, selecciona <strong>"Sin restricciones"</strong> o <strong>"No optimizar"</strong>.</li>
+            <li>En dispositivos Xiaomi/HyperOS, activa la opción <strong>"Inicio automático"</strong>.</li>
+          </ol>
+        </div>
       </section>
 
       <div class="pt-6 border-t border-slate-800 flex items-center justify-between">

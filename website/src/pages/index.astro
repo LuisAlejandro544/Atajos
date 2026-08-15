@@ -58,6 +58,53 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
+    <!-- Sección de Transparencia: Segundo Plano Responsable -->
+    <div class="mt-24 p-8 sm:p-10 rounded-3xl bg-slate-800/30 border border-indigo-500/20 backdrop-blur-sm">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 mb-3">
+            🛡️ Transparencia de Arquitectura
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Segundo plano consciente: sólo cuando tú lo ordenas
+          </h2>
+        </div>
+        <a href="/docs#segundo-plano" class="text-xs sm:text-sm font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 transition-colors whitespace-nowrap">
+          <span>Ver detalles técnicos en la documentación</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-300 text-sm">
+        <div class="space-y-2">
+          <div class="font-bold text-white flex items-center gap-2">
+            <span class="text-indigo-400 font-mono">01.</span> Sin procesos fantasma
+          </div>
+          <p class="text-slate-400 leading-relaxed text-xs sm:text-sm">
+            No mantenemos conexiones abiertas a servidores ni servicios de rastreo. La CPU del dispositivo permanece en reposo profundo (deep sleep) hasta que ocurre un evento configurado.
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <div class="font-bold text-white flex items-center gap-2">
+            <span class="text-indigo-400 font-mono">02.</span> WakeLocks de milisegundos
+          </div>
+          <p class="text-slate-400 leading-relaxed text-xs sm:text-sm">
+            Para tareas críticas (como avisarte por voz cuando la batería llega al 100%), la app adquiere un bloqueo parcial de CPU solo durante los segundos que tarda en hablar y se libera de inmediato.
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <div class="font-bold text-white flex items-center gap-2">
+            <span class="text-indigo-400 font-mono">03.</span> Libre de restricciones OEM
+          </div>
+          <p class="text-slate-400 leading-relaxed text-xs sm:text-sm">
+            Capas como MIUI, HyperOS o One UI suelen cerrar apps en segundo plano. Solicitar la exención de optimización de batería garantiza que tus alarmas y automatizaciones funcionen a tiempo.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Sección de Descarga -->
     <div id="descarga" class="mt-28 p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-slate-800/80 to-dark-900 border border-slate-700/80 text-center max-w-4xl mx-auto shadow-2xl">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 mb-4">
@@ -115,6 +162,16 @@ import Layout from '../layouts/Layout.astro';
           </summary>
           <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed">
             No. Toda tu información, atajos creados, registros de ejecución y variables dinámicas se almacenan única y exclusivamente de forma local en tu dispositivo mediante SQLite cifrado/Room. No tenemos servidores propios que reciban tus datos.
+          </p>
+        </details>
+
+        <details class="group p-5 sm:p-6 rounded-2xl bg-slate-800/40 border border-slate-700/60 hover:border-slate-600 transition-all [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex items-center justify-between cursor-pointer font-bold text-white text-base sm:text-lg">
+            <span>¿Por qué la app necesita ejecutarse en segundo plano o desactivar el ahorro de batería?</span>
+            <span class="text-indigo-400 transition-transform group-open:rotate-180">↓</span>
+          </summary>
+          <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed">
+            Para poder responder a eventos del sistema (como avisarte por voz cuando el móvil termina de cargarse al 100%, cuando conectas el cable o a una hora específica programada), Android necesita permitir que la app se despierte momentáneamente. No consumimos batería de fondo ni tenemos procesos continuos de escucha: sólo actuamos en el instante exacto en el que ocurre el disparador que tú configuraste.
           </p>
         </details>
 

@@ -1,7 +1,10 @@
 package com.example.engine.handlers
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.RingtoneManager
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
@@ -23,13 +26,19 @@ class TtsActionHandler(private val context: Context) : ActionHandler, TextToSpee
     private var tts: TextToSpeech? = null
     @Volatile
     private var isTtsReady = false
-    private val initDeferred = CompletableDeferred<Boolean>()
+    private var initDeferred = CompletableDeferred<Boolean>()
 
     init {
-        // En Android, TextToSpeech DEBE inicializarse en el hilo principal (Main Looper)
-        // para que pueda enlazar de inmediato con el servicio del sistema de voz (IPC)
+        initTts()
+    }
+
+    private fun initTts() {
         Handler(Looper.getMainLooper()).post {
             try {
+                if (initDeferred.isCompleted) {
+                    initDeferred = CompletableDeferred()
+                }
+                isTtsReady = false
                 tts = TextToSpeech(context.applicationContext, this)
             } catch (e: Exception) {
                 Log.e(TAG, "Error instanciando TextToSpeech en Main Looper", e)
@@ -43,22 +52,34 @@ class TtsActionHandler(private val context: Context) : ActionHandler, TextToSpee
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             try {
-                val result = tts?.setLanguage(Locale("es", "ES"))
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    tts?.setLanguage(Locale.getDefault())
+                val currentTts = tts
+                if (currentTts != null) {
+                    // Configurar atributos de audio para que suene claro incluso con pantalla bloqueada
+                    val audioAttributes = AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build()
+                    currentTts.setAudioAttributes(audioAttributes)
+
+                    val result = currentTts.setLanguage(Locale("es", "ES"))
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        currentTts.setLanguage(Locale.getDefault())
+                    }
                 }
                 isTtsReady = true
                 if (!initDeferred.isCompleted) {
                     initDeferred.complete(true)
                 }
+                Log.d(TAG, "TextToSpeech inicializado con éxito y listo para reproducir")
             } catch (e: Exception) {
-                Log.e(TAG, "Error configurando idioma TTS", e)
+                Log.e(TAG, "Error configurando idioma/audio en TTS", e)
                 if (!initDeferred.isCompleted) {
                     initDeferred.complete(false)
                 }
             }
         } else {
             Log.e(TAG, "Fallo al inicializar TTS con status: $status")
+            isTtsReady = false
             if (!initDeferred.isCompleted) {
                 initDeferred.complete(false)
             }
@@ -75,40 +96,70 @@ class TtsActionHandler(private val context: Context) : ActionHandler, TextToSpee
         }
         val text = com.example.engine.VariableResolverHelper.resolve(rawText, context)
 
-        // Si el motor TTS aún se está inicializando (común al conectar cargador en segundo plano),
-        // esperamos hasta 2500ms a que termine de conectarse con el servicio de voz.
-        if (!isTtsReady) {
+        // Si TTS no está listo o fue liberado/desconectado por el sistema, reinicializar bajo demanda
+        if (tts == null || !isTtsReady) {
+            Log.d(TAG, "TextToSpeech no estaba listo al ejecutar acción. Reinicializando bajo demanda...")
+            initTts()
             withTimeoutOrNull(2500L) {
                 initDeferred.await()
             }
         }
 
-        return if (tts != null && isTtsReady) {
+        var speechSuccess = false
+        val currentTts = tts
+
+        if (currentTts != null && isTtsReady) {
             val utteranceId = "atajos_tts_${System.currentTimeMillis()}"
             val speechDeferred = CompletableDeferred<Unit>()
 
-            withContext(Dispatchers.Main) {
-                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                    override fun onStart(id: String?) {}
-                    override fun onDone(id: String?) {
-                        if (id == utteranceId && !speechDeferred.isCompleted) speechDeferred.complete(Unit)
-                    }
-                    override fun onError(id: String?) {
-                        if (id == utteranceId && !speechDeferred.isCompleted) speechDeferred.complete(Unit)
-                    }
-                })
+            val speakResult = withContext(Dispatchers.Main) {
+                try {
+                    currentTts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                        override fun onStart(id: String?) {
+                            Log.d(TAG, "Inicio de pronunciación TTS: $id")
+                        }
+                        override fun onDone(id: String?) {
+                            Log.d(TAG, "Fin de pronunciación TTS: $id")
+                            if (id == utteranceId && !speechDeferred.isCompleted) {
+                                speechDeferred.complete(Unit)
+                            }
+                        }
+                        override fun onError(id: String?) {
+                            Log.w(TAG, "Error en pronunciación TTS: $id")
+                            if (id == utteranceId && !speechDeferred.isCompleted) {
+                                speechDeferred.complete(Unit)
+                            }
+                        }
+                    })
 
-                tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+                    val params = Bundle().apply {
+                        putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_NOTIFICATION)
+                        putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
+                    }
+                    currentTts.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Excepción invocando tts.speak", e)
+                    TextToSpeech.ERROR
+                }
             }
 
-            // Damos tiempo a reproducir el audio antes de que el receiver o el executor finalicen
-            withTimeoutOrNull(5000L) {
-                speechDeferred.await()
+            if (speakResult == TextToSpeech.SUCCESS) {
+                speechSuccess = true
+                // Damos tiempo a reproducir el audio completo antes de finalizar el hilo o receptor
+                withTimeoutOrNull(6000L) {
+                    speechDeferred.await()
+                }
+            } else {
+                Log.w(TAG, "tts.speak devolvió código de error ($speakResult). Intentando fallback sonoro y reconexión...")
+                isTtsReady = false
+                initTts() // Preparar para el siguiente evento
             }
+        }
 
+        return if (speechSuccess) {
             "Pronunciando: \"$text\""
         } else {
-            // Fallback sonoro del sistema si el motor TTS tarda o no está presente
+            // Fallback sonoro del sistema si el motor TTS tarda o falló la conexión IPC
             try {
                 val notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
                 val ringtone = RingtoneManager.getRingtone(context.applicationContext, notificationUri)
@@ -147,6 +198,8 @@ class TtsActionHandler(private val context: Context) : ActionHandler, TextToSpee
                 try {
                     tts?.stop()
                     tts?.shutdown()
+                    tts = null
+                    isTtsReady = false
                 } catch (_: Exception) {}
             }
         } catch (e: Exception) {
@@ -158,4 +211,3 @@ class TtsActionHandler(private val context: Context) : ActionHandler, TextToSpee
         private const val TAG = "TtsActionHandler"
     }
 }
-
