@@ -1,8 +1,27 @@
-fix(engine): solucionar inicialización de TextToSpeech en hilo principal y compatibilidad de eventos de carga
+feat(engine): implementar AutomationService en primer plano con registro dinámico para disparadores de hardware
 
-- Corregir la inicialización de `TextToSpeech` forzando su creación en el `Main Looper` (`Dispatchers.Main`) para garantizar el enlace IPC con el servicio de voz del sistema en segundo plano.
-- Implementar fallback sonoro con `RingtoneManager` y notificación del sistema ante posibles retardos en el motor TTS durante la pantalla bloqueada o segundo plano.
-- Agregar soporte a variantes de acciones de sistema (`POWER_CONNECTED` y `POWER_DISCONNECTED`) en `PowerTriggerReceiver` y en el manifiesto para máxima compatibilidad con capas de personalización OEM.
-- Activar por defecto la regla de automatización de conexión de cargador en `DefaultShortcutsProvider`.
-- Rediseñar el banner de estado de ejecución (`ExecutionStatusBanner`) con proporciones compactas y elegantes.
-- Limitar el historial de ejecuciones a 20 registros con purga automática en SQLite Room (`ExecutionLogDao`).
+- Implementar `AutomationService` (Foreground Service persistente) para superar las restricciones de difusión en segundo plano de Android 8.0+ (Background Execution Limits).
+- Registrar dinámicamente el receptor de hardware (`PowerTriggerReceiver`) con `registerReceiver()` para capturar eventos de conexión/desconexión de corriente y cambios de nivel de batería en tiempo real.
+- Agregar `BootReceiver` para iniciar automáticamente el servicio de automatizaciones tras el reinicio del dispositivo (`ACTION_BOOT_COMPLETED` y `ACTION_MY_PACKAGE_REPLACED`).
+- Iniciar `AutomationService` automáticamente al abrir `MainActivity`.
+- Añadir permisos y declaraciones necesarias en `AndroidManifest.xml` (`FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`).
+
+---
+
+refactor(architecture): desacoplamiento modular de DefaultShortcutsProvider, AppPickerBottomSheet y ShortcutsViewModel
+
+- Desacoplar `DefaultShortcutsProvider.kt` (de 635 líneas a 22 líneas) mediante proveedores especializados bajo `data/defaults/`: `DefaultShortcutsList.kt`, `GalleryTemplatesList.kt` y `DefaultAutomationsList.kt`.
+- Modularizar `AppPickerBottomSheet.kt` (de 371 líneas a 125 líneas) creando submódulos de UI bajo `ui/components/apppicker/`: `AppPickerHeader.kt`, `AppPickerLoadingState.kt`, `AppPickerSearchBar.kt`, `AppPickerFilterRow.kt` y `AppPickerListItem.kt`.
+- Desacoplar `ShortcutsViewModel.kt` extrayendo el gestor de ciclo de vida de ejecuciones, corrutinas activas y registro de auditoría a `ShortcutExecutionManager.kt`.
+- Actualizar la documentación arquitectónica en `STRUCTURE.md`.
+
+---
+
+feat(engine): integración nativa de AlarmManager para automatizaciones horarias y mejora en BrightnessActionHandler
+
+- Implementar `TimeSchedulerHelper` para programar y cancelar alarmas exactas (`AlarmManager.setExactAndAllowWhileIdle`) permitiendo ejecución en segundo plano y Doze Mode.
+- Crear `TimeTriggerReceiver` para ejecutar atajos por horario y reprogramarlos automáticamente para el día siguiente.
+- Conectar reprogramación de alarmas tras reinicio del sistema en `BootReceiver`.
+- Reforzar `BrightnessActionHandler` con verificación de `Settings.System.canWrite`, navegación guiada a ajustes mediante URI del paquete (`package:`) y aviso visual interactivo.
+- Añadir permisos `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM` y `WRITE_SETTINGS` en `AndroidManifest.xml`.
+

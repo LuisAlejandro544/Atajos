@@ -38,6 +38,12 @@ interface AutomationDao {
     @Delete
     suspend fun deleteAutomation(automation: AutomationEntity)
 
+    @Query("SELECT * FROM automations ORDER BY id DESC")
+    suspend fun getAllAutomationsSync(): List<AutomationEntity>
+
+    @Query("SELECT * FROM automations WHERE id = :id")
+    suspend fun getAutomationById(id: Long): AutomationEntity?
+
     @Query("DELETE FROM automations WHERE id = :id")
     suspend fun deleteById(id: Long)
 

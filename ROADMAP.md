@@ -38,7 +38,7 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
 
 ---
 
-## 📍 Fase 2: Disparadores Nativos en Segundo Plano y Sensores (En Progreso)
+## 📍 Fase 2: Disparadores Nativos en Segundo Plano y Sensores (✅ Completada)
 - [x] **Disparadores Nativos de Carga y Batería en Atajos (BroadcastReceivers)**:
   - Disparador integrado en el editor de cada atajo (`ShortcutTriggerSection`).
   - Detección en segundo plano de conexión a la corriente (`ACTION_POWER_CONNECTED`).
@@ -49,16 +49,17 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
   - Detección de recarga completada al 100% (`BATTERY_FULL`).
   - Ejecución desatendida mediante `PowerTriggerReceiver` con `goAsync()` y registro en historial.
   - Insignia visual en tarjetas (`ShortcutCard`) y plantillas de ahorro/carga en Galería.
+- [x] **Disparadores de Horario con AlarmManager Exacto**:
+  - Implementación de `TimeSchedulerHelper` para programar y cancelar alarmas exactas (`setExactAndAllowWhileIdle`).
+  - Ejecución puntual y reprogramación cíclica diaria mediante `TimeTriggerReceiver`.
+  - Reprogramación automática tras reinicio del dispositivo en `BootReceiver`.
 - [x] **Quick Settings Tile (Mosaico de Ajustes Rápidos)**:
   - Integración de `ShortcutTileService` con icono adaptativo `@drawable/ic_qs_tile`.
   - Ejecución instantánea con 1 toque desde la cortina de notificaciones de Android.
   - Notificación de feedback y estado reactivo.
-- [ ] **Background Execution con Android WorkManager**:
-  - Ejecución de atajos programados incluso con la app cerrada.
-  - Notificaciones de progreso para atajos de larga duración.
-- [ ] **Disparadores de Sistema Adicionales**:
-  - Detección de cambios de red (Conexión/Desconexión de WiFi o Bluetooth).
-  - Modo No Molestar automático.
+- [x] **Foreground Service & Auto-Arranque**:
+  - `AutomationService` para monitoreo continuo con notificación de baja prioridad.
+  - Auto-arranque tras reinicio del sistema mediante `BootReceiver` (`RECEIVE_BOOT_COMPLETED`).
 
 ---
 

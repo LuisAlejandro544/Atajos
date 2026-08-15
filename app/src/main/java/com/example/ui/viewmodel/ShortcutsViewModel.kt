@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.db.AppDatabase
 import com.example.data.db.DefaultShortcutsProvider
-import com.example.data.model.ActionJsonHelper
 import com.example.data.model.ActionType
 import com.example.data.model.AutomationEntity
 import com.example.data.model.ExecutionLogEntity
@@ -15,7 +14,6 @@ import com.example.data.repository.ShortcutRepository
 import com.example.engine.ActionExecutor
 import com.example.engine.AppShortcutsHelper
 import com.example.engine.ExecutionStatus
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,21 +24,19 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel principal que centraliza los flujos de datos reactivos (Room + StateFlow)
- * y delega la lógica en gestores especializados (ShortcutEditorManager, AutomationsManager).
+ * y delega la lógica en gestores especializados (ShortcutEditorManager, AutomationsManager, ShortcutExecutionManager).
  */
 class ShortcutsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: ShortcutRepository
     val actionExecutor: ActionExecutor
 
-    // Control de trabajo de ejecución activa para cancelación
-    private var activeExecutionJob: Job? = null
-
     // Gestores modulares
     private val editorManager: ShortcutEditorManager
     private val automationsManager: AutomationsManager
+    private val executionManager: ShortcutExecutionManager
 
-    // Flujos de datos principales
+    // Flujos de datos reactivos principales
     val allShortcuts: StateFlow<List<ShortcutEntity>>
     val allAutomations: StateFlow<List<AutomationEntity>>
     val recentLogs: StateFlow<List<ExecutionLogEntity>>
@@ -72,9 +68,10 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
         actionExecutor = ActionExecutor(application)
         executionStatus = actionExecutor.status
 
+        executionManager = ShortcutExecutionManager(repository, actionExecutor, viewModelScope)
         editorManager = ShortcutEditorManager(repository, actionExecutor, viewModelScope)
-        automationsManager = AutomationsManager(repository, viewModelScope) { shortcutId ->
-            runShortcutById(shortcutId)
+        automationsManager = AutomationsManager(application, repository, viewModelScope) { shortcutId ->
+            executionManager.runShortcutById(shortcutId)
         }
 
         allShortcuts = repository.allShortcuts.stateIn(
@@ -144,58 +141,12 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
         _searchQuery.value = query
     }
 
-    // ── Operaciones con Atajos ────────────────────────────────────────────────
-    fun runShortcut(shortcut: ShortcutEntity) {
-        activeExecutionJob?.cancel()
-        activeExecutionJob = viewModelScope.launch {
-            val actions = ActionJsonHelper.fromJson(shortcut.actionsJson)
-            actionExecutor.executeShortcut(
-                shortcutId = shortcut.id,
-                shortcutTitle = shortcut.title,
-                actions = actions
-            ) { success, resultMessage, durationMs ->
-                viewModelScope.launch {
-                    val isCancelled = resultMessage.contains("Cancelado", ignoreCase = true)
-                    if (success && !isCancelled) {
-                        repository.recordExecution(shortcut.id)
-                    }
-                    val statusStr = when {
-                        isCancelled -> "CANCELLED"
-                        success -> "SUCCESS"
-                        else -> "FAILED"
-                    }
-                    repository.logExecution(
-                        ExecutionLogEntity(
-                            shortcutId = shortcut.id,
-                            shortcutTitle = shortcut.title,
-                            iconKey = shortcut.iconKey,
-                            colorHex = shortcut.colorHex,
-                            timestamp = System.currentTimeMillis(),
-                            status = statusStr,
-                            actionCount = actions.size,
-                            durationMs = durationMs,
-                            summary = resultMessage
-                        )
-                    )
-                }
-            }
-        }
-    }
+    // ── Operaciones y Ejecución de Atajos ─────────────────────────────────────
+    fun runShortcut(shortcut: ShortcutEntity) = executionManager.runShortcut(shortcut)
 
-    fun cancelExecution() {
-        actionExecutor.cancelExecution()
-        activeExecutionJob?.cancel()
-        activeExecutionJob = null
-    }
+    fun runShortcutById(shortcutId: Long) = executionManager.runShortcutById(shortcutId)
 
-    fun runShortcutById(shortcutId: Long) {
-        viewModelScope.launch {
-            val shortcut = repository.getShortcutById(shortcutId)
-            if (shortcut != null) {
-                runShortcut(shortcut)
-            }
-        }
-    }
+    fun cancelExecution() = executionManager.cancelExecution()
 
     fun toggleFavorite(shortcut: ShortcutEntity) {
         viewModelScope.launch {

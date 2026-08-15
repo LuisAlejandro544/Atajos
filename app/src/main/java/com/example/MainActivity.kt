@@ -27,6 +27,7 @@ import com.example.ui.navigation.HomeTabActions
 import com.example.ui.navigation.MainTabActions
 import com.example.ui.navigation.MainTabContent
 import com.example.ui.navigation.TopBarActions
+import com.example.engine.service.AutomationService
 import com.example.ui.screens.ShortcutEditorScreen
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.viewmodel.ShortcutsViewModel
@@ -35,6 +36,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        AutomationService.start(this)
         setContent {
             MyApplicationTheme {
                 val viewModel: ShortcutsViewModel = viewModel()

@@ -24,7 +24,8 @@ Una aplicación nativa para Android construida con **Kotlin** y **Jetpack Compos
 - 📳 **Vibración Háptica Avanzada**: Soporte para patrones preconfigurados (Pulso suave, Golpe fuerte, Doble pulso, Triple pulso, Latido de corazón, Código Morse SOS y Duración en milisegundos a medida).
 - 🔒 **Gestión Dinámica de Permisos**: Detección y solicitud automática en el inicio de la app (`POST_NOTIFICATIONS`, `CAMERA`), con banner de recordatorio si faltan accesos clave.
 - 🎨 **Editor Visual de Atajos**: Añade, reordena y configura pasos de ejecución, asigna colores en degradado, nombres personalizados e iconos temáticos.
-- ⏰ **Automatizaciones Programadas**: Configuración de disparadores por horario (mañana, noche) o estado de hardware.
+- ⏰ **Automatizaciones Programadas con AlarmManager**: Configuración de disparadores por horario con alarmas exactas (`setExactAndAllowWhileIdle`), ejecución puntual en segundo plano incluso en modo reposo (Doze Mode) y reprogramación tras el reinicio del sistema (`BootReceiver`).
+- 🔌 **Disparadores por Estado de Hardware**: Activación automática al conectar/desconectar el cargador o ante niveles críticos de batería.
 - 📦 **Galería de Plantillas**: Atajos prediseñados listos para instalar con un toque (Lanzador de Juegos, Modo SOS, Saludo Matutino, Modo Enfoque, etc.).
 - 📜 **Historial de Ejecución**: Registro de tiempos de ejecución, duración de pasos y estado de éxito/error.
 - 💾 **Persistencia Local con Room**: Base de datos SQLite local rápida y segura; todos tus atajos y configuraciones se guardan localmente en el dispositivo.

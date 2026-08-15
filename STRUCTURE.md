@@ -58,7 +58,12 @@ app/src/main/java/com/example/
 │   │   ├── ShortcutDao.kt        # Consultas reactivas (Flow) para atajos
 │   │   ├── AutomationDao.kt      # Operaciones CRUD para automatizaciones
 │   │   ├── ExecutionLogDao.kt    # Registro de historial de ejecuciones
-│   │   └── DefaultShortcutsProvider.kt # Atajos de ejemplo y plantillas iniciales
+│   │   └── DefaultShortcutsProvider.kt # Fachada modular para atajos y plantillas iniciales
+│   │
+│   ├── defaults/                 # Proveedores modulares de plantillas y datos iniciales
+│   │   ├── DefaultShortcutsList.kt   # Atajos base sembrados en SQLite
+│   │   ├── GalleryTemplatesList.kt   # Catálogo completo de plantillas de la galería
+│   │   └── DefaultAutomationsList.kt # Automatizaciones de ejemplo iniciales
 │   │
 │   ├── model/
 │   │   ├── AppInfo.kt            # Modelo de metadatos de aplicaciones instaladas
@@ -76,10 +81,15 @@ app/src/main/java/com/example/
 │   ├── AppScannerHelper.kt       # Escaneo en segundo plano (Dispatchers.IO) de apps y juegos
 │   ├── AppShortcutsHelper.kt     # Gestor de accesos directos dinámicos en el icono del launcher
 │   ├── VariableResolverHelper.kt # Motor de interpolación de variables del sistema en tiempo real
+│   ├── service/                  # Servicios en segundo plano
+│   │   └── AutomationService.kt  # Foreground Service persistente para monitorización de hardware
 │   ├── tiles/                    # Servicios de Mosaico en el panel de Ajustes Rápidos (Quick Settings)
 │   │   └── ShortcutTileService.kt# TileService para ejecución instantánea de atajos favoritos desde la cortina
 │   ├── triggers/                 # Disparadores nativos de sistema en segundo plano
-│   │   └── PowerTriggerReceiver.kt # BroadcastReceiver para alimentación (POWER_CONNECTED/DISCONNECTED) y eventos de batería (BATTERY_LOW, OK, FULL)
+│   │   ├── BootReceiver.kt         # Auto-arranque tras reinicio del sistema (BOOT_COMPLETED)
+│   │   ├── PowerTriggerReceiver.kt # BroadcastReceiver para eventos de alimentación y batería
+│   │   ├── TimeSchedulerHelper.kt  # Asistente de programación con AlarmManager exacto
+│   │   └── TimeTriggerReceiver.kt  # BroadcastReceiver activado por AlarmManager a la hora exacta
 │   └── handlers/                 # Manejadores de acciones modulares individuales
 │       ├── ActionHandler.kt              # Interfaz base con contrato de ejecución y release
 │       ├── HttpRequestActionHandler.kt   # Peticiones HTTP y Webhooks (GET, POST, PUT, DELETE) con variables dinámicas
@@ -99,13 +109,20 @@ app/src/main/java/com/example/
     │   ├── ActionCard.kt         # Tarjeta de acción reordenable y contenedor modular
     │   ├── ActionTypeItem.kt     # Componente modularizado para ítems de selección de acción
     │   ├── AddActionBottomSheet.kt # Diálogo modal para agregar acciones
-    │   ├── AppPickerBottomSheet.kt # Selector visual de juegos/apps con buscador y estados de carga
+    │   ├── AppPickerBottomSheet.kt # Contenedor orquestador del selector de aplicaciones
     │   ├── CustomizationPickers.kt # Selectores de paletas de color e iconos
     │   ├── ExecutionStatusBanner.kt# Banner dinámico de progreso en vivo
     │   ├── IconHelper.kt         # Mapeo tipado de iconos de Material Symbols
     │   ├── PermissionBanner.kt   # Banner informativo para activación de permisos en tiempo de ejecución
     │   ├── ShortcutCard.kt       # Tarjeta de atajo en la pantalla principal
     │   ├── VariablePickerChips.kt# Selector horizontal para autocompletar variables dinámicas
+    │   │
+    │   ├── apppicker/            # Submódulos desacoplados del selector de aplicaciones
+    │   │   ├── AppPickerHeader.kt       # Cabecera con título, icono temático y botón de cierre
+    │   │   ├── AppPickerLoadingState.kt # Indicador y textos de carga durante el escaneo
+    │   │   ├── AppPickerSearchBar.kt    # Campo de búsqueda interactivo
+    │   │   ├── AppPickerFilterRow.kt    # Fila de FilterChips (Todas / Juegos / Apps)
+    │   │   └── AppPickerListItem.kt     # Ítem de aplicación con icono, badge y selección
     │   │
     │   ├── automations/          # Submódulos desacoplados del sistema de automatizaciones
     │   │   ├── AutomationCard.kt       # Tarjeta individual con switches y acciones de prueba/borrado
@@ -149,11 +166,12 @@ app/src/main/java/com/example/
     │   └── Type.kt               # Tipografía Material Design
     │
     └── viewmodel/
-        ├── ShortcutsViewModel.kt    # Fachada central y coordinación de flujos (StateFlow)
-        ├── ShortcutEditorManager.kt # Gestor modular de mutaciones del editor
-        ├── AutomationsManager.kt    # Gestor modular de lógica y CRUD de automatizaciones
-        ├── EditorState.kt           # Modelo de estado inmutable para el editor
-        └── DefaultActionFactory.kt  # Fábrica de acciones predeterminadas
+        ├── ShortcutsViewModel.kt        # Fachada central y coordinación de flujos (StateFlow)
+        ├── ShortcutExecutionManager.kt  # Gestor modular de ejecución de atajos y guardado de logs
+        ├── ShortcutEditorManager.kt     # Gestor modular de mutaciones del editor
+        ├── AutomationsManager.kt        # Gestor modular de lógica y CRUD de automatizaciones
+        ├── EditorState.kt               # Modelo de estado inmutable para el editor
+        └── DefaultActionFactory.kt      # Fábrica de acciones predeterminadas
 ```
 
 ---
