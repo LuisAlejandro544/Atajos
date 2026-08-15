@@ -23,10 +23,19 @@ class BootReceiver : BroadcastReceiver() {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val db = AppDatabase.getInstance(appContext)
+                    
+                    // 1. Reprogramar alarmas de automatizaciones de horario
                     val automations = db.automationDao().getAllAutomationsSync()
                     automations.filter { it.isEnabled && it.triggerType == TriggerType.TIME_OF_DAY }.forEach {
                         TimeSchedulerHelper.scheduleAutomationAlarm(appContext, it)
                     }
+
+                    // 2. Reprogramar alarmas de atajos directos con disparador de hora exacta
+                    val timeShortcuts = db.shortcutDao().getTimeExactShortcuts()
+                    timeShortcuts.forEach { shortcut ->
+                        TimeSchedulerHelper.scheduleShortcutAlarm(appContext, shortcut)
+                    }
+                    Log.d("BootReceiver", "Alarmas horarias reprogramadas con éxito (${automations.size} autos, ${timeShortcuts.size} atajos)")
                 } catch (e: Exception) {
                     Log.e("BootReceiver", "Error reprogramando alarmas tras reinicio", e)
                 } finally {

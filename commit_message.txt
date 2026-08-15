@@ -1,27 +1,12 @@
-feat(engine): implementar AutomationService en primer plano con registro dinámico para disparadores de hardware
+feat(triggers): implementar disparadores configurables por porcentaje exacto de batería y hora exacta programada
 
-- Implementar `AutomationService` (Foreground Service persistente) para superar las restricciones de difusión en segundo plano de Android 8.0+ (Background Execution Limits).
-- Registrar dinámicamente el receptor de hardware (`PowerTriggerReceiver`) con `registerReceiver()` para capturar eventos de conexión/desconexión de corriente y cambios de nivel de batería en tiempo real.
-- Agregar `BootReceiver` para iniciar automáticamente el servicio de automatizaciones tras el reinicio del dispositivo (`ACTION_BOOT_COMPLETED` y `ACTION_MY_PACKAGE_REPLACED`).
-- Iniciar `AutomationService` automáticamente al abrir `MainActivity`.
-- Añadir permisos y declaraciones necesarias en `AndroidManifest.xml` (`FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`).
-
----
-
-refactor(architecture): desacoplamiento modular de DefaultShortcutsProvider, AppPickerBottomSheet y ShortcutsViewModel
-
-- Desacoplar `DefaultShortcutsProvider.kt` (de 635 líneas a 22 líneas) mediante proveedores especializados bajo `data/defaults/`: `DefaultShortcutsList.kt`, `GalleryTemplatesList.kt` y `DefaultAutomationsList.kt`.
-- Modularizar `AppPickerBottomSheet.kt` (de 371 líneas a 125 líneas) creando submódulos de UI bajo `ui/components/apppicker/`: `AppPickerHeader.kt`, `AppPickerLoadingState.kt`, `AppPickerSearchBar.kt`, `AppPickerFilterRow.kt` y `AppPickerListItem.kt`.
-- Desacoplar `ShortcutsViewModel.kt` extrayendo el gestor de ciclo de vida de ejecuciones, corrutinas activas y registro de auditoría a `ShortcutExecutionManager.kt`.
-- Actualizar la documentación arquitectónica en `STRUCTURE.md`.
-
----
-
-feat(engine): integración nativa de AlarmManager para automatizaciones horarias y mejora en BrightnessActionHandler
-
-- Implementar `TimeSchedulerHelper` para programar y cancelar alarmas exactas (`AlarmManager.setExactAndAllowWhileIdle`) permitiendo ejecución en segundo plano y Doze Mode.
-- Crear `TimeTriggerReceiver` para ejecutar atajos por horario y reprogramarlos automáticamente para el día siguiente.
-- Conectar reprogramación de alarmas tras reinicio del sistema en `BootReceiver`.
-- Reforzar `BrightnessActionHandler` con verificación de `Settings.System.canWrite`, navegación guiada a ajustes mediante URI del paquete (`package:`) y aviso visual interactivo.
-- Añadir permisos `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM` y `WRITE_SETTINGS` en `AndroidManifest.xml`.
-
+- Agregar soporte para disparador de batería con porcentaje exacto personalizado (`BATTERY_LEVEL:XX`):
+  - Integrar panel interactivo en `ShortcutTriggerSection` con Slider dinámico (5% a 100%), visor numérico destacado y chips rápidos (15%, 20%, 50%, 80%, 90%, 100%).
+  - Procesar broadcasts de `ACTION_BATTERY_CHANGED` en `PowerTriggerReceiver` con filtrado inteligente, mapeo de atajos por porcentaje y debounce para evitar ejecuciones repetidas.
+- Agregar soporte para disparador de hora exacta programada (`TIME_EXACT:HH:mm`):
+  - Integrar panel interactivo en `ShortcutTriggerSection` con visor visual de hora, integración nativa con `TimePickerDialog` de Android y chips rápidos de horas habituales (07:00, 08:30, 14:00, 20:00, 22:30).
+  - Programar y cancelar alarmas exactas vía `AlarmManager` en `TimeSchedulerHelper` al guardar/editar atajos desde `ShortcutEditorManager`.
+  - Ejecutar y reprogramar diariamente los atajos directos en `TimeTriggerReceiver`.
+  - Reprogramar automáticamente las alarmas de atajos y automatizaciones tras el reinicio del sistema en `BootReceiver`.
+- Actualizar badges contextuales en las tarjetas de atajos (`ShortcutCard`) para reflejar `⏰ HH:mm` y `🔋 XX%`.
+- Mejorar el diálogo de nueva automatización (`NewAutomationDialog`) con integración de `TimePickerDialog`.

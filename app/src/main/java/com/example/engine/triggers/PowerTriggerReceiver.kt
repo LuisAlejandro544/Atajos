@@ -20,34 +20,64 @@ import kotlinx.coroutines.launch
 
 /**
  * BroadcastReceiver nativo del sistema para capturar eventos de alimentación y estado de batería
- * (conexión/desconexión de corriente, batería baja, batería restablecida o carga completa al 100%)
+ * (conexión/desconexión de corriente, porcentaje exacto de batería, batería baja, batería restablecida o carga completa al 100%)
  * y ejecutar automáticamente tanto los atajos con disparador directo como las automatizaciones activas en segundo plano.
  */
 class PowerTriggerReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
         val action = intent?.action ?: return
-        val (triggerTypeKey, autoTriggerType) = when (action) {
-            Intent.ACTION_POWER_CONNECTED, "android.intent.action.POWER_CONNECTED" ->
-                Pair(ShortcutTrigger.POWER_CONNECTED.key, TriggerType.CHARGER_CONNECTED)
-            Intent.ACTION_POWER_DISCONNECTED, "android.intent.action.POWER_DISCONNECTED" ->
-                Pair(ShortcutTrigger.POWER_DISCONNECTED.key, TriggerType.CHARGER_DISCONNECTED)
-            Intent.ACTION_BATTERY_LOW ->
-                Pair(ShortcutTrigger.BATTERY_LOW.key, TriggerType.BATTERY_LOW)
-            Intent.ACTION_BATTERY_OKAY ->
-                Pair(ShortcutTrigger.BATTERY_OK.key, TriggerType.BATTERY_OK)
+
+        var exactBatteryPct: Int? = null
+        var triggerTypeKey: String? = null
+        var autoTriggerType: TriggerType? = null
+
+        when (action) {
+            Intent.ACTION_POWER_CONNECTED, "android.intent.action.POWER_CONNECTED" -> {
+                triggerTypeKey = ShortcutTrigger.POWER_CONNECTED.key
+                autoTriggerType = TriggerType.CHARGER_CONNECTED
+            }
+            Intent.ACTION_POWER_DISCONNECTED, "android.intent.action.POWER_DISCONNECTED" -> {
+                triggerTypeKey = ShortcutTrigger.POWER_DISCONNECTED.key
+                autoTriggerType = TriggerType.CHARGER_DISCONNECTED
+            }
+            Intent.ACTION_BATTERY_LOW -> {
+                triggerTypeKey = ShortcutTrigger.BATTERY_LOW.key
+                autoTriggerType = TriggerType.BATTERY_LOW
+            }
+            Intent.ACTION_BATTERY_OKAY -> {
+                triggerTypeKey = ShortcutTrigger.BATTERY_OK.key
+                autoTriggerType = TriggerType.BATTERY_OK
+            }
             Intent.ACTION_BATTERY_CHANGED -> {
                 val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
                 val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
                 val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
                 val batteryPct = if (scale > 0) (level * 100) / scale else -1
-                if (batteryPct == 100 || status == BatteryManager.BATTERY_STATUS_FULL) {
-                    Pair(ShortcutTrigger.BATTERY_FULL.key, TriggerType.BATTERY_FULL)
+
+                if (batteryPct >= 0) {
+                    exactBatteryPct = batteryPct
+                    if (batteryPct == 100 || status == BatteryManager.BATTERY_STATUS_FULL) {
+                        triggerTypeKey = ShortcutTrigger.BATTERY_FULL.key
+                        autoTriggerType = TriggerType.BATTERY_FULL
+                    }
                 } else {
                     return
                 }
             }
             else -> return
+        }
+
+        // Debounce para porcentaje de batería idéntico
+        if (exactBatteryPct != null) {
+            val lastPct = lastProcessedBatteryPct
+            val now = System.currentTimeMillis()
+            if (lastPct == exactBatteryPct && (now - lastProcessedTimestamp) < 30000L) {
+                // Mismo porcentaje recibido en menos de 30s, evitar duplicados innecesarios
+                return
+            }
+            lastProcessedBatteryPct = exactBatteryPct
+            lastProcessedTimestamp = now
         }
 
         val pendingResult = goAsync()
@@ -60,41 +90,55 @@ class PowerTriggerReceiver : BroadcastReceiver() {
                 val database = AppDatabase.getInstance(appContext)
                 val repository = ShortcutRepository(database)
 
-                // 1. Obtener atajos configurados directamente con este disparador
-                val directShortcuts = repository.getShortcutsForTrigger(triggerTypeKey)
-
-                // 2. Obtener automatizaciones activas configuradas para este evento
-                val activeAutomations = repository.getActiveAutomationsByTriggerType(autoTriggerType)
-
-                // 3. Unificar la lista para evitar ejecuciones duplicadas del mismo atajo
                 val shortcutsToRun = mutableListOf<Pair<ShortcutEntity, String>>()
                 val seenShortcutIds = mutableSetOf<Long>()
 
-                for (shortcut in directShortcuts) {
-                    if (seenShortcutIds.add(shortcut.id)) {
-                        shortcutsToRun.add(Pair(shortcut, "Atajo Directo"))
+                // 1. Atajos por evento estándar (Cargador conectado/desconectado, Batería baja, etc.)
+                if (triggerTypeKey != null) {
+                    val directShortcuts = repository.getShortcutsForTrigger(triggerTypeKey)
+                    for (s in directShortcuts) {
+                        if (seenShortcutIds.add(s.id)) {
+                            shortcutsToRun.add(Pair(s, "Atajo Directo"))
+                        }
                     }
                 }
 
-                for (automation in activeAutomations) {
-                    val shortcut = repository.getShortcutById(automation.shortcutId)
-                    if (shortcut != null && seenShortcutIds.add(shortcut.id)) {
-                        shortcutsToRun.add(Pair(shortcut, automation.title))
+                // 2. Atajos con disparador de porcentaje exacto (BATTERY_LEVEL:XX)
+                if (exactBatteryPct != null) {
+                    val targetKey = "BATTERY_LEVEL:$exactBatteryPct"
+                    val batteryLevelShortcuts = repository.getBatteryLevelShortcuts().filter {
+                        it.trigger.equals(targetKey, ignoreCase = true)
+                    }
+                    for (s in batteryLevelShortcuts) {
+                        if (seenShortcutIds.add(s.id)) {
+                            shortcutsToRun.add(Pair(s, "Batería al $exactBatteryPct%"))
+                        }
+                    }
+                }
+
+                // 3. Automatizaciones activas configuradas para este evento
+                if (autoTriggerType != null) {
+                    val activeAutomations = repository.getActiveAutomationsByTriggerType(autoTriggerType)
+                    for (automation in activeAutomations) {
+                        val shortcut = repository.getShortcutById(automation.shortcutId)
+                        if (shortcut != null && seenShortcutIds.add(shortcut.id)) {
+                            shortcutsToRun.add(Pair(shortcut, automation.title))
+                        }
                     }
                 }
 
                 if (shortcutsToRun.isEmpty()) {
-                    Log.d(TAG, "No hay atajos ni automatizaciones activas para el evento: $triggerTypeKey")
                     return@launch
                 }
 
-                val triggerLabel = when (triggerTypeKey) {
-                    ShortcutTrigger.POWER_CONNECTED.key -> "Cargador Conectado"
-                    ShortcutTrigger.POWER_DISCONNECTED.key -> "Cargador Desconectado"
-                    ShortcutTrigger.BATTERY_LOW.key -> "Batería Baja"
-                    ShortcutTrigger.BATTERY_OK.key -> "Batería Restablecida"
-                    ShortcutTrigger.BATTERY_FULL.key -> "Batería 100%"
-                    else -> triggerTypeKey
+                val triggerLabel = when {
+                    exactBatteryPct != null && triggerTypeKey == null -> "Batería al $exactBatteryPct%"
+                    triggerTypeKey == ShortcutTrigger.POWER_CONNECTED.key -> "Cargador Conectado"
+                    triggerTypeKey == ShortcutTrigger.POWER_DISCONNECTED.key -> "Cargador Desconectado"
+                    triggerTypeKey == ShortcutTrigger.BATTERY_LOW.key -> "Batería Baja"
+                    triggerTypeKey == ShortcutTrigger.BATTERY_OK.key -> "Batería Restablecida"
+                    triggerTypeKey == ShortcutTrigger.BATTERY_FULL.key -> "Batería 100%"
+                    else -> triggerTypeKey ?: "Evento de Batería"
                 }
 
                 for ((shortcut, sourceName) in shortcutsToRun) {
@@ -115,7 +159,7 @@ class PowerTriggerReceiver : BroadcastReceiver() {
                         execDuration = durationMs
                     }
 
-                    // Registrar de forma síncrona en la base de datos antes de finalizar el receiver
+                    // Registrar en base de datos
                     try {
                         if (execSuccess) {
                             repository.recordExecution(shortcut.id)
@@ -152,5 +196,7 @@ class PowerTriggerReceiver : BroadcastReceiver() {
 
     companion object {
         private const val TAG = "PowerTriggerReceiver"
+        private var lastProcessedBatteryPct: Int? = null
+        private var lastProcessedTimestamp: Long = 0L
     }
 }

@@ -35,6 +35,12 @@ class ShortcutRepository(private val database: AppDatabase) {
 
     suspend fun getShortcutById(id: Long): ShortcutEntity? = shortcutDao.getShortcutById(id)
 
+    suspend fun getAllShortcutsSync(): List<ShortcutEntity> = shortcutDao.getAllShortcutsSync()
+
+    suspend fun getTimeExactShortcuts(): List<ShortcutEntity> = shortcutDao.getTimeExactShortcuts()
+
+    suspend fun getBatteryLevelShortcuts(): List<ShortcutEntity> = shortcutDao.getBatteryLevelShortcuts()
+
     suspend fun getShortcutsForPowerTrigger(trigger: String): List<ShortcutEntity> =
         shortcutDao.getShortcutsForPowerTrigger(trigger)
 

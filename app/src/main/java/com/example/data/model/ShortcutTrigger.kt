@@ -11,50 +11,72 @@ enum class ShortcutTrigger(
 ) {
     NONE(
         key = "NONE",
-        label = "Manual",
-        description = "Se ejecuta únicamente al tocarlo o desde el acceso directo",
+        label = "Solo Manual",
+        description = "Se ejecuta al tocarlo en la app o desde el icono de la pantalla de inicio",
         iconKey = "play_circle"
+    ),
+    TIME_EXACT(
+        key = "TIME_EXACT",
+        label = "A una hora exacta del día",
+        description = "Se ejecuta automáticamente a la hora programada todos los días",
+        iconKey = "schedule"
+    ),
+    BATTERY_LEVEL(
+        key = "BATTERY_LEVEL",
+        label = "Nivel de batería personalizado",
+        description = "Se ejecuta automáticamente cuando la batería alcance un porcentaje específico",
+        iconKey = "battery_charging_full"
     ),
     POWER_CONNECTED(
         key = "POWER_CONNECTED",
         label = "Al conectar cargador",
-        description = "Se activa automáticamente al conectar el teléfono a la corriente",
+        description = "Se ejecuta en segundo plano cuando el teléfono comienza a cargar corriente",
         iconKey = "battery_charging_full"
     ),
     POWER_DISCONNECTED(
         key = "POWER_DISCONNECTED",
         label = "Al desconectar cargador",
-        description = "Se activa automáticamente al desenchufar el cargador",
+        description = "Se ejecuta en segundo plano cuando se desenchufa el teléfono",
         iconKey = "power_off"
     ),
     POWER_BOTH(
         key = "POWER_BOTH",
         label = "Al conectar o desconectar",
-        description = "Se activa en ambos cambios de estado de alimentación",
+        description = "Se activa ante cualquier cambio en el estado de alimentación",
         iconKey = "bolt"
     ),
     BATTERY_LOW(
         key = "BATTERY_LOW",
         label = "Batería baja (<15%)",
-        description = "Se activa automáticamente cuando la batería desciende del 15%",
+        description = "Se ejecuta automáticamente cuando la batería desciende al nivel crítico",
         iconKey = "battery_alert"
     ),
     BATTERY_OK(
         key = "BATTERY_OK",
-        label = "Batería restablecida",
-        description = "Se activa al salir del estado de batería baja",
+        label = "Batería restablecida (>20%)",
+        description = "Se ejecuta al recuperar un nivel de batería seguro",
         iconKey = "battery_saver"
     ),
     BATTERY_FULL(
         key = "BATTERY_FULL",
         label = "Batería cargada al 100%",
-        description = "Se activa automáticamente cuando la recarga llega al 100%",
+        description = "Se ejecuta cuando el dispositivo finaliza la recarga completa",
         iconKey = "battery_full"
     );
 
     companion object {
-        fun fromKey(key: String): ShortcutTrigger {
-            return entries.firstOrNull { it.key.equals(key, ignoreCase = true) } ?: NONE
+        fun fromKey(rawKey: String): ShortcutTrigger {
+            val baseKey = rawKey.substringBefore(":")
+            return entries.firstOrNull { it.key.equals(baseKey, ignoreCase = true) } ?: NONE
+        }
+
+        fun extractValue(rawKey: String, defaultValue: String): String {
+            return if (rawKey.contains(":")) {
+                rawKey.substringAfter(":")
+            } else {
+                defaultValue
+            }
         }
     }
 }
+

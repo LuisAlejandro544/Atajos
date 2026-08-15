@@ -1,11 +1,13 @@
 package com.example.ui.viewmodel
 
+import android.content.Context
 import com.example.data.model.ActionJsonHelper
 import com.example.data.model.ActionType
 import com.example.data.model.ShortcutAction
 import com.example.data.model.ShortcutEntity
 import com.example.data.repository.ShortcutRepository
 import com.example.engine.ActionExecutor
+import com.example.engine.triggers.TimeSchedulerHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +18,7 @@ import kotlinx.coroutines.launch
  * Gestor modular que encapsula el estado y las operaciones del editor de atajos.
  */
 class ShortcutEditorManager(
+    private val context: Context,
     private val repository: ShortcutRepository,
     private val actionExecutor: ActionExecutor,
     private val coroutineScope: CoroutineScope
@@ -146,7 +149,16 @@ class ShortcutEditorManager(
             createdAt = System.currentTimeMillis()
         )
         coroutineScope.launch {
-            repository.saveShortcut(shortcut)
+            val savedId = repository.saveShortcut(shortcut)
+            val finalShortcut = shortcut.copy(id = savedId)
+
+            // Sincronizar alarmas si es disparador de hora exacta
+            if (finalShortcut.trigger.startsWith("TIME_EXACT:")) {
+                TimeSchedulerHelper.scheduleShortcutAlarm(context, finalShortcut)
+            } else if (state.id != 0L) {
+                TimeSchedulerHelper.cancelShortcutAlarm(context, state.id)
+            }
+
             closeEditor()
             onSaved()
         }

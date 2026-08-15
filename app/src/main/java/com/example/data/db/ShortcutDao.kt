@@ -14,6 +14,15 @@ interface ShortcutDao {
     @Query("SELECT * FROM shortcuts ORDER BY id ASC")
     fun getAllShortcuts(): Flow<List<ShortcutEntity>>
 
+    @Query("SELECT * FROM shortcuts ORDER BY id ASC")
+    suspend fun getAllShortcutsSync(): List<ShortcutEntity>
+
+    @Query("SELECT * FROM shortcuts WHERE trigger LIKE 'TIME_EXACT:%'")
+    suspend fun getTimeExactShortcuts(): List<ShortcutEntity>
+
+    @Query("SELECT * FROM shortcuts WHERE trigger LIKE 'BATTERY_LEVEL:%'")
+    suspend fun getBatteryLevelShortcuts(): List<ShortcutEntity>
+
     @Query("SELECT * FROM shortcuts WHERE category = :category ORDER BY id ASC")
     fun getShortcutsByCategory(category: String): Flow<List<ShortcutEntity>>
 

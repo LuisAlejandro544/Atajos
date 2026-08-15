@@ -249,13 +249,15 @@ fun ShortcutCard(
                                 )
                             }
 
-                            val triggerBadge = when (shortcut.trigger) {
-                                "POWER_CONNECTED" -> "⚡ Al conectar"
-                                "POWER_DISCONNECTED" -> "🔌 Al desconectar"
-                                "POWER_BOTH" -> "⚡🔌 Carga"
-                                "BATTERY_LOW" -> "🪫 Batería baja"
-                                "BATTERY_OK" -> "🔋 Batería OK"
-                                "BATTERY_FULL" -> "🔋 Batería 100%"
+                            val triggerBadge = when {
+                                shortcut.trigger.startsWith("TIME_EXACT:") -> "⏰ " + shortcut.trigger.substringAfter("TIME_EXACT:")
+                                shortcut.trigger.startsWith("BATTERY_LEVEL:") -> "🔋 " + shortcut.trigger.substringAfter("BATTERY_LEVEL:") + "%"
+                                shortcut.trigger == "POWER_CONNECTED" -> "⚡ Al conectar"
+                                shortcut.trigger == "POWER_DISCONNECTED" -> "🔌 Al desconectar"
+                                shortcut.trigger == "POWER_BOTH" -> "⚡🔌 Carga"
+                                shortcut.trigger == "BATTERY_LOW" -> "🪫 Batería baja"
+                                shortcut.trigger == "BATTERY_OK" -> "🔋 Batería OK"
+                                shortcut.trigger == "BATTERY_FULL" -> "🔋 Batería 100%"
                                 else -> null
                             }
 

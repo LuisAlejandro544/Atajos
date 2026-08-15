@@ -69,7 +69,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
         executionStatus = actionExecutor.status
 
         executionManager = ShortcutExecutionManager(repository, actionExecutor, viewModelScope)
-        editorManager = ShortcutEditorManager(repository, actionExecutor, viewModelScope)
+        editorManager = ShortcutEditorManager(application, repository, actionExecutor, viewModelScope)
         automationsManager = AutomationsManager(application, repository, viewModelScope) { shortcutId ->
             executionManager.runShortcutById(shortcutId)
         }

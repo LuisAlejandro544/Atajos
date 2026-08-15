@@ -1,8 +1,16 @@
 package com.example.ui.components.editor
 
+import android.app.TimePickerDialog
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,33 +19,53 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PowerOff
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ShortcutTrigger
+import java.util.Calendar
 
 /**
- * Componente modular para configurar el disparador automático nativo del atajo (ej. al conectar/desconectar el cargador).
+ * Componente modular para configurar el disparador automático nativo del atajo
+ * (disparadores de batería personalizada con selector de porcentaje exacto, hora programada, eventos de carga).
  */
 @Composable
 fun ShortcutTriggerSection(
@@ -45,12 +73,44 @@ fun ShortcutTriggerSection(
     onTriggerSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val triggers = listOf(
+    val context = LocalContext.current
+    val currentTrigger = ShortcutTrigger.fromKey(selectedTriggerKey)
+
+    // Estados para valor personalizado de batería y hora
+    val initialBatteryPct = if (currentTrigger == ShortcutTrigger.BATTERY_LEVEL) {
+        ShortcutTrigger.extractValue(selectedTriggerKey, "50").toIntOrNull() ?: 50
+    } else 50
+
+    val initialTime = if (currentTrigger == ShortcutTrigger.TIME_EXACT) {
+        ShortcutTrigger.extractValue(selectedTriggerKey, "08:00")
+    } else "08:00"
+
+    var customBatteryPct by remember(selectedTriggerKey) {
+        mutableFloatStateOf(initialBatteryPct.toFloat())
+    }
+
+    var customTimeStr by remember(selectedTriggerKey) {
+        mutableStateOf(initialTime)
+    }
+
+    val triggerOptions = listOf(
         TriggerOption(
             trigger = ShortcutTrigger.NONE,
             icon = Icons.Default.TouchApp,
             title = "Solo Manual",
             subtitle = "Se ejecuta al tocarlo en la app o desde el icono de la pantalla de inicio."
+        ),
+        TriggerOption(
+            trigger = ShortcutTrigger.TIME_EXACT,
+            icon = Icons.Default.Schedule,
+            title = "A una hora exacta del día",
+            subtitle = "Se ejecuta automáticamente a la hora que elijas todos los días."
+        ),
+        TriggerOption(
+            trigger = ShortcutTrigger.BATTERY_LEVEL,
+            icon = Icons.Default.BatteryChargingFull,
+            title = "Nivel de batería personalizado",
+            subtitle = "Elige el porcentaje exacto al que quieres que inicie el atajo."
         ),
         TriggerOption(
             trigger = ShortcutTrigger.POWER_CONNECTED,
@@ -103,7 +163,7 @@ fun ShortcutTriggerSection(
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "Ejecuta este atajo automáticamente sin necesidad de abrir la aplicación.",
+                text = "Ejecuta este atajo automáticamente según eventos del sistema, hora u porcentaje de batería.",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -112,13 +172,25 @@ fun ShortcutTriggerSection(
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            triggers.forEach { option ->
-                val isSelected = selectedTriggerKey.equals(option.trigger.key, ignoreCase = true)
+            triggerOptions.forEach { option ->
+                val isSelected = currentTrigger == option.trigger
 
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onTriggerSelected(option.trigger.key) }
+                        .clickable {
+                            when (option.trigger) {
+                                ShortcutTrigger.BATTERY_LEVEL -> {
+                                    onTriggerSelected("BATTERY_LEVEL:${customBatteryPct.toInt()}")
+                                }
+                                ShortcutTrigger.TIME_EXACT -> {
+                                    onTriggerSelected("TIME_EXACT:$customTimeStr")
+                                }
+                                else -> {
+                                    onTriggerSelected(option.trigger.key)
+                                }
+                            }
+                        }
                         .testTag("trigger_option_${option.trigger.key.lowercase()}"),
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(
@@ -134,40 +206,273 @@ fun ShortcutTriggerSection(
                         BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     }
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(horizontal = 14.dp, vertical = 10.dp)
                     ) {
-                        Icon(
-                            imageVector = option.icon,
-                            contentDescription = null,
-                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = option.title,
-                                fontSize = 14.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = option.icon,
+                                contentDescription = null,
+                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp)
                             )
-                            Text(
-                                text = option.subtitle,
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                lineHeight = 14.sp
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = option.title,
+                                    fontSize = 14.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = option.subtitle,
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    lineHeight = 14.sp
+                                )
+                            }
+
+                            RadioButton(
+                                selected = isSelected,
+                                onClick = {
+                                    when (option.trigger) {
+                                        ShortcutTrigger.BATTERY_LEVEL -> {
+                                            onTriggerSelected("BATTERY_LEVEL:${customBatteryPct.toInt()}")
+                                        }
+                                        ShortcutTrigger.TIME_EXACT -> {
+                                            onTriggerSelected("TIME_EXACT:$customTimeStr")
+                                        }
+                                        else -> {
+                                            onTriggerSelected(option.trigger.key)
+                                        }
+                                    }
+                                }
                             )
                         }
 
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = { onTriggerSelected(option.trigger.key) }
-                        )
+                        // ── Sub-panel: Selector interactivo de Nivel de Batería Exacto ──────────────────
+                        AnimatedVisibility(
+                            visible = isSelected && option.trigger == ShortcutTrigger.BATTERY_LEVEL,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                                    .padding(12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Porcentaje objetivo:",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = MaterialTheme.colorScheme.primaryContainer
+                                    ) {
+                                        Text(
+                                            text = "${customBatteryPct.toInt()}%",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                Slider(
+                                    value = customBatteryPct,
+                                    onValueChange = {
+                                        customBatteryPct = it
+                                        onTriggerSelected("BATTERY_LEVEL:${it.toInt()}")
+                                    },
+                                    valueRange = 5f..100f,
+                                    steps = 18, // Pasos de 5%
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = MaterialTheme.colorScheme.primary,
+                                        activeTrackColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .testTag("battery_level_slider")
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                // Chips rápidos para seleccionar porcentaje
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    listOf(15, 20, 50, 80, 90, 100).forEach { pct ->
+                                        val isCurrentPct = customBatteryPct.toInt() == pct
+                                        FilterChip(
+                                            selected = isCurrentPct,
+                                            onClick = {
+                                                customBatteryPct = pct.toFloat()
+                                                onTriggerSelected("BATTERY_LEVEL:$pct")
+                                            },
+                                            label = {
+                                                Text(
+                                                    text = "$pct%",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = if (isCurrentPct) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            },
+                                            modifier = Modifier.weight(1f),
+                                            colors = FilterChipDefaults.filterChipColors(
+                                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                                selectedLabelColor = Color.White
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // ── Sub-panel: Selector interactivo de Hora Exacta ──────────────────────────────
+                        AnimatedVisibility(
+                            visible = isSelected && option.trigger == ShortcutTrigger.TIME_EXACT,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                                    .padding(12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.primaryContainer),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.AccessTime,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.width(10.dp))
+
+                                        Column {
+                                            Text(
+                                                text = "Hora programada:",
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            Text(
+                                                text = customTimeStr,
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            val parts = customTimeStr.split(":")
+                                            val currentHour = parts.getOrNull(0)?.toIntOrNull() ?: 8
+                                            val currentMinute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+
+                                            val timePicker = TimePickerDialog(
+                                                context,
+                                                { _, selectedHour, selectedMinute ->
+                                                    val formatted = String.format("%02d:%02d", selectedHour, selectedMinute)
+                                                    customTimeStr = formatted
+                                                    onTriggerSelected("TIME_EXACT:$formatted")
+                                                },
+                                                currentHour,
+                                                currentMinute,
+                                                true // Formato 24 horas
+                                            )
+                                            timePicker.show()
+                                        },
+                                        shape = RoundedCornerShape(10.dp),
+                                        modifier = Modifier.testTag("open_time_picker_button")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Cambiar hora", fontSize = 12.sp)
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Text(
+                                    text = "Horas habituales:",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    listOf("07:00", "08:30", "14:00", "20:00", "22:30").forEach { time ->
+                                        val isCurrent = customTimeStr == time
+                                        FilterChip(
+                                            selected = isCurrent,
+                                            onClick = {
+                                                customTimeStr = time
+                                                onTriggerSelected("TIME_EXACT:$time")
+                                            },
+                                            label = {
+                                                Text(
+                                                    text = time,
+                                                    fontSize = 11.sp,
+                                                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            },
+                                            modifier = Modifier.weight(1f),
+                                            colors = FilterChipDefaults.filterChipColors(
+                                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                                selectedLabelColor = Color.White
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

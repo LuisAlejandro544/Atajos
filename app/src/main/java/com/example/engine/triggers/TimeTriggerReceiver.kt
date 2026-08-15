@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 /**
  * BroadcastReceiver activado por AlarmManager a la hora exacta programada.
- * Ejecuta el atajo configurado en la automatización y reprograma la alarma para el día siguiente.
+ * Ejecuta el atajo configurado (directo o mediante automatización) y reprograma la alarma para el día siguiente.
  */
 class TimeTriggerReceiver : BroadcastReceiver() {
 
@@ -32,9 +32,9 @@ class TimeTriggerReceiver : BroadcastReceiver() {
 
         val automationId = intent.getLongExtra(EXTRA_AUTOMATION_ID, -1L)
         val shortcutId = intent.getLongExtra(EXTRA_SHORTCUT_ID, -1L)
-        val automationTitle = intent.getStringExtra(EXTRA_AUTOMATION_TITLE) ?: "Automatización Horaria"
+        val automationTitle = intent.getStringExtra(EXTRA_AUTOMATION_TITLE) ?: "Horario programado"
 
-        if (automationId == -1L || shortcutId == -1L) return
+        if (shortcutId == -1L) return
 
         val pendingResult = goAsync()
         val appContext = context.applicationContext
@@ -43,47 +43,51 @@ class TimeTriggerReceiver : BroadcastReceiver() {
             try {
                 val db = AppDatabase.getInstance(appContext)
                 val repository = ShortcutRepository(db)
-                val automationsList = db.automationDao().getAllAutomationsSync()
-                val currentAutomation = automationsList.find { it.id == automationId }
+                val shortcut = repository.getShortcutById(shortcutId)
 
-                if (currentAutomation != null && currentAutomation.isEnabled) {
-                    val shortcut = repository.getShortcutById(shortcutId)
-                    if (shortcut != null) {
-                        val actions = ActionJsonHelper.fromJson(shortcut.actionsJson)
-                        val executor = ActionExecutor(appContext)
+                if (shortcut != null) {
+                    val actions = ActionJsonHelper.fromJson(shortcut.actionsJson)
+                    val executor = ActionExecutor(appContext)
 
-                        executor.executeShortcut(
-                            shortcutId = shortcut.id,
-                            shortcutTitle = "${shortcut.title} (⏰ $automationTitle)",
-                            actions = actions
-                        ) { success, resultMessage, durationMs ->
-                            CoroutineScope(Dispatchers.IO).launch {
-                                if (success) {
-                                    repository.recordExecution(shortcut.id)
-                                }
-                                repository.logExecution(
-                                    ExecutionLogEntity(
-                                        shortcutId = shortcut.id,
-                                        shortcutTitle = shortcut.title,
-                                        iconKey = shortcut.iconKey,
-                                        colorHex = shortcut.colorHex,
-                                        timestamp = System.currentTimeMillis(),
-                                        status = if (success) "SUCCESS" else "FAILED",
-                                        actionCount = actions.size,
-                                        durationMs = durationMs,
-                                        summary = "Disparado por horario: $automationTitle. $resultMessage"
-                                    )
-                                )
-                                executor.release()
+                    executor.executeShortcut(
+                        shortcutId = shortcut.id,
+                        shortcutTitle = "${shortcut.title} (⏰ $automationTitle)",
+                        actions = actions
+                    ) { success, resultMessage, durationMs ->
+                        CoroutineScope(Dispatchers.IO).launch {
+                            if (success) {
+                                repository.recordExecution(shortcut.id)
                             }
+                            repository.logExecution(
+                                ExecutionLogEntity(
+                                    shortcutId = shortcut.id,
+                                    shortcutTitle = shortcut.title,
+                                    iconKey = shortcut.iconKey,
+                                    colorHex = shortcut.colorHex,
+                                    timestamp = System.currentTimeMillis(),
+                                    status = if (success) "SUCCESS" else "FAILED",
+                                    actionCount = actions.size,
+                                    durationMs = durationMs,
+                                    summary = "Disparado por horario: $automationTitle. $resultMessage"
+                                )
+                            )
+                            executor.release()
                         }
+                    }
 
-                        // Reprogramar para el día siguiente automáticamente
-                        TimeSchedulerHelper.scheduleAutomationAlarm(appContext, currentAutomation)
+                    // Reprogramar para el día siguiente automáticamente
+                    if (automationId != -1L) {
+                        val automationsList = db.automationDao().getAllAutomationsSync()
+                        val currentAutomation = automationsList.find { it.id == automationId }
+                        if (currentAutomation != null && currentAutomation.isEnabled) {
+                            TimeSchedulerHelper.scheduleAutomationAlarm(appContext, currentAutomation)
+                        }
+                    } else if (shortcut.trigger.startsWith("TIME_EXACT:")) {
+                        TimeSchedulerHelper.scheduleShortcutAlarm(appContext, shortcut)
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error ejecutando automatización horaria $automationId", e)
+                Log.e(TAG, "Error ejecutando atajo por alarma horaria (shortcut: $shortcutId, auto: $automationId)", e)
             } finally {
                 pendingResult.finish()
             }

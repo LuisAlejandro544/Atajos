@@ -1,13 +1,24 @@
 package com.example.ui.components.automations
 
+import android.app.TimePickerDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -16,7 +27,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,6 +47,7 @@ fun NewAutomationDialog(
     onDismiss: () -> Unit,
     onSave: (AutomationEntity) -> Unit
 ) {
+    val context = LocalContext.current
     var title by remember { mutableStateOf("") }
     var selectedTrigger by remember { mutableStateOf(TriggerType.TIME_OF_DAY) }
     var triggerValue by remember { mutableStateOf("08:00") }
@@ -69,7 +83,7 @@ fun NewAutomationDialog(
                 )
 
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    TriggerType.values().forEach { trigger ->
+                    TriggerType.entries.forEach { trigger ->
                         FilterChip(
                             selected = selectedTrigger == trigger,
                             onClick = {
@@ -85,15 +99,51 @@ fun NewAutomationDialog(
                 }
 
                 if (selectedTrigger == TriggerType.TIME_OF_DAY) {
-                    OutlinedTextField(
-                        value = triggerValue,
-                        onValueChange = { triggerValue = it },
-                        label = { Text("Hora programada (HH:MM)") },
-                        placeholder = { Text("08:00") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.AccessTime,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Hora: $triggerValue",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = {
+                                    val parts = triggerValue.split(":")
+                                    val hour = parts.getOrNull(0)?.toIntOrNull() ?: 8
+                                    val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                                    TimePickerDialog(
+                                        context,
+                                        { _, h, m ->
+                                            triggerValue = String.format("%02d:%02d", h, m)
+                                        },
+                                        hour,
+                                        minute,
+                                        true
+                                    ).show()
+                                },
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Elegir hora", fontSize = 12.sp)
+                            }
+                        }
+                    }
                 }
 
                 Text(
