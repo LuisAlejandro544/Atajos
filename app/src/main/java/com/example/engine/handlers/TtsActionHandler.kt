@@ -54,9 +54,9 @@ class TtsActionHandler(private val context: Context) : ActionHandler, TextToSpee
             try {
                 val currentTts = tts
                 if (currentTts != null) {
-                    // Configurar atributos de audio para que suene claro incluso con pantalla bloqueada
+                    // Configurar atributos de audio para que suene claro incluso con pantalla bloqueada o en silencio
                     val audioAttributes = AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                        .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
                         .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                         .build()
                     currentTts.setAudioAttributes(audioAttributes)
@@ -133,7 +133,7 @@ class TtsActionHandler(private val context: Context) : ActionHandler, TextToSpee
                     })
 
                     val params = Bundle().apply {
-                        putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_NOTIFICATION)
+                        putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC)
                         putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
                     }
                     currentTts.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
