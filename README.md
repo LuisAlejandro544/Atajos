@@ -1,7 +1,7 @@
 # Flurix para Android ⚡
 
 > **Automatización rápida y potente de tareas en Android sin complicaciones.**
-> **Versión Actual:** `0.1.0-E` (Estable)
+> **Versión Actual:** `0.1.0-B` (Beta)
 
 ---
 
@@ -12,7 +12,7 @@ Flurix utiliza una resolución dinámica en `build.gradle.kts` que ajusta autom�
 | Canal | Sufijo de Versión | `applicationId` | Nombre en Pantalla (Launcher) | Propósito y Estabilidad |
 | :--- | :--- | :--- | :--- | :--- |
 | **Estable** | `-E` (ej. `0.1.0-E`) | `com.flurix.app` | **Flurix** | Versiones consolidadas y verificadas para uso diario y distribución principal en Uptodown. |
-| **Beta** | `-B` / `-BETA` (ej. `0.2.0-B`) | `com.flurix.app.beta` | **Flurix Beta** | Funciones destinadas a la versión estable en fase de prueba y validación. |
+| **Beta** | `-B` / `-BETA` (ej. `0.1.0-B`) | `com.flurix.app.beta` | **Flurix Beta** | Funciones destinadas a la versión estable en fase de prueba y validación. |
 | **Desarrollo** | `-DEV` / `-D` (ej. `0.2.0-DEV`) | `com.flurix.app.dev` | **Flurix Dev** | Entorno de desarrollo activo con funciones volátiles y cambios frecuentes. |
 | **Canary / Creador** | `-CANARY` / `-CREATOR` | `com.flurix.app.canary` | **Flurix Canary** | Versión de vanguardia para pruebas directas del creador e integración continua. |
 
@@ -65,23 +65,25 @@ Una aplicación nativa para Android construida con **Kotlin** y **Jetpack Compos
 
 ## 🤖 Automatización y Workflows de GitHub Actions
 
-El repositorio cuenta con 5 flujos de trabajo optimizados:
-1. **`Build Android Debug APK`** (`build-apk.yml`): Compila y firma automáticamente el APK listo para descargar e instalar en dispositivos o emuladores.
-2. **`Android Device Hardware Simulation & Test`** (`android-device-simulation.yml`): Simulación completa en emulador oficial de Android (KVM / API 34) bajo demanda (`workflow_dispatch`) con caché acelerado de AVD y Gradle; inyecta eventos de hardware reales (conexión de cargador, desenchufe, niveles de batería al 15%, 80%, 100%) e inspecciona logs de ejecución para detectar fallos o excepciones en segundo plano.
-3. **`Sync Code from Zip Archive`** (`sync-from-zip.yml`): Se activa automáticamente al subir cualquier archivo comprimido (`.zip`, `.7z`, `.tar.gz`, etc.) a la carpeta `zip/`, descomprime, sincroniza cambios preservando el control de versiones y **elimina automáticamente los archivos comprimidos** procesados para mantener el repositorio limpio sin basura.
-4. **`Repository Size & Metrics Report`** (`repo-size-report.yml`): Calcula métricas de almacenamiento, peso de `.git`, líneas de código y genera reportes detallados en `REPO_SIZE_REPORT.md` y en el Step Summary de GitHub Actions.
-5. **`Purge Actions History`** (`clean-workflow-runs.yml`): Flujo manual de seguridad y privacidad (`workflow_dispatch`) que elimina todas las ejecuciones previas de GitHub Actions en el repositorio, buscando tokens prioritarios en GitHub Secrets (`PAT_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`) y purgando logs para evitar filtraciones y mantener limpia la pestaña de Actions.
+El repositorio cuenta con 7 flujos de trabajo optimizados:
+1. **`Build Beta Release APK`** (`build-release-beta.yml`): Se activa estrictamente al publicar un **Pre-release** con tag Beta (ej. `v0.1.0-beta`, `v0.1.0-B`). Valida los secretos de firma en GitHub Secrets, compila el APK Release optimizado con ProGuard/R8 y lo adjunta automáticamente a los Assets del Pre-release.
+2. **`Update Beta Release Notes from Changelog`** (`update-release-notes-beta.yml`): Sincroniza automáticamente la descripción y notas del Pre-release en GitHub utilizando el contenido de `Chanelog-beta.md`.
+3. **`Build Android Debug APK`** (`build-apk.yml`): Compila y firma automáticamente el APK de depuración y lo envía directamente a tu Telegram mediante bot privado (sin consumir almacenamiento de artifacts en GitHub).
+4. **`Android Device Hardware Simulation & Test`** (`android-device-simulation.yml`): Simulación completa en emulador oficial de Android (KVM / API 34) bajo demanda (`workflow_dispatch`) con caché acelerado de AVD y Gradle; inyecta eventos de hardware reales (conexión de cargador, desenchufe, niveles de batería al 15%, 80%, 100%) e inspecciona logs de ejecución para detectar fallos o excepciones en segundo plano.
+5. **`Sync Code from Zip Archive`** (`sync-from-zip.yml`): Se activa automáticamente al subir cualquier archivo comprimido (`.zip`, `.7z`, `.tar.gz`, etc.) a la carpeta `zip/`, descomprime, sincroniza cambios preservando el control de versiones y **elimina automáticamente los archivos comprimidos** procesados para mantener el repositorio limpio sin basura.
+6. **`Repository Size & Metrics Report`** (`repo-size-report.yml`): Calcula métricas de almacenamiento, peso de `.git`, líneas de código y genera reportes detallados en `REPO_SIZE_REPORT.md` y en el Step Summary de GitHub Actions.
+7. **`Purge Actions History`** (`clean-workflow-runs.yml`): Flujo manual de seguridad y privacidad (`workflow_dispatch`) que elimina todas las ejecuciones previas de GitHub Actions en el repositorio, buscando tokens prioritarios en GitHub Secrets (`PAT_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`) y purgando logs para evitar filtraciones y mantener limpia la pestaña de Actions.
 
 ---
 
 ## 🚀 Compilación y Descarga del APK
 
-### Opción 1: Descarga Directa desde GitHub Actions (Recomendada)
-Cada commit y pull request ejecuta automáticamente un flujo de CI en GitHub Actions que compila y firma el APK:
-1. Ve a la pestaña **Actions** en tu repositorio de GitHub.
-2. Selecciona la última ejecución del workflow **Build Android Debug APK**.
-3. En la sección **Artifacts** al final de la página, descarga el archivo `Atajos-Debug-APK.zip`.
-4. Descomprime e instala el archivo `.apk` directamente en tu dispositivo Android o emulador.
+### Opción 1: Envío Directo a tu Telegram mediante GitHub Actions (Recomendada)
+Cada ejecución manual o automática del flujo de CI compila, firma y envía el APK directamente a tu chat privado o canal de Telegram:
+1. Configura tus secrets en GitHub (`TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`).
+2. Ve a la pestaña **Actions** en tu repositorio de GitHub.
+3. Ejecuta el workflow **Build Android Debug APK**.
+4. Recibirás el archivo `.apk` directamente en tu Telegram con el resumen de la compilación listo para instalar.
 
 ### Opción 2: Compilación Local con Gradle
 Requisitos previos: **JDK 17** o superior y Android SDK configurado.

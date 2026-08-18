@@ -65,13 +65,119 @@ jobs:
           fi
 
       - name: Verify Generated APK
+        id: find_apk
         run: |
           echo "Listing generated APK files:"
           find app/build/outputs/apk/ -name "*.apk" -ls
+          APK_FILE=$(find app/build/outputs/apk/debug/ -name "*.apk" | head -n 1)
+          if [ -z "$APK_FILE" ]; then
+            echo "::error::No APK file found in app/build/outputs/apk/debug/"
+            exit 1
+          fi
+          echo "apk_path=$APK_FILE" >> "$GITHUB_OUTPUT"
+          APK_SIZE_BYTES=$(stat -c%s "$APK_FILE")
+          APK_SIZE_MB=$(echo "scale=2; $APK_SIZE_BYTES / 1048576" | bc -l || awk "BEGIN {printf \"%.2f\", $APK_SIZE_BYTES/1048576}")
+          echo "apk_size=$APK_SIZE_MB MB" >> "$GITHUB_OUTPUT"
+          echo "Selected APK: $APK_FILE ($APK_SIZE_MB MB)"
 
-      - name: Upload Debug APK Artifact
-        uses: actions/upload-artifact@v4
+      - name: Set up Python for Telegram Upload
+        uses: actions/setup-python@v5
         with:
-          name: Atajos-Debug-APK
-          path: app/build/outputs/apk/debug/*.apk
-          retention-days: 14
+          python-version: '3.11'
+
+      - name: Install Telegram Dependencies
+        run: |
+          pip install --no-cache-dir requests telethon
+
+      - name: Send Debug APK to Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          APK_PATH: ${{ steps.find_apk.outputs.apk_path }}
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_MSG: ${{ github.event.head_commit.message || 'Compilación manual vía Workflow Dispatch' }}
+          REF_NAME: ${{ github.ref_name }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python - << 'EOF'
+          import os
+          import sys
+          import asyncio
+          import requests
+          from datetime import datetime
+
+          bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+          chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+          api_id = os.environ.get("TELEGRAM_API_ID", "").strip()
+          api_hash = os.environ.get("TELEGRAM_API_HASH", "").strip()
+          apk_path = os.environ.get("APK_PATH", "").strip()
+          commit_sha = os.environ.get("COMMIT_SHA", "")[:7]
+          commit_msg = os.environ.get("COMMIT_MSG", "N/A").split("\n")[0]
+          ref_name = os.environ.get("REF_NAME", "main")
+          repo_name = os.environ.get("REPO_NAME", "Flurix")
+
+          if not bot_token or not chat_id:
+              print("::error::Faltan los secrets TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID en el repositorio de GitHub.")
+              print("Por favor, agrega TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID en Settings -> Secrets and variables -> Actions.")
+              sys.exit(1)
+
+          if not apk_path or not os.path.exists(apk_path):
+              print(f"::error::El archivo APK no existe en la ruta: {apk_path}")
+              sys.exit(1)
+
+          file_size_bytes = os.path.getsize(apk_path)
+          file_size_mb = file_size_bytes / (1024 * 1024)
+          file_name = os.path.basename(apk_path)
+          now_utc = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+
+          caption = (
+              f"⚡ <b>Flurix — Compilación Debug</b>\n\n"
+              f"📦 <b>Archivo:</b> <code>{file_name}</code> ({file_size_mb:.2f} MB)\n"
+              f"🌿 <b>Rama:</b> <code>{ref_name}</code>\n"
+              f"📝 <b>Commit:</b> <code>{commit_sha}</code> - {commit_msg}\n"
+              f"⏱️ <b>Fecha:</b> {now_utc}\n\n"
+              f"🚀 <i>Descarga e instala directamente en tu dispositivo.</i>"
+          )
+
+          print(f"Subiendo {file_name} ({file_size_mb:.2f} MB) a Telegram...")
+
+          # Soporte de hasta 2GB mediante Telethon (MTProto) si API_ID y API_HASH están configurados
+          if api_id and api_hash:
+              print("Utilizando motor MTProto (Telethon) con soporte de hasta 2GB...")
+              from telethon import TelegramClient
+
+              async def upload_mtproto():
+                  async with TelegramClient('bot_session', int(api_id), api_hash) as client:
+                      await client.start(bot_token=bot_token)
+                      target_peer = int(chat_id) if chat_id.lstrip('-').isdigit() else chat_id
+                      await client.send_file(
+                          entity=target_peer,
+                          file=apk_path,
+                          caption=caption,
+                          parse_mode='html'
+                      )
+
+              asyncio.run(upload_mtproto())
+              print("✅ APK enviado exitosamente a Telegram vía MTProto (hasta 2GB soportado).")
+          else:
+              print("Utilizando Bot API estándar de Telegram...")
+              if file_size_mb > 50:
+                  print("::warning::El archivo excede 50MB y no se han configurado TELEGRAM_API_ID / TELEGRAM_API_HASH.")
+                  print("Para archivos de hasta 2GB, añade los secrets TELEGRAM_API_ID y TELEGRAM_API_HASH obtenidos en https://my.telegram.org.")
+              
+              url = f"https://api.telegram.org/bot{bot_token}/sendDocument"
+              with open(apk_path, "rb") as doc:
+                  files = {"document": (file_name, doc, "application/vnd.android.package-archive")}
+                  data = {
+                      "chat_id": chat_id,
+                      "caption": caption,
+                      "parse_mode": "HTML"
+                  }
+                  resp = requests.post(url, data=data, files=files, timeout=600)
+                  if resp.status_code != 200:
+                      print(f"::error::Error al subir a Telegram: HTTP {resp.status_code} - {resp.text}")
+                      sys.exit(1)
+                  print("✅ APK enviado exitosamente a Telegram vía Bot API.")
+          EOF

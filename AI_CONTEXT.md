@@ -7,7 +7,7 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
 ## 📌 Resumen del Proyecto
 
 - **Nombre**: Flurix para Android
-- **Versión Actual**: `0.1.0-E` (Canal Estable)
+- **Versión Actual**: `0.1.0-B` (Canal Beta)
 - **Esquema Dinámico de Prefijos y Canales**:
   - `-E` (Estable): `com.flurix.app` — Launcher: `Flurix`. Versiones consolidadas y verificadas para uso general.
   - `-DEV` / `-D` (Desarrollo): `com.flurix.app.dev` — Launcher: `Flurix Dev`. Funciones puras en desarrollo que pueden contener errores y características experimentales.

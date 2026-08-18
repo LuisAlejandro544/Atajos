@@ -1,0 +1,66 @@
+name: Update Beta Release Notes from Changelog
+
+on:
+  release:
+    types: [prereleased, published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag de la Pre-release Beta (ej. v0.1.0-beta o 0.1.0-B)'
+        required: false
+        default: 'v0.1.0-beta'
+
+concurrency:
+  group: update-release-notes-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  update-beta-notes:
+    name: Sync Chanelog-beta.md to GitHub Pre-release
+    # Se activa obligatoriamente si es un pre-release y el tag contiene el identificador de Beta ('-B', '-beta', 'beta', '-BETA')
+    if: >-
+      (github.event_name == 'release' &&
+       github.event.release.prerelease == true &&
+       (contains(github.event.release.tag_name, '-B') ||
+        contains(github.event.release.tag_name, '-beta') ||
+        contains(github.event.release.tag_name, 'beta') ||
+        contains(github.event.release.tag_name, 'Beta') ||
+        contains(github.event.release.tag_name, '-BETA'))) ||
+      (github.event_name == 'workflow_dispatch' &&
+       (contains(github.event.inputs.tag_name, '-B') ||
+        contains(github.event.inputs.tag_name, '-beta') ||
+        contains(github.event.inputs.tag_name, 'beta') ||
+        contains(github.event.inputs.tag_name, 'Beta') ||
+        contains(github.event.inputs.tag_name, '-BETA')))
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Changelog File Exists
+        id: verify_changelog
+        run: |
+          if [ -f "Chanelog-beta.md" ]; then
+            echo "changelog_file=Chanelog-beta.md" >> "$GITHUB_OUTPUT"
+            echo "✅ Archivo Chanelog-beta.md encontrado."
+          elif [ -f "Changelog-beta.md" ]; then
+            echo "changelog_file=Changelog-beta.md" >> "$GITHUB_OUTPUT"
+            echo "✅ Archivo Changelog-beta.md encontrado."
+          else
+            echo "::error::No se encontró el archivo Chanelog-beta.md en la raíz del repositorio."
+            exit 1
+          fi
+
+      - name: Update Pre-release Notes on GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.event.release.tag_name || github.event.inputs.tag_name || 'v0.1.0-beta' }}
+          CHANGELOG_PATH: ${{ steps.verify_changelog.outputs.changelog_file }}
+        run: |
+          echo "Actualizando notas de la Pre-release $TAG_NAME con el contenido de $CHANGELOG_PATH..."
+          gh release edit "$TAG_NAME" --notes-file "$CHANGELOG_PATH"
+          echo "✅ Notas de la Pre-release $TAG_NAME actualizadas correctamente."

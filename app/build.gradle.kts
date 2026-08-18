@@ -5,7 +5,7 @@ plugins {
   alias(libs.plugins.roborazzi)
 }
 
-val currentVersionName = "0.1.0-E"
+val currentVersionName = "0.1.0-B"
 
 val (appId, appDisplayName, appChannel) = when {
     currentVersionName.endsWith("-DEV", ignoreCase = true) || currentVersionName.endsWith("-D", ignoreCase = true) -> {
@@ -42,11 +42,16 @@ android {
 
   signingConfigs {
     create("release") {
-      val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
-      storeFile = file(keystorePath)
-      storePassword = System.getenv("STORE_PASSWORD")
-      keyAlias = "upload"
-      keyPassword = System.getenv("KEY_PASSWORD")
+      val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/release.keystore"
+      val storePwd = System.getenv("KEYSTORE_PASSWORD") ?: System.getenv("STORE_PASSWORD")
+      val keyAliasVal = System.getenv("KEY_ALIAS") ?: "upload"
+      val keyPwd = System.getenv("KEY_PASSWORD")
+      if (!storePwd.isNullOrEmpty() && !keyPwd.isNullOrEmpty() && file(keystorePath).exists()) {
+        storeFile = file(keystorePath)
+        storePassword = storePwd
+        keyAlias = keyAliasVal
+        keyPassword = keyPwd
+      }
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")
@@ -59,7 +64,8 @@ android {
   buildTypes {
     release {
       isCrunchPngs = false
-      isMinifyEnabled = false
+      isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
       signingConfig = signingConfigs.getByName("release")
     }

@@ -203,16 +203,18 @@ website/
 ## 🏷️ Esquema de Versiones y Canales de Publicación
 
 Flurix sigue la convención de sufijos con resolución dinámica de identificadores de paquete y nombres en launcher:
-- **`-E` (Estable)**: `com.flurix.app` (Launcher: `Flurix`). Canal de producción principal (versión actual: `0.1.0-E`).
+- **`-E` (Estable)**: `com.flurix.app` (Launcher: `Flurix`). Canal de producción principal.
 - **`-DEV` / `-D` (Desarrollo)**: `com.flurix.app.dev` (Launcher: `Flurix Dev`). Canal experimental activo.
-- **`-B` / `-BETA` (Beta)**: `com.flurix.app.beta` (Launcher: `Flurix Beta`). Canal de pruebas antes del paso a estable.
+- **`-B` / `-BETA` (Beta)**: `com.flurix.app.beta` (Launcher: `Flurix Beta`). Canal de pruebas antes del paso a estable (versión actual: `0.1.0-B`).
 - **`-CANARY` / `-CREATOR`**: `com.flurix.app.canary` (Launcher: `Flurix Canary`). Canal del autor para pruebas continuas.
 
 ---
 
 ## 🤖 Workflows de Integración Continua (`.github/workflows/`)
 
-- `build-apk.yml`: Compilación y empaquetado de APK Debug.
+- `build-release-beta.yml`: Compilación y empaquetado optimizado con ProGuard/R8 de APK Release Beta activado por Pre-release (tag `-B` / `-beta`) y subida a Release Assets.
+- `update-release-notes-beta.yml`: Sincronización automática del cuerpo de la Pre-release con el contenido de `Chanelog-beta.md`.
+- `build-apk.yml`: Compilación de APK Debug y envío directo a Telegram vía bot.
 - `android-device-simulation.yml`: Simulación en emulador oficial de Android (KVM / API 34), inyección de eventos de hardware (`adb shell cmd battery`) y auditoría de excepciones fatales en runtime con caché de AVD y Gradle.
 - `sync-from-zip.yml`: Sincronización automática de código desde archivos comprimidos y auto-limpieza.
 - `repo-size-report.yml`: Auditoría y reporte del peso del repositorio y métricas.

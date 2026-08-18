@@ -1,0 +1,152 @@
+name: Build Beta Release APK
+
+on:
+  release:
+    types: [prereleased, published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag de la Pre-release (ej. v0.1.0-beta o 0.1.0-B)'
+        required: false
+        default: 'v0.1.0-beta'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-beta-release:
+    name: Build & Publish Beta Release APK
+    # Se activa obligatoriamente si es un pre-release y el tag contiene el identificador de Beta ('-B', '-beta', 'beta', '-BETA')
+    if: >-
+      (github.event_name == 'release' &&
+       github.event.release.prerelease == true &&
+       (contains(github.event.release.tag_name, '-B') ||
+        contains(github.event.release.tag_name, '-beta') ||
+        contains(github.event.release.tag_name, 'beta') ||
+        contains(github.event.release.tag_name, 'Beta') ||
+        contains(github.event.release.tag_name, '-BETA'))) ||
+      (github.event_name == 'workflow_dispatch' &&
+       (contains(github.event.inputs.tag_name, '-B') ||
+        contains(github.event.inputs.tag_name, '-beta') ||
+        contains(github.event.inputs.tag_name, 'beta') ||
+        contains(github.event.inputs.tag_name, 'Beta') ||
+        contains(github.event.inputs.tag_name, '-BETA')))
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle with Cache
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+          cache-read-only: false
+
+      - name: Validate Release Signing Secrets
+        id: check_secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 || secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD || secrets.KEYSTORE_PASSWORD || secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS || secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD || secrets.KEY_PASSWORD }}
+        run: |
+          echo "Verificando disponibilidad de secretos de firma Release..."
+          MISSING_SECRETS=""
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS} RELEASE_KEYSTORE_BASE64"
+          fi
+          if [ -z "$KEYSTORE_PASSWORD" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS} RELEASE_KEYSTORE_PASSWORD"
+          fi
+          if [ -z "$KEY_ALIAS" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS} RELEASE_KEY_ALIAS"
+          fi
+          if [ -z "$KEY_PASSWORD" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS} RELEASE_KEY_PASSWORD"
+          fi
+
+          if [ -n "$MISSING_SECRETS" ]; then
+            echo "::error::No se puede compilar el APK Release porque faltan los siguientes secrets en GitHub:${MISSING_SECRETS}"
+            echo "Por favor, configúralos en Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+          echo "✅ Todos los secretos de firma Release están presentes."
+          echo "Decoding release keystore..."
+          echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+          ls -la release.keystore
+
+      - name: Grant execute permission for gradlew
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+          else
+            gradle wrapper
+            chmod +x ./gradlew
+          fi
+
+      - name: Compile Optimized Beta Release APK with R8 / ProGuard
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD || secrets.KEYSTORE_PASSWORD || secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS || secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD || secrets.KEY_PASSWORD }}
+        run: |
+          if [ -f "./gradlew" ]; then
+            ./gradlew assembleRelease --stacktrace --no-daemon
+          else
+            gradle assembleRelease --stacktrace --no-daemon
+          fi
+
+      - name: Verify and Prepare Release APK
+        id: prepare_apk
+        run: |
+          echo "Buscando APK Release compilado..."
+          find app/build/outputs/apk/ -name "*.apk" -ls
+          RELEASE_APK=$(find app/build/outputs/apk/release/ -name "*.apk" | head -n 1)
+          if [ -z "$RELEASE_APK" ]; then
+            echo "::error::No se encontró ningún APK en app/build/outputs/apk/release/"
+            exit 1
+          fi
+
+          TAG_NAME="${{ github.event.release.tag_name || github.event.inputs.tag_name || 'v0.1.0-beta' }}"
+          FINAL_NAME="Flurix-Beta-${TAG_NAME}.apk"
+          cp "$RELEASE_APK" "$FINAL_NAME"
+
+          APK_SIZE_BYTES=$(stat -c%s "$FINAL_NAME")
+          APK_SIZE_MB=$(echo "scale=2; $APK_SIZE_BYTES / 1048576" | bc -l || awk "BEGIN {printf \"%.2f\", $APK_SIZE_BYTES/1048576}")
+          
+          echo "apk_path=$FINAL_NAME" >> "$GITHUB_OUTPUT"
+          echo "apk_name=$FINAL_NAME" >> "$GITHUB_OUTPUT"
+          echo "apk_size=$APK_SIZE_MB MB" >> "$GITHUB_OUTPUT"
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "✅ APK Release listo: $FINAL_NAME ($APK_SIZE_MB MB)"
+
+      - name: Upload Release APK to Pre-release Assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.prepare_apk.outputs.tag_name }}
+          APK_PATH: ${{ steps.prepare_apk.outputs.apk_path }}
+        run: |
+          echo "Subiendo $APK_PATH a los assets del Pre-release $TAG_NAME..."
+          gh release upload "$TAG_NAME" "$APK_PATH" --clobber
+          echo "✅ APK Beta Release adjuntado exitosamente a los assets de la Pre-release $TAG_NAME."
+
+      - name: Cleanup Keystore
+        if: always()
+        run: |
+          rm -f release.keystore
+          echo "🧹 Keystore temporal eliminado con seguridad."

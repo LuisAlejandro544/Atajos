@@ -2,7 +2,7 @@
 
 Plan de evolución técnica y funcional para el desarrollo progresivo de la aplicación.
 
-**Versión Actual:** `0.1.0-E` (Estable)
+**Versión Actual:** `0.1.0-B` (Beta)
 
 ### 🏷️ Convención Dinámica de Sufijos y Package IDs
 - **`-E` (Estable)**: `com.flurix.app` (Launcher: `Flurix`). Versión de producción y uso diario, verificada y libre de errores críticos conocidos (ej. `0.1.0-E`).
