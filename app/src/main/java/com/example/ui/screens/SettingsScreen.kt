@@ -84,6 +84,7 @@ import com.example.engine.updates.AppReleaseInfo
 import com.example.engine.updates.UpdateCheckStatus
 import com.example.engine.updates.UpdateCheckerHelper
 import com.example.ui.components.BatteryOptimizationHelper
+import com.example.ui.components.updates.AllChannelsDialog
 import com.example.ui.components.updates.UpdateDialog
 import com.example.ui.theme.CyanAccent
 import com.example.ui.theme.IndigoPrimary
@@ -111,6 +112,9 @@ fun SettingsScreen(
     var selectedLegalDocument by remember { mutableStateOf<LegalDocumentType?>(null) }
     var isCheckingUpdates by remember { mutableStateOf(false) }
     var availableUpdate by remember { mutableStateOf<AppReleaseInfo?>(null) }
+    var showAllChannelsDialog by remember { mutableStateOf(false) }
+    var channelReleasesMap by remember { mutableStateOf<Map<String, AppReleaseInfo>>(emptyMap()) }
+    var isLoadingChannels by remember { mutableStateOf(false) }
     val isBatteryOptimized = remember { !BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context) }
 
     LazyColumn(
@@ -248,6 +252,42 @@ fun SettingsScreen(
                             Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("Releases Web", fontSize = 12.sp)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    TextButton(
+                        onClick = {
+                            if (!isLoadingChannels) {
+                                isLoadingChannels = true
+                                coroutineScope.launch {
+                                    val releasesMap = UpdateCheckerHelper.fetchChannelReleases(BuildConfig.VERSION_NAME)
+                                    channelReleasesMap = releasesMap
+                                    isLoadingChannels = false
+                                    showAllChannelsDialog = true
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("btn_explore_all_channels")
+                    ) {
+                        if (isLoadingChannels) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(14.dp),
+                                strokeWidth = 2.dp,
+                                color = IndigoPrimary
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Cargando canales...", fontSize = 12.sp)
+                        } else {
+                            Text(
+                                "⚡ Ver todos los canales (Estable / Beta / Dev)",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = IndigoPrimary
+                            )
                         }
                     }
                 }
@@ -437,6 +477,18 @@ fun SettingsScreen(
         UpdateDialog(
             releaseInfo = release,
             onDismiss = { availableUpdate = null }
+        )
+    }
+
+    // Diálogo explorador de todos los canales (Estable, Beta, Dev)
+    if (showAllChannelsDialog) {
+        AllChannelsDialog(
+            channelReleases = channelReleasesMap,
+            currentChannel = BuildConfig.APP_CHANNEL,
+            onSelectReleaseToDownload = { release ->
+                availableUpdate = release
+            },
+            onDismiss = { showAllChannelsDialog = false }
         )
     }
 }

@@ -1,4 +1,4 @@
-feat(updates): integrar sistema de actualización in-app y optimización de tamaño del APK
+feat(updates): integrar sistema de actualización multicanal in-app y web con descarga directa de APK
 
 - Habilita la exclusión de metadatos redundantes en el empaquetado del APK (`packaging.resources.excludes` para licencias duplicadas, `.kotlin_module` y `.version`).
 - Añade reglas R8 en `proguard-rules.pro` con `-assumenosideeffects` para remover llamadas de depuración `Log.v` y `Log.d` en compilaciones de producción.
@@ -7,4 +7,6 @@ feat(updates): integrar sistema de actualización in-app y optimización de tama
 - Añade dos modalidades de actualización en `UpdateDialog`:
   * Descarga e instalación in-app en segundo plano (`UpdateDownloadManager`) con barra de progreso, tamaño total y descargado en MB, velocidad de conexión en tiempo real (`MB/s` o `KB/s`) e invocación del instalador oficial mediante `FileProvider`.
   * Acceso directo a la página de Releases en GitHub desde el navegador.
+- Añade el explorador multicanal `AllChannelsDialog` en los Ajustes de la app para explorar y descargar versiones de Estable, Beta y Dev.
+- Actualiza la página web (`website/src/pages/index.astro`) con sección de descarga multicanal dinámica (Estable, Beta y Dev) alimentada automáticamente por la API de GitHub Releases con cálculo de peso en MB y enlace directo a los APKs.
 - Incorpora la tarjeta interactiva de actualizaciones en `SettingsScreen` y declara el permiso `REQUEST_INSTALL_PACKAGES` y `FileProvider` en `AndroidManifest.xml`.

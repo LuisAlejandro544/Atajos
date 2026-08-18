@@ -108,6 +108,69 @@ object UpdateCheckerHelper {
         }
     }
 
+    suspend fun fetchChannelReleases(
+        currentVersionName: String
+    ): Map<String, AppReleaseInfo> = withContext(Dispatchers.IO) {
+        val result = mutableMapOf<String, AppReleaseInfo>()
+        try {
+            var jsonString = fetchReleasesJson(GITHUB_RELEASES_URL)
+            if (jsonString.isNullOrBlank() || jsonString.trim().startsWith("{\"message\"")) {
+                jsonString = fetchReleasesJson(FALLBACK_RELEASES_URL)
+            }
+            if (jsonString.isNullOrBlank() || !jsonString.trim().startsWith("[")) {
+                return@withContext result
+            }
+
+            val releasesArray = JSONArray(jsonString)
+            for (i in 0 until releasesArray.length()) {
+                val releaseObj = releasesArray.getJSONObject(i)
+                val tagName = releaseObj.optString("tag_name", "").trim()
+                val name = releaseObj.optString("name", tagName)
+                val changelog = releaseObj.optString("body", "Sin notas de versión.")
+                val htmlUrl = releaseObj.optString("html_url", "https://github.com/LuisAlejandro544/Flurix/releases")
+                val isPrerelease = releaseObj.optBoolean("prerelease", false)
+                val publishedAt = releaseObj.optString("published_at", "")
+
+                var apkDownloadUrl = ""
+                var apkSize = 0L
+                val assetsArray = releaseObj.optJSONArray("assets")
+                if (assetsArray != null) {
+                    for (j in 0 until assetsArray.length()) {
+                        val asset = assetsArray.getJSONObject(j)
+                        val assetName = asset.optString("name", "")
+                        if (assetName.endsWith(".apk", ignoreCase = true)) {
+                            apkDownloadUrl = asset.optString("browser_download_url", "")
+                            apkSize = asset.optLong("size", 0L)
+                            break
+                        }
+                    }
+                }
+
+                val releaseChannel = detectReleaseChannel(tagName, name, isPrerelease)
+                val isNewer = isVersionNewer(remoteVersionTag = tagName, localVersionName = currentVersionName)
+
+                val releaseInfo = AppReleaseInfo(
+                    tagName = tagName,
+                    name = name,
+                    changelog = changelog,
+                    apkDownloadUrl = apkDownloadUrl,
+                    apkSizeInBytes = apkSize,
+                    htmlUrl = htmlUrl,
+                    isPrerelease = isPrerelease,
+                    publishedAt = publishedAt,
+                    channel = releaseChannel,
+                    isNewerThanCurrent = isNewer
+                )
+
+                // Conservar el más reciente por canal
+                if (!result.containsKey(releaseChannel)) {
+                    result[releaseChannel] = releaseInfo
+                }
+            }
+        } catch (_: Exception) {}
+        result
+    }
+
     private fun detectReleaseChannel(tagName: String, name: String, isPrerelease: Boolean): String {
         val combined = "$tagName $name".uppercase(Locale.ROOT)
         return when {
