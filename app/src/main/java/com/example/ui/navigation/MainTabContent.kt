@@ -17,6 +17,7 @@ import com.example.engine.ExecutionStatus
 import com.example.ui.screens.AutomationsScreen
 import com.example.ui.screens.GalleryScreen
 import com.example.ui.screens.HistoryScreen
+import com.example.ui.screens.SettingsScreen
 import com.example.ui.screens.ShortcutsHomeScreen
 
 /**
@@ -92,6 +93,11 @@ fun MainTabContent(
                     2 -> HistoryScreen(
                         logs = recentLogs,
                         onClearHistory = actions.history.onClearHistory
+                    )
+
+                    3 -> SettingsScreen(
+                        onOpenBatteryDialog = actions.settings.onOpenBatteryDialog,
+                        onRequestPermissions = actions.settings.onRequestPermissions
                     )
 
                     else -> ShortcutsHomeScreen(

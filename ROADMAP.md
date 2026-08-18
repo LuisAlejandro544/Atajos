@@ -85,13 +85,17 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
 ---
 
 ## 📍 Fase 4: Portabilidad, Presencia Web y Distribución
-- [x] **Sitio Web Oficial y Documentación Legal para Cloudflare Pages**:
-  - Arquitectura moderna con **Astro v4 + Tailwind CSS** lista para despliegue estático ultra-rápido en Cloudflare.
+- [x] **Sitio Web Oficial y Documentación Legal para Cloudflare**:
+  - Arquitectura moderna con **Astro v4 + Tailwind CSS** lista para despliegue estático ultra-rápido en Cloudflare (`https://atajos-pagina.luisalejandrososacamacho9.workers.dev/`).
   - Marco legal Source-Available bajo **PolyForm Noncommercial License 1.0.0** (`LICENSE`).
-  - Página de Términos y Condiciones de Uso (`/legal/terminos`) con cláusulas de no redistribución por terceros.
-  - Política de Privacidad con compromiso estricto Offline-First y Cero Telemetría (`/legal/privacidad`).
+  - Página de Términos y Condiciones de Uso (`/legal/terminos/`) con cláusulas de no redistribución por terceros.
+  - Política de Privacidad con compromiso estricto Offline-First y Cero Telemetría (`/legal/privacidad/`).
   - Landing page (`/`) con descarga directa de APK y presentación de características.
-  - Centro de Documentación técnica (`/docs`).
+  - Centro de Documentación técnica (`/docs/`).
+- [x] **Apartado de Ajustes y Visor Legal In-App (`SettingsScreen`)**:
+  - Nueva pestaña de Ajustes con información de versión, canal de distribución y arquitectura offline-first.
+  - Visor interactivo nativo de Términos y Condiciones y Política de Privacidad (`LegalViewerBottomSheet`) con texto estructurado y botones de acceso web.
+  - Acceso directo a configuración de optimización de batería y permisos del sistema.
 - [ ] **Importación y Exportación**:
   - Exportar atajos en formato JSON para respaldos locales.
   - Compartir atajos mediante enlaces o códigos QR.

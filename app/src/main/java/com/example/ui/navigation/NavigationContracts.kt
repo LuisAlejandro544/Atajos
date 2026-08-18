@@ -35,6 +35,11 @@ data class HistoryTabActions(
     val onClearHistory: () -> Unit
 )
 
+data class SettingsTabActions(
+    val onOpenBatteryDialog: () -> Unit,
+    val onRequestPermissions: () -> Unit
+)
+
 data class TopBarActions(
     val onRequestPermissions: () -> Unit,
     val onDismissPermissionBanner: () -> Unit,
@@ -50,5 +55,6 @@ data class MainTabActions(
     val automations: AutomationsTabActions,
     val gallery: GalleryTabActions,
     val history: HistoryTabActions,
+    val settings: SettingsTabActions,
     val topBar: TopBarActions
 )

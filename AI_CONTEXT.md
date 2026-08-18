@@ -96,8 +96,12 @@ Este documento proporciona contexto técnico estructurado y directo para modelos
    - `repo-size-report.yml`: Auditoría automática del peso del proyecto, desglose por directorios, extensiones y generación de `REPO_SIZE_REPORT.md`.
 
 7. **Portal Web y Documentación Legal (`/website`)**:
-   - Construido con **Astro v4 + Tailwind CSS** configurado para compilación estática (`output: 'static'`) en Cloudflare Pages (`https://atajos.pages.dev`).
-   - Contiene la Landing Page (`/`), Términos y Condiciones de Uso (`/legal/terminos`), Política de Privacidad (`/legal/privacidad`) y Guía de Documentación (`/docs`).
+   - Construido con **Astro v4 + Tailwind CSS** configurado para compilación estática (`output: 'static'`) en Cloudflare (`https://atajos-pagina.luisalejandrososacamacho9.workers.dev/`).
+   - Contiene la Landing Page (`/`), Términos y Condiciones de Uso (`/legal/terminos/`), Política de Privacidad (`/legal/privacidad/`) y Guía de Documentación (`/docs/`).
+
+8. **Pantalla de Ajustes y Visor Legal In-App (`SettingsScreen`)**:
+   - Sección interactiva en la interfaz principal (Pestaña Ajustes) que expone Términos y Condiciones y Política de Privacidad con visor nativo enriquecido (`LegalViewerBottomSheet`) y enlaces directos al portal web.
+   - Acceso a configuración de optimización de batería (Doze Mode), permisos del sistema y enlaces al repositorio en GitHub y documentación técnica.
 
 ---
 

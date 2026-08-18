@@ -26,6 +26,7 @@ import com.example.ui.navigation.HistoryTabActions
 import com.example.ui.navigation.HomeTabActions
 import com.example.ui.navigation.MainTabActions
 import com.example.ui.navigation.MainTabContent
+import com.example.ui.navigation.SettingsTabActions
 import com.example.ui.navigation.TopBarActions
 import com.example.engine.service.AutomationService
 import com.example.ui.screens.ShortcutEditorScreen
@@ -182,6 +183,10 @@ fun ShortcutsApp(
                 ),
                 history = HistoryTabActions(
                     onClearHistory = viewModel::clearLogs
+                ),
+                settings = SettingsTabActions(
+                    onOpenBatteryDialog = { showBatteryOptimizationDialog = true },
+                    onRequestPermissions = { permissionLauncher.launch(permissionList) }
                 ),
                 topBar = TopBarActions(
                     onRequestPermissions = { permissionLauncher.launch(permissionList) },

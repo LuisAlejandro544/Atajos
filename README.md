@@ -42,6 +42,7 @@ Una aplicación nativa para Android construida con **Kotlin** y **Jetpack Compos
 - 🎨 **Editor Visual de Atajos**: Añade, reordena y configura pasos de ejecución, asigna colores en degradado, nombres personalizados e iconos temáticos.
 - ⏰ **Automatizaciones Programadas con AlarmManager**: Configuración de disparadores por horario con alarmas exactas (`setExactAndAllowWhileIdle`), ejecución puntual en segundo plano incluso en modo reposo (Doze Mode) y reprogramación tras el reinicio del sistema (`BootReceiver`).
 - 🔌 **Disparadores por Estado de Hardware**: Activación automática al conectar/desconectar el cargador o ante niveles críticos de batería.
+- ⚙️ **Apartado de Ajustes y Visor Legal Integrado**: Nueva pestaña dedicada de Configuración para consultar los Términos y Condiciones de Uso y la Política de Privacidad directamente dentro de la app (mediante un visor interactivo enriquecido) o abrir sus enlaces web oficiales en Cloudflare Workers, además de gestionar la optimización de batería y permisos.
 - 📦 **Galería de Plantillas**: Atajos prediseñados listos para instalar con un toque (Lanzador de Juegos, Modo SOS, Saludo Matutino, Modo Enfoque, etc.).
 - 📜 **Historial de Ejecución**: Registro de tiempos de ejecución, duración de pasos y estado de éxito/error.
 - 💾 **Persistencia Local con Room**: Base de datos SQLite local rápida y segura; todos tus atajos y configuraciones se guardan localmente en el dispositivo.
@@ -142,13 +143,13 @@ chmod +x ./gradlew
 
 ---
 
-## 🌐 Sitio Web y Documentos Legales (Cloudflare Pages)
+## 🌐 Sitio Web y Documentos Legales (Cloudflare Workers)
 
-El proyecto incluye el sitio web oficial en la carpeta `/website`, construido con **Astro + Tailwind CSS** y optimizado para dispositivos móviles:
-- 🏠 **Landing Page (`/`):** Presentación del proyecto, sección de preguntas frecuentes (FAQ) y descarga directa del APK.
-- 📜 **Términos y Condiciones (`/legal/terminos`):** Marco legal para la ejecución de atajos locales.
-- 🛡️ **Política de Privacidad (`/legal/privacidad`):** Declaración de arquitectura 100% offline-first y sin rastreo.
-- 📚 **Documentación (`/docs`):** Guía completa de variables dinámicas, acciones soportadas y disparadores.
+El proyecto incluye el sitio web oficial en la carpeta `/website`, construido con **Astro + Tailwind CSS** y desplegado en Cloudflare:
+- 🏠 **Landing Page:** [https://atajos-pagina.luisalejandrososacamacho9.workers.dev/](https://atajos-pagina.luisalejandrososacamacho9.workers.dev/)
+- 📜 **Términos y Condiciones:** [https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/terminos/](https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/terminos/)
+- 🛡️ **Política de Privacidad:** [https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/privacidad/](https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/privacidad/)
+- 📚 **Documentación:** [https://atajos-pagina.luisalejandrososacamacho9.workers.dev/docs/](https://atajos-pagina.luisalejandrososacamacho9.workers.dev/docs/)
 - 🐙 **Repositorio GitHub:** [https://github.com/LuisAlejandro544/Atajos](https://github.com/LuisAlejandro544/Atajos)
 
 Para desarrollo local del sitio web:

@@ -13,12 +13,20 @@
 
 # Keep Moshi models and serialization adapters
 -keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod
+-dontwarn com.squareup.moshi.**
+-dontwarn javax.annotation.**
 -keep class com.squareup.moshi.** { *; }
 -keep class com.example.data.model.** { *; }
 -keep @com.squareup.moshi.JsonClass class * { *; }
 -keepclassmembers class * {
-    @com.squareup.moshi.Json(name = *) <fields>;
+    @com.squareup.moshi.Json *;
 }
+-keepclassmembers class * {
+    @com.squareup.moshi.JsonQualifier *;
+}
+-keep @com.squareup.moshi.JsonQualifier @interface * { *; }
+-keep class *JsonAdapter { *; }
+-keep class * extends com.squareup.moshi.JsonAdapter { *; }
 
 # Keep OkHttp & Retrofit
 -dontwarn okhttp3.**

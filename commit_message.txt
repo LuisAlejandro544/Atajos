@@ -1,6 +1,10 @@
-fix(r8): corregir sintaxis de anotaciones Moshi en proguard-rules.pro para la compilacion Release Beta
+feat(ui): implementar apartado de Ajustes y visor legal in-app para Términos y Privacidad
 
-- Corrige el error de sintaxis en la regla de ProGuard/R8 de Moshi (`@com.squareup.moshi.Json(name = *)`), el cual provocaba el fallo de compilación en la tarea `:app:minifyReleaseWithR8` (offset 731, line 20, column 29).
-- Reemplaza la regla por la directiva válida `-keepclassmembers class * { @com.squareup.moshi.Json *; }` y añade soporte para `@JsonQualifier`.
-- Añade `-dontwarn com.squareup.moshi.**` para evitar advertencias de dependencias durante la minificación y ofuscación R8.
-- Integra la pantalla de Configuración (SettingsScreen) con los enlaces actualizados a Términos y Condiciones y Política de Privacidad alojados en Cloudflare Workers.
+- Crea la nueva pantalla modular `SettingsScreen` accesible desde la barra de navegación inferior (pestaña Ajustes).
+- Implementa el visor nativo `LegalViewerBottomSheet` para consultar de forma interactiva y estructurada el texto completo de Términos y Condiciones (Licencia PolyForm 1.0.0) y la Política de Privacidad (filosofía Offline-First y cero telemetría).
+- Añade botones de acción para abrir los enlaces web oficiales desplegados en Cloudflare Workers:
+  * Términos y Condiciones: https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/terminos/
+  * Política de Privacidad: https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/privacidad/
+- Integra accesos directos para la configuración de optimización de batería (Doze Mode), permisos del sistema y enlaces al repositorio de GitHub y documentación del proyecto.
+- Actualiza `ShortcutsBottomBar`, `MainTabContent`, `NavigationContracts` y la documentación técnica (`AI_CONTEXT.md`, `README.md`, `ROADMAP.md`, `STRUCTURE.md`).
+- Corrige el error de sintaxis en `app/proguard-rules.pro` para R8 (`@com.squareup.moshi.Json(name = *)`) que impedía la compilación del APK Release Beta en la tarea `:app:minifyReleaseWithR8`, añadiendo reglas compatibles para `@Json`, `@JsonQualifier` y adaptadores Moshi.

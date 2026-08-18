@@ -158,7 +158,8 @@ app/src/main/java/com/example/
     │   ├── ShortcutEditorScreen.kt  # Editor visual modularizado
     │   ├── AutomationsScreen.kt     # Orquestador desacoplado de automatizaciones
     │   ├── GalleryScreen.kt         # Catálogo de plantillas prefabricadas
-    │   └── HistoryScreen.kt         # Visor de logs y tiempos de ejecución
+    │   ├── HistoryScreen.kt         # Visor de logs y tiempos de ejecución
+    │   └── SettingsScreen.kt        # Apartado de configuración, visor legal in-app y enlaces web
     │
     ├── theme/
     │   ├── Color.kt              # Paleta moderna y colores temáticos

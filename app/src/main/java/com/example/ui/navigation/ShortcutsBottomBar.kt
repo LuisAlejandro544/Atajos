@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoMode
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -69,6 +70,19 @@ fun ShortcutsBottomBar(
                 indicatorColor = IndigoPrimary.copy(alpha = 0.15f)
             ),
             modifier = Modifier.testTag("tab_history")
+        )
+
+        NavigationBarItem(
+            selected = selectedTab == 3,
+            onClick = { onTabSelected(3) },
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Ajustes") },
+            label = { Text("Ajustes") },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = IndigoPrimary,
+                selectedTextColor = IndigoPrimary,
+                indicatorColor = IndigoPrimary.copy(alpha = 0.15f)
+            ),
+            modifier = Modifier.testTag("tab_settings")
         )
     }
 }

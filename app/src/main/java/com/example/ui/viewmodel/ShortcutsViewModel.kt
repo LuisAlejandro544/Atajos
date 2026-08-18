@@ -43,7 +43,7 @@ class ShortcutsViewModel(application: Application) : AndroidViewModel(applicatio
     val executionStatus: StateFlow<ExecutionStatus>
 
     // Control de pestañas y filtros
-    private val _selectedTab = MutableStateFlow(0) // 0: Atajos, 1: Automatizaciones, 2: Galería, 3: Historial
+    private val _selectedTab = MutableStateFlow(0) // 0: Atajos, 1: Galería, 2: Historial, 3: Ajustes
     val selectedTab: StateFlow<Int> = _selectedTab.asStateFlow()
 
     private val _selectedCategory = MutableStateFlow("Todos")
