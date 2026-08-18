@@ -1,12 +1,6 @@
-ci: enviar APK Debug a Telegram e implementar workflow de Release Beta con ProGuard y assets de GitHub
+fix(r8): corregir sintaxis de anotaciones Moshi en proguard-rules.pro para la compilacion Release Beta
 
-- Actualiza el flujo de trabajo de CI Build Android Debug APK (.github/workflows/build-apk.yml) para enviar el archivo APK compilado directamente al chat o canal de Telegram mediante bot.
-- Elimina el paso actions/upload-artifact evitando que el APK se almacene en los artefactos de GitHub.
-- Soporta transferencias mediante Bot API estándar y arquitectura MTProto (Telethon) para envíos de archivos de hasta 2GB.
-- Incluye mensaje informativo con nombre de archivo, tamaño en MB, rama, commit y marca de tiempo UTC en Telegram.
-- Crea el flujo de trabajo Build Beta Release APK (.github/workflows/build-release-beta.yml) que se activa estrictamente ante Pre-releases con tags de versión Beta (-B / -beta / beta) y sube el APK firmado a sus Release Assets.
-- Añade el flujo de trabajo Update Beta Release Notes from Changelog (.github/workflows/update-release-notes-beta.yml) que sincroniza automáticamente el contenido de Chanelog-beta.md con la descripción de la Pre-release en GitHub.
-- Crea el archivo Chanelog-beta.md con el resumen detallado de características, acciones, disparadores de hardware y arquitectura offline-first de Flurix Beta v0.1.0-B.
-- Añade validación estricta de secretos de firma Release en GitHub Secrets (RELEASE_KEYSTORE_BASE64, RELEASE_KEYSTORE_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD) cancelando la compilación si faltan.
-- Habilita la minificación y reducción de recursos con ProGuard/R8 (isMinifyEnabled = true, isShrinkResources = true) y añade reglas de preservación para Room SQLite, Moshi, OkHttp y Coroutines en proguard-rules.pro.
-- Actualiza la versión del proyecto al canal Beta (0.1.0-B) asignando automáticamente el applicationId com.flurix.app.beta y la etiqueta Flurix Beta.
+- Corrige el error de sintaxis en la regla de ProGuard/R8 de Moshi (`@com.squareup.moshi.Json(name = *)`), el cual provocaba el fallo de compilación en la tarea `:app:minifyReleaseWithR8` (offset 731, line 20, column 29).
+- Reemplaza la regla por la directiva válida `-keepclassmembers class * { @com.squareup.moshi.Json *; }` y añade soporte para `@JsonQualifier`.
+- Añade `-dontwarn com.squareup.moshi.**` para evitar advertencias de dependencias durante la minificación y ofuscación R8.
+- Integra la pantalla de Configuración (SettingsScreen) con los enlaces actualizados a Términos y Condiciones y Política de Privacidad alojados en Cloudflare Workers.
