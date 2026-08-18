@@ -1,9 +1,7 @@
-chore: renombrar aplicación a Flurix y diseñar nuevo logo
+fix: solucionar cierre inesperado en inicio y corregir icono adaptativo de Flurix
 
-- Actualiza el nombre oficial de la app a Flurix en strings.xml, metadata.json y settings.gradle.kts.
-- Actualiza la documentación técnica (README.md, ROADMAP.md, STRUCTURE.md, AI_CONTEXT.md, AGENTS.md) reflejando la nueva identidad libre de conflictos de marca.
-- Diseña y genera el nuevo icono/logo para Flurix con estética moderna de flujo y nodos superpuestos.
-- Configura el icono adaptativo en drawable/ic_launcher_foreground.xml e ic_launcher_background.xml.
-- Exporta y guarda el logo en formato WebP (/flurix_logo.webp y en res/drawable/flurix_logo.webp) listo para descarga y previsualización.
-- Establece la versión inicial de la aplicación en 0.1.0-E en app/build.gradle.kts.
-- Define el esquema oficial de prefijos de estabilidad en la documentación: -E (Estable), -DEV (Desarrollo activo/inestable con funciones volátiles) y -B (Beta previa a estable).
+- Soluciona el fallo crítico de cierre en el arranque provocado por el paso de un recurso mipmap adaptativo a la notificación de Foreground Service en AutomationService, reemplazándolo por el drawable vectorial ic_qs_tile.
+- Corrige la visualización del icono de la aplicación en launchers que solicitan iconos redondeados creando mipmap-anydpi-v26/ic_launcher_round.xml y vinculando el logo original de Flurix (flurix_logo_1786836958239) en ic_launcher_foreground y en las variantes de densidad mipmap.
+- Implementa la resolución dinámica de identificadores de paquete (applicationId) y nombres en pantalla según el canal de versión en build.gradle.kts: com.flurix.app (Flurix) para Estable (-E), com.flurix.app.dev (Flurix Dev) para Desarrollo (-DEV/-D), com.flurix.app.beta (Flurix Beta) para Beta (-B/-BETA) y com.flurix.app.canary (Flurix Canary) para Canary/Creador (-CANARY/-CREATOR).
+- Añade el flujo de trabajo manual de GitHub Actions Purge Actions History (.github/workflows/clean-workflow-runs.yml) para eliminar de forma segura todo el historial de ejecuciones previas y logs con resolución prioritaria de tokens en GitHub Secrets (PAT_TOKEN, GH_TOKEN, GITHUB_TOKEN).
+- Optimiza el ciclo de vida y la inicialización segura del servicio en segundo plano protegiendo las llamadas contra restricciones de runtime en Android 14 y 15.

@@ -1,0 +1,56 @@
+name: "Purge Actions History"
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_purge:
+        description: 'Escribe "SI" para confirmar el borrado total del historial de Actions'
+        required: true
+        default: 'SI'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  purge-history:
+    name: "Purgar Historial de Ejecuciones"
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛡️ Validar Confirmación de Seguridad
+        run: |
+          if [ "${{ github.event.inputs.confirm_purge }}" != "SI" ] && [ "${{ github.event.inputs.confirm_purge }}" != "si" ] && [ "${{ github.event.inputs.confirm_purge }}" != "YES" ] && [ "${{ github.event.inputs.confirm_purge }}" != "yes" ]; then
+            echo "❌ Operación cancelada: No se confirmó la eliminación (debes escribir SI)."
+            exit 1
+          fi
+          echo "✅ Confirmación recibida. Procediendo con el purgado..."
+
+      - name: 🧹 Eliminar Todas las Ejecuciones de Workflows Anteriores
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GH_TOKEN || secrets.GITHUB_TOKEN || github.token }}
+          REPO: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        run: |
+          echo "🔍 Consultando historial de ejecuciones en: $REPO..."
+
+          # Obtener lista de IDs de todas las ejecuciones pasadas
+          RUN_IDS=$(gh api --paginate "repos/$REPO/actions/runs" -q '.workflow_runs[].id' 2>/dev/null || true)
+
+          if [ -z "$RUN_IDS" ]; then
+            echo "✨ No hay ejecuciones previas para eliminar. La pestaña de Actions ya está limpia."
+            exit 0
+          fi
+
+          TOTAL_DELETED=0
+          for ID in $RUN_IDS; do
+            # No intentar borrar la ejecución actual mientras se está ejecutando
+            if [ "$ID" = "$CURRENT_RUN_ID" ]; then
+              continue
+            fi
+
+            echo "🗑️ Eliminando registro de ejecución ID: $ID"
+            gh api -X DELETE "repos/$REPO/actions/runs/$ID" --silent || echo "⚠️ No se pudo eliminar la ejecución $ID (puede haber sido eliminada previamente)."
+            TOTAL_DELETED=$((TOTAL_DELETED + 1))
+          done
+
+          echo "🎉 Limpieza completada exitosamente. Total de ejecuciones eliminadas: $TOTAL_DELETED"

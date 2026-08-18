@@ -19,10 +19,11 @@ Este archivo contiene las directivas, roles y protocolos de razonamiento que cua
    - No reviertas cambios previamente aprobados por el usuario.
    - Mantén la persistencia con Room y el flujo reactivo con `StateFlow` y `Flow`.
 
-4. **Esquema de Canales y Prefijos de Versiones**:
-   - **`-E` (Estable)**: Versiones verificadas, listas para producción y uso diario sin inestabilidades conocidas (ej. `0.1.0-E`).
-   - **`-DEV` (Desarrollo)**: Funciones puras en desarrollo que pueden contener errores y ser inestables. Las funciones pueden aparecer y desaparecer.
-   - **`-B` (Beta / Testing)**: Funciones destinadas a llegar a la versión estable, pero que aún se encuentran en fase de prueba y pueden presentar inestabilidad.
+4. **Esquema de Canales, Prefijos y Package IDs**:
+   - **`-E` (Estable)**: `com.flurix.app` — Etiqueta en Launcher: `Flurix`. Versiones verificadas para producción y uso diario.
+   - **`-DEV` / `-D` (Desarrollo)**: `com.flurix.app.dev` — Etiqueta en Launcher: `Flurix Dev`. Funciones puras en desarrollo con cambios volátiles.
+   - **`-B` / `-BETA` (Beta / Testing)**: `com.flurix.app.beta` — Etiqueta en Launcher: `Flurix Beta`. Funciones pre-estable en validación.
+   - **`-CANARY` / `-CREATOR`**: `com.flurix.app.canary` — Etiqueta en Launcher: `Flurix Canary`. Compilaciones de vanguardia para el creador.
 
 ---
 

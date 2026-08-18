@@ -5,13 +5,18 @@
 
 ---
 
-## 🏷️ Canales y Esquema de Versiones
+## 🏷️ Canales y Esquema Dinámico de Versiones
 
-Flurix utiliza una nomenclatura de sufijos clara para distinguir la estabilidad de cada compilación:
+Flurix utiliza una resolución dinámica en `build.gradle.kts` que ajusta automáticamente el identificador de paquete (`applicationId`) y la etiqueta en la pantalla de inicio (`appName`) según el sufijo de versión:
 
-- **`-E` (Estable)**: Versiones consolidadas, listas para uso diario y distribución principal (ej. `0.1.0-E`).
-- **`-DEV` (Desarrollo)**: Funciones puras en desarrollo que pueden contener errores, inestabilidad, y donde las funcionalidades pueden aparecer y desaparecer.
-- **`-B` (Beta)**: Funciones que llegarán a la versión estable, pero que se encuentran en fase de prueba y pueden presentar inestabilidad puntual.
+| Canal | Sufijo de Versión | `applicationId` | Nombre en Pantalla (Launcher) | Propósito y Estabilidad |
+| :--- | :--- | :--- | :--- | :--- |
+| **Estable** | `-E` (ej. `0.1.0-E`) | `com.flurix.app` | **Flurix** | Versiones consolidadas y verificadas para uso diario y distribución principal en Uptodown. |
+| **Beta** | `-B` / `-BETA` (ej. `0.2.0-B`) | `com.flurix.app.beta` | **Flurix Beta** | Funciones destinadas a la versión estable en fase de prueba y validación. |
+| **Desarrollo** | `-DEV` / `-D` (ej. `0.2.0-DEV`) | `com.flurix.app.dev` | **Flurix Dev** | Entorno de desarrollo activo con funciones volátiles y cambios frecuentes. |
+| **Canary / Creador** | `-CANARY` / `-CREATOR` | `com.flurix.app.canary` | **Flurix Canary** | Versión de vanguardia para pruebas directas del creador e integración continua. |
+
+> 💡 **Instalación Coexistente:** Gracias a los diferentes `applicationId`, puedes tener instaladas simultáneamente la versión Estable, Beta y Dev en el mismo teléfono sin que se sobreescriban.
 
 Una aplicación nativa para Android construida con **Kotlin** y **Jetpack Compose (Material Design 3)** que permite crear, editar, organizar y ejecutar flujos de acciones automatizadas en el dispositivo. Diseñada para ser rápida, ligera y totalmente funcional sin depender de servicios externos obligatorios ni tiendas cerradas (optimizada para distribución directa como APK o en tiendas de terceros como Uptodown).
 
@@ -54,17 +59,18 @@ Una aplicación nativa para Android construida con **Kotlin** y **Jetpack Compos
 | **Base de Datos** | AndroidX Room (SQLite) con Kotlin Symbol Processing (KSP) |
 | **Concurrencia** | Kotlin Coroutines & Reactive Flow (`Dispatchers.IO`, `Dispatchers.Main`) |
 | **Build System** | Gradle Kotlin DSL (`build.gradle.kts`) |
-| **CI / CD & Auditoría** | GitHub Actions (Compilación de APK, Simulación de Hardware en Emulador Real, Limpieza de archivos zip, Informe de peso del repositorio) |
+| **CI / CD & Auditoría** | GitHub Actions (Compilación de APK, Simulación de Hardware en Emulador Real, Limpieza de archivos zip, Informe de peso del repositorio, Purgado de historial de Actions) |
 
 ---
 
 ## 🤖 Automatización y Workflows de GitHub Actions
 
-El repositorio cuenta con 4 flujos de trabajo optimizados:
+El repositorio cuenta con 5 flujos de trabajo optimizados:
 1. **`Build Android Debug APK`** (`build-apk.yml`): Compila y firma automáticamente el APK listo para descargar e instalar en dispositivos o emuladores.
 2. **`Android Device Hardware Simulation & Test`** (`android-device-simulation.yml`): Simulación completa en emulador oficial de Android (KVM / API 34) bajo demanda (`workflow_dispatch`) con caché acelerado de AVD y Gradle; inyecta eventos de hardware reales (conexión de cargador, desenchufe, niveles de batería al 15%, 80%, 100%) e inspecciona logs de ejecución para detectar fallos o excepciones en segundo plano.
 3. **`Sync Code from Zip Archive`** (`sync-from-zip.yml`): Se activa automáticamente al subir cualquier archivo comprimido (`.zip`, `.7z`, `.tar.gz`, etc.) a la carpeta `zip/`, descomprime, sincroniza cambios preservando el control de versiones y **elimina automáticamente los archivos comprimidos** procesados para mantener el repositorio limpio sin basura.
 4. **`Repository Size & Metrics Report`** (`repo-size-report.yml`): Calcula métricas de almacenamiento, peso de `.git`, líneas de código y genera reportes detallados en `REPO_SIZE_REPORT.md` y en el Step Summary de GitHub Actions.
+5. **`Purge Actions History`** (`clean-workflow-runs.yml`): Flujo manual de seguridad y privacidad (`workflow_dispatch`) que elimina todas las ejecuciones previas de GitHub Actions en el repositorio, buscando tokens prioritarios en GitHub Secrets (`PAT_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`) y purgando logs para evitar filtraciones y mantener limpia la pestaña de Actions.
 
 ---
 

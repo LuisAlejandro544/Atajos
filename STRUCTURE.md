@@ -202,10 +202,11 @@ website/
 
 ## 🏷️ Esquema de Versiones y Canales de Publicación
 
-Flurix sigue la convención de sufijos:
-- **`-E` (Estable)**: Canal de producción principal (versión actual: `0.1.0-E`).
-- **`-DEV` (Desarrollo)**: Canal experimental donde funciones pueden agregarse, modificarse o eliminarse.
-- **`-B` (Beta)**: Canal de pruebas antes del paso a estable.
+Flurix sigue la convención de sufijos con resolución dinámica de identificadores de paquete y nombres en launcher:
+- **`-E` (Estable)**: `com.flurix.app` (Launcher: `Flurix`). Canal de producción principal (versión actual: `0.1.0-E`).
+- **`-DEV` / `-D` (Desarrollo)**: `com.flurix.app.dev` (Launcher: `Flurix Dev`). Canal experimental activo.
+- **`-B` / `-BETA` (Beta)**: `com.flurix.app.beta` (Launcher: `Flurix Beta`). Canal de pruebas antes del paso a estable.
+- **`-CANARY` / `-CREATOR`**: `com.flurix.app.canary` (Launcher: `Flurix Canary`). Canal del autor para pruebas continuas.
 
 ---
 
@@ -215,6 +216,7 @@ Flurix sigue la convención de sufijos:
 - `android-device-simulation.yml`: Simulación en emulador oficial de Android (KVM / API 34), inyección de eventos de hardware (`adb shell cmd battery`) y auditoría de excepciones fatales en runtime con caché de AVD y Gradle.
 - `sync-from-zip.yml`: Sincronización automática de código desde archivos comprimidos y auto-limpieza.
 - `repo-size-report.yml`: Auditoría y reporte del peso del repositorio y métricas.
+- `clean-workflow-runs.yml`: Purgado manual y seguro (`workflow_dispatch`) de todo el historial de ejecuciones previas de GitHub Actions con compatibilidad para GitHub Secrets (`PAT_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`).
 
 ---
 

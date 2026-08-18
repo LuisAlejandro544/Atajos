@@ -5,16 +5,37 @@ plugins {
   alias(libs.plugins.roborazzi)
 }
 
+val currentVersionName = "0.1.0-E"
+
+val (appId, appDisplayName, appChannel) = when {
+    currentVersionName.endsWith("-DEV", ignoreCase = true) || currentVersionName.endsWith("-D", ignoreCase = true) -> {
+        Triple("com.flurix.app.dev", "Flurix Dev", "DEV")
+    }
+    currentVersionName.endsWith("-B", ignoreCase = true) || currentVersionName.endsWith("-BETA", ignoreCase = true) -> {
+        Triple("com.flurix.app.beta", "Flurix Beta", "BETA")
+    }
+    currentVersionName.endsWith("-CANARY", ignoreCase = true) || currentVersionName.endsWith("-CREATOR", ignoreCase = true) -> {
+        Triple("com.flurix.app.canary", "Flurix Canary", "CANARY")
+    }
+    else -> {
+        Triple("com.flurix.app", "Flurix", "STABLE")
+    }
+}
+
 android {
   namespace = "com.example"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.atajos.nxkq"
+    applicationId = appId
     minSdk = 24
     targetSdk = 36
     versionCode = 1
-    versionName = "0.1.0-E"
+    versionName = currentVersionName
+
+    manifestPlaceholders["appName"] = appDisplayName
+    buildConfigField("String", "APP_CHANNEL", "\"$appChannel\"")
+    buildConfigField("String", "APP_DISPLAY_NAME", "\"$appDisplayName\"")
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

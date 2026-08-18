@@ -71,9 +71,9 @@ class AutomationService : Service() {
         )
 
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Atajos activo")
+            .setContentTitle("Flurix activo")
             .setContentText("Monitoreando disparadores de batería y sistema")
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_qs_tile)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -81,22 +81,20 @@ class AutomationService : Service() {
             .build()
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    ServiceCompat.startForeground(
-                        this,
-                        NOTIFICATION_ID,
-                        notification,
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
-                    )
-                } else {
-                    ServiceCompat.startForeground(
-                        this,
-                        NOTIFICATION_ID,
-                        notification,
-                        0
-                    )
-                }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                ServiceCompat.startForeground(
+                    this,
+                    NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                )
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ServiceCompat.startForeground(
+                    this,
+                    NOTIFICATION_ID,
+                    notification,
+                    0
+                )
             } else {
                 startForeground(NOTIFICATION_ID, notification)
             }
