@@ -1,10 +1,10 @@
-feat(ui): implementar apartado de Ajustes y visor legal in-app para Términos y Privacidad
+feat(updates): integrar sistema de actualización in-app y optimización de tamaño del APK
 
-- Crea la nueva pantalla modular `SettingsScreen` accesible desde la barra de navegación inferior (pestaña Ajustes).
-- Implementa el visor nativo `LegalViewerBottomSheet` para consultar de forma interactiva y estructurada el texto completo de Términos y Condiciones (Licencia PolyForm 1.0.0) y la Política de Privacidad (filosofía Offline-First y cero telemetría).
-- Añade botones de acción para abrir los enlaces web oficiales desplegados en Cloudflare Workers:
-  * Términos y Condiciones: https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/terminos/
-  * Política de Privacidad: https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/privacidad/
-- Integra accesos directos para la configuración de optimización de batería (Doze Mode), permisos del sistema y enlaces al repositorio de GitHub y documentación del proyecto.
-- Actualiza `ShortcutsBottomBar`, `MainTabContent`, `NavigationContracts` y la documentación técnica (`AI_CONTEXT.md`, `README.md`, `ROADMAP.md`, `STRUCTURE.md`).
-- Corrige el error de sintaxis en `app/proguard-rules.pro` para R8 (`@com.squareup.moshi.Json(name = *)`) que impedía la compilación del APK Release Beta en la tarea `:app:minifyReleaseWithR8`, añadiendo reglas compatibles para `@Json`, `@JsonQualifier` y adaptadores Moshi.
+- Habilita la exclusión de metadatos redundantes en el empaquetado del APK (`packaging.resources.excludes` para licencias duplicadas, `.kotlin_module` y `.version`).
+- Añade reglas R8 en `proguard-rules.pro` con `-assumenosideeffects` para remover llamadas de depuración `Log.v` y `Log.d` en compilaciones de producción.
+- Mantiene activadas las directivas `isShrinkResources = true` e `isMinifyEnabled = true` para asegurar el menor peso posible de descarga.
+- Integra el comprobador automático de versiones con GitHub Releases (`UpdateCheckerHelper`), filtrando automáticamente por el canal instalado del usuario (Beta, Dev, Estable o Canary).
+- Añade dos modalidades de actualización en `UpdateDialog`:
+  * Descarga e instalación in-app en segundo plano (`UpdateDownloadManager`) con barra de progreso, tamaño total y descargado en MB, velocidad de conexión en tiempo real (`MB/s` o `KB/s`) e invocación del instalador oficial mediante `FileProvider`.
+  * Acceso directo a la página de Releases en GitHub desde el navegador.
+- Incorpora la tarjeta interactiva de actualizaciones en `SettingsScreen` y declara el permiso `REQUEST_INSTALL_PACKAGES` y `FileProvider` en `AndroidManifest.xml`.

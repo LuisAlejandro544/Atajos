@@ -81,6 +81,10 @@ app/src/main/java/com/example/
 │   ├── AppScannerHelper.kt       # Escaneo en segundo plano (Dispatchers.IO) de apps y juegos
 │   ├── AppShortcutsHelper.kt     # Gestor de accesos directos dinámicos en el icono del launcher
 │   ├── VariableResolverHelper.kt # Motor de interpolación de variables del sistema en tiempo real
+│   ├── updates/                  # Sistema de comprobación y descarga de actualizaciones
+│   │   ├── UpdateModels.kt       # Modelos tipados de releases y estados reactivos de descarga
+│   │   ├── UpdateCheckerHelper.kt# Consultor de GitHub Releases API con filtrado por canal
+│   │   └── UpdateDownloadManager.kt# Gestor de descarga in-app, cálculo de velocidad y FileProvider
 │   ├── service/                  # Servicios en segundo plano
 │   │   └── AutomationService.kt  # Foreground Service persistente para monitorización de hardware
 │   ├── tiles/                    # Servicios de Mosaico en el panel de Ajustes Rápidos (Quick Settings)
@@ -127,6 +131,9 @@ app/src/main/java/com/example/
     │   ├── automations/          # Submódulos desacoplados del sistema de automatizaciones
     │   │   ├── AutomationCard.kt       # Tarjeta individual con switches y acciones de prueba/borrado
     │   │   └── NewAutomationDialog.kt  # Modal de creación de automatización y configuración de triggers
+    │   │
+    │   ├── updates/              # Submódulos de actualización y descarga
+    │   │   └── UpdateDialog.kt         # Diálogo interactivo con descarga in-app, progreso y velocidad en vivo
     │   │
     │   ├── actioninputs/         # Submódulos de parametrización por tipo de acción
     │   │   ├── AppLauncherInputSection.kt # Selector y visualizador de juego/app configurado

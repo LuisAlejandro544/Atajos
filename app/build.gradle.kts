@@ -80,6 +80,16 @@ android {
     buildConfig = true
   }
   testOptions { unitTests { isIncludeAndroidResources = true } }
+  packaging {
+    resources {
+      excludes += "/META-INF/{AL2.0,LGPL2.1}"
+      excludes += "/META-INF/*.kotlin_module"
+      excludes += "/META-INF/*.version"
+      excludes += "/META-INF/DEPENDENCIES"
+      excludes += "/META-INF/LICENSE*"
+      excludes += "/META-INF/NOTICE*"
+    }
+  }
   dependenciesInfo {
     includeInApk = false
     includeInBundle = true

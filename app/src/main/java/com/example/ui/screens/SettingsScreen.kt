@@ -42,11 +42,14 @@ import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -62,6 +65,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,9 +79,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.BuildConfig
+import com.example.engine.updates.AppReleaseInfo
+import com.example.engine.updates.UpdateCheckStatus
+import com.example.engine.updates.UpdateCheckerHelper
 import com.example.ui.components.BatteryOptimizationHelper
+import com.example.ui.components.updates.UpdateDialog
 import com.example.ui.theme.CyanAccent
 import com.example.ui.theme.IndigoPrimary
+import kotlinx.coroutines.launch
 
 private const val URL_TERMINOS = "https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/terminos/"
 private const val URL_PRIVACIDAD = "https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/privacidad/"
@@ -97,7 +107,10 @@ fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     var selectedLegalDocument by remember { mutableStateOf<LegalDocumentType?>(null) }
+    var isCheckingUpdates by remember { mutableStateOf(false) }
+    var availableUpdate by remember { mutableStateOf<AppReleaseInfo?>(null) }
     val isBatteryOptimized = remember { !BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context) }
 
     LazyColumn(
@@ -110,6 +123,135 @@ fun SettingsScreen(
         item {
             Spacer(modifier = Modifier.height(8.dp))
             SettingsHeaderCard()
+        }
+
+        // Sección Actualizaciones de la App
+        item {
+            SettingsSectionTitle(
+                title = "Actualizaciones de la App",
+                icon = Icons.Default.SystemUpdate
+            )
+        }
+
+        item {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("card_updates_settings")
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(IndigoPrimary.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.SystemUpdate,
+                                contentDescription = null,
+                                tint = IndigoPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Buscador de Actualizaciones",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Canal ${BuildConfig.APP_CHANNEL} • v${BuildConfig.VERSION_NAME}",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Consulta si existe un nuevo release en GitHub para tu canal de distribución (Beta, Dev o Estable) y descarga o instala el APK directamente.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 16.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                if (!isCheckingUpdates) {
+                                    isCheckingUpdates = true
+                                    coroutineScope.launch {
+                                        when (val status = UpdateCheckerHelper.checkForUpdates(
+                                            currentVersionName = BuildConfig.VERSION_NAME,
+                                            currentChannel = BuildConfig.APP_CHANNEL
+                                        )) {
+                                            is UpdateCheckStatus.UpdateAvailable -> {
+                                                isCheckingUpdates = false
+                                                availableUpdate = status.release
+                                            }
+                                            is UpdateCheckStatus.UpToDate -> {
+                                                isCheckingUpdates = false
+                                                Toast.makeText(context, "¡Estás en la última versión de Flurix (v${BuildConfig.VERSION_NAME})!", Toast.LENGTH_SHORT).show()
+                                            }
+                                            is UpdateCheckStatus.Error -> {
+                                                isCheckingUpdates = false
+                                                Toast.makeText(context, status.message, Toast.LENGTH_LONG).show()
+                                            }
+                                            else -> {
+                                                isCheckingUpdates = false
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            enabled = !isCheckingUpdates,
+                            colors = ButtonDefaults.buttonColors(containerColor = IndigoPrimary),
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag("btn_check_updates")
+                        ) {
+                            if (isCheckingUpdates) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Buscando...", fontSize = 12.sp)
+                            } else {
+                                Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Buscar ahora", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
+                        OutlinedButton(
+                            onClick = { openBrowserUrl(context, "https://github.com/LuisAlejandro544/Flurix/releases") },
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag("btn_open_all_releases")
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Releases Web", fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
         }
 
         // Sección Legal y Transparencia
@@ -287,6 +429,14 @@ fun SettingsScreen(
                 }
                 openBrowserUrl(context, url)
             }
+        )
+    }
+
+    // Diálogo interactivo de actualización de la app (In-App y Releases Web)
+    availableUpdate?.let { release ->
+        UpdateDialog(
+            releaseInfo = release,
+            onDismiss = { availableUpdate = null }
         )
     }
 }
