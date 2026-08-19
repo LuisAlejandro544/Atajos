@@ -44,13 +44,14 @@ class AutomationsManager(
 
     fun saveAutomation(automation: AutomationEntity) {
         coroutineScope.launch {
-            repository.saveAutomation(automation)
+            val savedId = repository.saveAutomation(automation)
+            val savedAutomation = automation.copy(id = savedId)
             closeAutomationDialog()
-            if (automation.triggerType == TriggerType.TIME_OF_DAY) {
-                if (automation.isEnabled) {
-                    TimeSchedulerHelper.scheduleAutomationAlarm(context, automation)
+            if (savedAutomation.triggerType == TriggerType.TIME_OF_DAY) {
+                if (savedAutomation.isEnabled) {
+                    TimeSchedulerHelper.scheduleAutomationAlarm(context, savedAutomation)
                 } else {
-                    TimeSchedulerHelper.cancelAutomationAlarm(context, automation.id)
+                    TimeSchedulerHelper.cancelAutomationAlarm(context, savedAutomation.id)
                 }
             }
         }

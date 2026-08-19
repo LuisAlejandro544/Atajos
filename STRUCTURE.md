@@ -92,7 +92,7 @@ app/src/main/java/com/example/
 │   ├── triggers/                 # Disparadores nativos de sistema en segundo plano
 │   │   ├── BootReceiver.kt         # Auto-arranque tras reinicio del sistema (BOOT_COMPLETED)
 │   │   ├── PowerTriggerReceiver.kt # BroadcastReceiver para eventos de alimentación y batería
-│   │   ├── TimeSchedulerHelper.kt  # Asistente de programación con AlarmManager exacto
+│   │   ├── TimeSchedulerHelper.kt  # Asistente de programación con AlarmManager de máxima precisión (setAlarmClock)
 │   │   └── TimeTriggerReceiver.kt  # BroadcastReceiver activado por AlarmManager a la hora exacta
 │   └── handlers/                 # Manejadores de acciones modulares individuales
 │       ├── ActionHandler.kt              # Interfaz base con contrato de ejecución y release
@@ -117,6 +117,8 @@ app/src/main/java/com/example/
     │   ├── CustomizationPickers.kt # Selectores de paletas de color e iconos
     │   ├── ExecutionStatusBanner.kt# Banner dinámico de progreso en vivo
     │   ├── IconHelper.kt         # Mapeo tipado de iconos de Material Symbols
+    │   ├── BatteryOptimizationDialog.kt # Modal explicativo de optimización de batería
+    │   ├── OverlayPermissionDialog.kt   # Modal explicativo de superposición (SYSTEM_ALERT_WINDOW)
     │   ├── PermissionBanner.kt   # Banner informativo para activación de permisos en tiempo de ejecución
     │   ├── ShortcutCard.kt       # Tarjeta de atajo en la pantalla principal
     │   ├── VariablePickerChips.kt# Selector horizontal para autocompletar variables dinámicas
@@ -220,6 +222,7 @@ Flurix sigue la convención de sufijos con resolución dinámica de identificado
 
 ## 🤖 Workflows de Integración Continua (`.github/workflows/`)
 
+- `foundation.yml`: Validación de estándares de arquitectura, pruebas unitarias locales (`testDebugUnitTest`), verificación de compilación y control de calidad Foundation para `LuisAlejandro544/Flurix`.
 - `build-release-beta.yml`: Compilación y empaquetado optimizado con ProGuard/R8 de APK Release Beta activado por Pre-release (tag `-B` / `-beta`) y subida a Release Assets.
 - `update-release-notes-beta.yml`: Sincronización automática del cuerpo de la Pre-release con el contenido de `Chanelog-beta.md`.
 - `build-apk.yml`: Compilación de APK Debug y envío directo a Telegram vía bot.

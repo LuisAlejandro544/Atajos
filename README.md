@@ -40,9 +40,10 @@ Una aplicación nativa para Android construida con **Kotlin** y **Jetpack Compos
 - 📳 **Vibración Háptica Avanzada**: Soporte para patrones preconfigurados (Pulso suave, Golpe fuerte, Doble pulso, Triple pulso, Latido de corazón, Código Morse SOS y Duración en milisegundos a medida).
 - 🔒 **Gestión Dinámica de Permisos**: Detección y solicitud automática en el inicio de la app (`POST_NOTIFICATIONS`, `CAMERA`), con banner de recordatorio si faltan accesos clave.
 - 🎨 **Editor Visual de Atajos**: Añade, reordena y configura pasos de ejecución, asigna colores en degradado, nombres personalizados e iconos temáticos.
-- ⏰ **Automatizaciones Programadas con AlarmManager**: Configuración de disparadores por horario con alarmas exactas (`setExactAndAllowWhileIdle`), ejecución puntual en segundo plano incluso en modo reposo (Doze Mode) y reprogramación tras el reinicio del sistema (`BootReceiver`).
+- ⏰ **Automatizaciones Programadas de Máxima Precisión (`setAlarmClock`)**: Configuración de disparadores por horario con la API de mayor prioridad del sistema (`AlarmManager.setAlarmClock`), garantizando ejecución exacta incluso durante juegos activos, Doze Mode o modos de ahorro de energía, con reprogramación automática tras el reinicio (`BootReceiver`).
+- 🪟 **Permiso de Superposición / Segundo Plano (`SYSTEM_ALERT_WINDOW`)**: Solicitud guiada y transparente de "Mostrar sobre otras aplicaciones", permitiendo que los atajos y automatizaciones abran aplicaciones y juegos directamente en segundo plano sin bloqueos del sistema Android.
 - 🔌 **Disparadores por Estado de Hardware**: Activación automática al conectar/desconectar el cargador o ante niveles críticos de batería.
-- ⚙️ **Apartado de Ajustes y Visor Legal Integrado**: Nueva pestaña dedicada de Configuración para consultar los Términos y Condiciones de Uso y la Política de Privacidad directamente dentro de la app (mediante un visor interactivo enriquecido) o abrir sus enlaces web oficiales en Cloudflare Workers, además de gestionar la optimización de batería y permisos.
+- ⚙️ **Apartado de Ajustes y Visor Legal Integrado**: Pestaña dedicada de Configuración para consultar los Términos y Condiciones de Uso y la Política de Privacidad directamente dentro de la app (mediante un visor interactivo enriquecido) o abrir sus enlaces web oficiales en Cloudflare Workers, además de gestionar la optimización de batería, superposición y permisos.
 - 📦 **Galería de Plantillas**: Atajos prediseñados listos para instalar con un toque (Lanzador de Juegos, Modo SOS, Saludo Matutino, Modo Enfoque, etc.).
 - 📜 **Historial de Ejecución**: Registro de tiempos de ejecución, duración de pasos y estado de éxito/error.
 - 💾 **Persistencia Local con Room**: Base de datos SQLite local rápida y segura; todos tus atajos y configuraciones se guardan localmente en el dispositivo.
@@ -150,7 +151,7 @@ El proyecto incluye el sitio web oficial en la carpeta `/website`, construido co
 - 📜 **Términos y Condiciones:** [https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/terminos/](https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/terminos/)
 - 🛡️ **Política de Privacidad:** [https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/privacidad/](https://atajos-pagina.luisalejandrososacamacho9.workers.dev/legal/privacidad/)
 - 📚 **Documentación:** [https://atajos-pagina.luisalejandrososacamacho9.workers.dev/docs/](https://atajos-pagina.luisalejandrososacamacho9.workers.dev/docs/)
-- 🐙 **Repositorio GitHub:** [https://github.com/LuisAlejandro544/Atajos](https://github.com/LuisAlejandro544/Atajos)
+- 🐙 **Repositorio GitHub:** [https://github.com/LuisAlejandro544/Flurix](https://github.com/LuisAlejandro544/Flurix)
 
 Para desarrollo local del sitio web:
 ```bash
@@ -168,11 +169,13 @@ npm run build # Genera la carpeta /dist lista para Cloudflare Pages
 
 ## 📄 Licencia
 
-Este proyecto está protegido bajo la **PolyForm Noncommercial License 1.0.0** (modelo *Source-Available*).
+Este proyecto está actualmente bajo la licencia temporal **PolyForm Noncommercial License 1.0.0** (modelo *Source-Available*). 
 
+> 📢 **Aviso de Licenciamiento:** La licencia actual es **temporal**. Próximamente el proyecto migrará a una **licencia de código abierto oficial (Open Source)** para abrir la colaboración comunitaria completa.
+>
 > **`Required Notice:`** Copyright (c) 2026 Luis Alejandro Sosa Camacho. Texto oficial disponible en [https://polyformproject.org/licenses/noncommercial/1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
 
 - Permite a los usuarios estudiar, inspeccionar y compilar el código fuente en sus propios dispositivos para fines privados y no comerciales.
-- **Prohíbe a terceros la redistribución, republicación o comercialización de paquetes APK** en tiendas de aplicaciones o sitios web sin el consentimiento expreso y por escrito del autor.
-- La distribución oficial y publicación en tiendas de terceros es facultad exclusiva del titular del proyecto.
+- **Prohíbe temporalmente a terceros la redistribución no autorizada o comercialización de paquetes APK** en tiendas de aplicaciones o sitios web sin el consentimiento expreso del autor.
+- La distribución oficial y publicación en tiendas de terceros es gestionada por el autor del proyecto.
 

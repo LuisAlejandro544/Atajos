@@ -1,12 +1,9 @@
-feat(updates): integrar sistema de actualización multicanal in-app y web con descarga directa de APK
+feat(triggers): mejorar precisión de alarmas y permisos de segundo plano
 
-- Habilita la exclusión de metadatos redundantes en el empaquetado del APK (`packaging.resources.excludes` para licencias duplicadas, `.kotlin_module` y `.version`).
-- Añade reglas R8 en `proguard-rules.pro` con `-assumenosideeffects` para remover llamadas de depuración `Log.v` y `Log.d` en compilaciones de producción.
-- Mantiene activadas las directivas `isShrinkResources = true` e `isMinifyEnabled = true` para asegurar el menor peso posible de descarga.
-- Integra el comprobador automático de versiones con GitHub Releases (`UpdateCheckerHelper`), filtrando automáticamente por el canal instalado del usuario (Beta, Dev, Estable o Canary).
-- Añade dos modalidades de actualización en `UpdateDialog`:
-  * Descarga e instalación in-app en segundo plano (`UpdateDownloadManager`) con barra de progreso, tamaño total y descargado en MB, velocidad de conexión en tiempo real (`MB/s` o `KB/s`) e invocación del instalador oficial mediante `FileProvider`.
-  * Acceso directo a la página de Releases en GitHub desde el navegador.
-- Añade el explorador multicanal `AllChannelsDialog` en los Ajustes de la app para explorar y descargar versiones de Estable, Beta y Dev.
-- Actualiza la página web (`website/src/pages/index.astro`) con sección de descarga multicanal dinámica (Estable, Beta y Dev) alimentada automáticamente por la API de GitHub Releases con cálculo de peso en MB y enlace directo a los APKs.
-- Incorpora la tarjeta interactiva de actualizaciones en `SettingsScreen` y declara el permiso `REQUEST_INSTALL_PACKAGES` y `FileProvider` en `AndroidManifest.xml`.
+- Integra el permiso especial `SYSTEM_ALERT_WINDOW` ("Mostrar sobre otras aplicaciones") en `AndroidManifest.xml`, `OverlayPermissionHelper` y el diálogo modal informativo `OverlayPermissionDialog` para autorizar la apertura de juegos y aplicaciones en segundo plano desde atajos y automatizaciones.
+- Corrige en `AutomationsManager.kt` la asignación del `savedId` retornado por `repository.saveAutomation(automation)` para garantizar que las alarmas temporales se programen y cancelen con su ID real persistido en SQLite.
+- Actualiza `TimeSchedulerHelper.kt` implementando `AlarmManager.setAlarmClock` con `AlarmClockInfo` como nivel de máxima prioridad del sistema operativo, evitando retrasos inducidos por Doze Mode, optimización de batería o modos de juego.
+- Incorpora la tarjeta de gestión y verificación de superposición sobre otras apps en `SettingsScreen.kt`.
+- Elimina recursos drawables no utilizados (`flurix_logo.webp`, `flurix_app_icon_1787028976462.jpg`, `ic_shortcuts_app.jpg`) reduciendo el peso de recursos del APK.
+- Actualiza la documentación técnica del proyecto (`README.md`, `ROADMAP.md`, `STRUCTURE.md`, `AI_CONTEXT.md` y `Chanelog-beta.md`), indicando que la licencia actual es temporal y preparando la futura transición a una licencia de código abierto (Open Source).
+- Añade el workflow de GitHub Actions `foundation.yml` para validaciones de arquitectura, pruebas unitarias y compilación Foundation de calidad en `LuisAlejandro544/Flurix`.

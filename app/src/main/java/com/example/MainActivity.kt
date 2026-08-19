@@ -89,9 +89,10 @@ fun ShortcutsApp(
     val executionStatus by viewModel.executionStatus.collectAsStateWithLifecycle()
     val showAutomationDialog by viewModel.showAutomationDialog.collectAsStateWithLifecycle()
 
-    // Manejo y Solicitud Dinámica de Permisos y Optimización de Batería
+    // Manejo y Solicitud Dinámica de Permisos, Superposición y Optimización de Batería
     var showPermissionBanner by remember { mutableStateOf(false) }
     var showBatteryOptimizationDialog by remember { mutableStateOf(false) }
+    var showOverlayPermissionDialog by remember { mutableStateOf(false) }
 
     val permissionList = remember {
         val list = mutableListOf<String>()
@@ -118,12 +119,39 @@ fun ShortcutsApp(
             permissionLauncher.launch(missing.toTypedArray())
         }
 
-        // Mostrar el modal informativo de optimización de batería en el primer ingreso si está optimizado por defecto
-        if (!com.example.ui.components.BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context) &&
+        // Mostrar solicitud del permiso "Mostrar sobre otras aplicaciones" (SYSTEM_ALERT_WINDOW) si falta
+        if (!com.example.ui.components.OverlayPermissionHelper.hasOverlayPermission(context) &&
+            !com.example.ui.components.OverlayPermissionHelper.hasShownPrompt(context)
+        ) {
+            showOverlayPermissionDialog = true
+        } else if (!com.example.ui.components.BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context) &&
             !com.example.ui.components.BatteryOptimizationHelper.hasShownPrompt(context)
         ) {
+            // Mostrar el modal informativo de optimización de batería en el primer ingreso si está optimizado por defecto
             showBatteryOptimizationDialog = true
         }
+    }
+
+    if (showOverlayPermissionDialog) {
+        com.example.ui.components.OverlayPermissionDialog(
+            onDismiss = {
+                com.example.ui.components.OverlayPermissionHelper.markPromptAsShown(context)
+                showOverlayPermissionDialog = false
+                if (!com.example.ui.components.BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context) &&
+                    !com.example.ui.components.BatteryOptimizationHelper.hasShownPrompt(context)
+                ) {
+                    showBatteryOptimizationDialog = true
+                }
+            },
+            onConfirmed = {
+                showOverlayPermissionDialog = false
+                if (!com.example.ui.components.BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context) &&
+                    !com.example.ui.components.BatteryOptimizationHelper.hasShownPrompt(context)
+                ) {
+                    showBatteryOptimizationDialog = true
+                }
+            }
+        )
     }
 
     if (showBatteryOptimizationDialog) {

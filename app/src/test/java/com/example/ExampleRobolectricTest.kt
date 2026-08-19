@@ -27,7 +27,15 @@ class ExampleRobolectricTest {
   fun `read string from context`() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     val appName = context.getString(R.string.app_name)
-    assertEquals("Atajos", appName)
+    assertEquals("Flurix", appName)
+  }
+
+  @Test
+  fun `overlay permission helper initial state and mark prompt`() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    assertFalse(com.example.ui.components.OverlayPermissionHelper.hasShownPrompt(context))
+    com.example.ui.components.OverlayPermissionHelper.markPromptAsShown(context)
+    assertTrue(com.example.ui.components.OverlayPermissionHelper.hasShownPrompt(context))
   }
 
   @Test

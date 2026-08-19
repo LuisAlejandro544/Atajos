@@ -1,0 +1,94 @@
+name: Flurix Foundation & Quality CI
+
+on:
+  push:
+    branches: [ "main", "master", "develop" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  foundation_check:
+    name: Foundation & Code Quality Gate
+    runs-on: ubuntu-latest
+    env:
+      REPO_FULL_NAME: "LuisAlejandro544/Flurix"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+
+      - name: Prepare Debug Keystore
+        run: |
+          if [ -f "debug.keystore.base64" ]; then
+            echo "Decoding debug.keystore from base64..."
+            base64 -d debug.keystore.base64 > debug.keystore
+          elif [ ! -f "debug.keystore" ]; then
+            echo "Generating fresh debug.keystore for foundation checks..."
+            keytool -genkey -v \
+              -keystore debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Ensure gradlew execution permissions
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+          else
+            gradle wrapper
+            chmod +x ./gradlew
+          fi
+
+      - name: Verify Architecture & Open Source Foundation Standards
+        run: |
+          echo "=================================================="
+          echo "  Flurix Open Source Foundation Quality Check"
+          echo "  Repository: $REPO_FULL_NAME"
+          echo "=================================================="
+          echo "Validating core structure and files..."
+          test -f "README.md" || { echo "ERROR: README.md is missing"; exit 1; }
+          test -f "LICENSE" || { echo "ERROR: LICENSE is missing"; exit 1; }
+          test -f "STRUCTURE.md" || { echo "ERROR: STRUCTURE.md is missing"; exit 1; }
+          test -f "ROADMAP.md" || { echo "ERROR: ROADMAP.md is missing"; exit 1; }
+          test -f "app/build.gradle.kts" || { echo "ERROR: build.gradle.kts is missing"; exit 1; }
+          echo "All structural foundation files verified successfully."
+
+      - name: Run Unit Tests & Local Validation
+        run: |
+          ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Verify Gradle Compilation & Applet Build
+        run: |
+          ./gradlew :app:assembleDebug --no-daemon
+
+      - name: Foundation Summary
+        if: always()
+        run: |
+          echo "Foundation verification complete for $REPO_FULL_NAME."

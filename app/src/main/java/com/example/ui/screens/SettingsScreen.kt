@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Policy
@@ -333,6 +334,77 @@ fun SettingsScreen(
                 title = "Sistema y Segundo Plano",
                 icon = Icons.Default.Tune
             )
+        }
+
+        item {
+            val hasOverlayPermission = com.example.ui.components.OverlayPermissionHelper.hasOverlayPermission(context)
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("card_overlay_settings")
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (hasOverlayPermission) Color(0xFF10B981).copy(alpha = 0.15f)
+                                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Layers,
+                                contentDescription = null,
+                                tint = if (hasOverlayPermission) Color(0xFF10B981) else MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Mostrar sobre otras apps",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = if (hasOverlayPermission) "Permiso concedido (Apertura libre en juegos)" else "Sin permiso (Android puede bloquear aperturas)",
+                                fontSize = 12.sp,
+                                color = if (hasOverlayPermission) Color(0xFF10B981) else MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Permite a Flurix abrir juegos o aplicaciones de tus atajos programados mientras estás jugando o usando otra pantalla.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 16.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        OutlinedButton(
+                            onClick = { com.example.ui.components.OverlayPermissionHelper.requestOverlayPermission(context) },
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.testTag("btn_configure_overlay")
+                        ) {
+                            Text(if (hasOverlayPermission) "Revisar Ajustes" else "Conceder Permiso", fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
         }
 
         item {

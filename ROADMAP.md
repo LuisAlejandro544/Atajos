@@ -59,10 +59,14 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
   - Detección de recarga completada al 100% (`BATTERY_FULL`).
   - Ejecución desatendida mediante `PowerTriggerReceiver` con `goAsync()` y registro en historial.
   - Insignia visual en tarjetas (`ShortcutCard`) y plantillas de ahorro/carga en Galería.
-- [x] **Disparadores de Horario con AlarmManager Exacto**:
-  - Implementación de `TimeSchedulerHelper` para programar y cancelar alarmas exactas (`setExactAndAllowWhileIdle`).
+- [x] **Disparadores de Horario con AlarmManager de Máxima Precisión (`setAlarmClock`)**:
+  - Implementación de `TimeSchedulerHelper` para programar y cancelar alarmas con `setAlarmClock` (`AlarmClockInfo`), evitando retrasos durante juegos activos o Doze Mode.
+  - Corrección de asignación de ID (`savedId`) en `AutomationsManager` para registro correcto y unívoco en base de datos.
   - Ejecución puntual y reprogramación cíclica diaria mediante `TimeTriggerReceiver`.
   - Reprogramación automática tras reinicio del dispositivo en `BootReceiver`.
+- [x] **Permiso de Superposición / Segundo Plano (`SYSTEM_ALERT_WINDOW`)**:
+  - Integración de `OverlayPermissionHelper` y diálogo contextual `OverlayPermissionDialog` al ingresar a la app.
+  - Permite la apertura libre de juegos y aplicaciones de atajos en segundo plano mientras se usan otras apps.
 - [x] **Quick Settings Tile (Mosaico de Ajustes Rápidos)**:
   - Integración de `ShortcutTileService` con icono adaptativo `@drawable/ic_qs_tile`.
   - Ejecución instantánea con 1 toque desde la cortina de notificaciones de Android.
@@ -87,11 +91,15 @@ Plan de evolución técnica y funcional para el desarrollo progresivo de la apli
 ## 📍 Fase 4: Portabilidad, Presencia Web y Distribución
 - [x] **Sitio Web Oficial y Documentación Legal para Cloudflare**:
   - Arquitectura moderna con **Astro v4 + Tailwind CSS** lista para despliegue estático ultra-rápido en Cloudflare (`https://atajos-pagina.luisalejandrososacamacho9.workers.dev/`).
-  - Marco legal Source-Available bajo **PolyForm Noncommercial License 1.0.0** (`LICENSE`).
+  - Marco legal Source-Available temporal bajo **PolyForm Noncommercial License 1.0.0** (`LICENSE`) con transición programada a **licencia de código abierto oficial (Open Source)**.
   - Página de Términos y Condiciones de Uso (`/legal/terminos/`) con cláusulas de no redistribución por terceros.
   - Política de Privacidad con compromiso estricto Offline-First y Cero Telemetría (`/legal/privacidad/`).
   - Landing page (`/`) con descarga directa de APK y presentación de características.
   - Centro de Documentación técnica (`/docs/`).
+- [x] **Flurix Foundation & Quality CI Workflow (`foundation.yml`)**:
+  - Automatización de validación de estructura, verificación de directrices de código abierto y compilación limpia con Gradle.
+- [ ] **Transición Oficial a Licencia de Código Abierto (Open Source)**:
+  - Migración formal hacia una licencia Open Source comunitaria (ej. Apache 2.0 / MIT / GPLv3) para permitir contribuciones abiertas globales.
 - [x] **Apartado de Ajustes y Visor Legal In-App (`SettingsScreen`)**:
   - Nueva pestaña de Ajustes con información de versión, canal de distribución y arquitectura offline-first.
   - Visor interactivo nativo de Términos y Condiciones y Política de Privacidad (`LegalViewerBottomSheet`) con texto estructurado y botones de acceso web.

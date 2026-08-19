@@ -1,8 +1,9 @@
-# ⚡ Flurix Beta (Canal Beta — Versión 0.1.0-B)
+# ⚡ Flurix Beta (Canal Beta — Versión v0.1.0 / 0.1.0-B)
 
 > **Automatización de tareas en Android sin dependencias obligatorias ni telemetría.**
+> **Versión:** `v0.1.0` (`0.1.0-B`)
 
-Bienvenido a la primera versión **Beta Oficial** de **Flurix para Android**. Esta entrega incluye el motor completo de automatización de acciones, disparadores de hardware en segundo plano, soporte para ajustes rápidos y optimización de compilación con ProGuard/R8.
+Bienvenido a la versión **Beta Oficial v0.1.0** de **Flurix para Android**. Esta entrega incluye el motor completo de automatización de acciones, disparadores de hardware en segundo plano con máxima precisión (`setAlarmClock`), soporte para superposición sobre otras aplicaciones (`SYSTEM_ALERT_WINDOW`), ajustes rápidos y optimización de compilación con ProGuard/R8.
 
 ---
 
@@ -30,7 +31,8 @@ Bienvenido a la primera versión **Beta Oficial** de **Flurix para Android**. Es
   - Batería baja crítica (<15% `ACTION_BATTERY_LOW`).
   - Batería restablecida (`ACTION_BATTERY_OKAY`).
   - Recarga completada al 100% (`BATTERY_FULL`).
-- **Disparador Horario con AlarmManager:** Ejecución a hora exacta (`setExactAndAllowWhileIdle`) y reprogramación tras reinicio (`BootReceiver`).
+- **Disparador Horario con AlarmManager de Máxima Precisión:** Ejecución a hora exacta sin retrasos mediante `setAlarmClock` (`AlarmClockInfo`), inmune a Doze Mode y optimizaciones de juegos, con reprogramación automática tras reinicio (`BootReceiver`).
+- **Permiso de Superposición en Segundo Plano (`SYSTEM_ALERT_WINDOW`):** Diálogo guiado para conceder "Mostrar sobre otras aplicaciones", permitiendo que los atajos y automatizaciones abran juegos y apps en segundo plano sin bloqueos de Android.
 - **Mosaico de Ajustes Rápidos (`Quick Settings Tile`):** Ejecución con 1 toque desde la cortina de notificaciones de Android.
 
 ---
