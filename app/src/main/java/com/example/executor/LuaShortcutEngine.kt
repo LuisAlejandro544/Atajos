@@ -117,6 +117,12 @@ class LuaShortcutEngine(
     }
 
     @Suppress("unused")
+    fun onSpeak(text: String) {
+        val result = executor.executeSingleBlock("SPEAK", text)
+        logs.add(result.message)
+    }
+
+    @Suppress("unused")
     fun onGetHour(): Int {
         return java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
     }

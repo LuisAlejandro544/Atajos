@@ -29,5 +29,8 @@ Este archivo define las instrucciones y restricciones persistentes para cualquie
    - Si existe un archivo `commit_message.txt`, asegúrate de que su contenido esté en español y no lo modifiques salvo petición expresa del usuario.
 
 7. **Consistencia de la Arquitectura de Atajos**:
-   - El retardo entre bloques en secuencias multi-acción debe mantenerse siempre en **1003 ms** (`ShortcutExecutor.STEP_DELAY_MS`).
-   - El motor de Lua integrado debe mantenerse en el estándar original con sus bindings a las capacidades del hardware Android (`flashlight`, `copy`, `map`, `timer`, `message`, `share`, `get_hour`, etc.).
+   - El retardo por defecto entre bloques en secuencias multi-acción se mantiene siempre en **1003 ms** (`ShortcutExecutor.STEP_DELAY_MS`), con la posibilidad de configurarse o ajustarse específicamente mediante el bloque de acción de espera (`WAIT`).
+   - La lista de atajos mantiene un orden de visualización estable (no debe desplazarse hacia arriba al ser ejecutado un atajo).
+   - El motor de Lua integrado debe mantenerse en el estándar original con sus bindings a las capacidades del hardware Android (`flashlight`, `copy`, `map`, `timer`, `message`, `share`, `speak`, `get_hour`, etc.).
+   - La síntesis de voz (Texto a Voz / TTS) utiliza el motor configurado en el sistema operativo Android (`android.speech.tts.TextToSpeech`), disponible como bloque nativo (`SPEAK`) y como función nativa en Lua (`speak(texto)`).
+   - Las herramientas de depuración para desarrollo móvil (LeakCanary y Chucker) y la introspección con Lua Debug Library (`debug.traceback`) deben mantenerse activas y funcionales en la variante Debug, con sus respectivos scripts modulares de descarga en el flujo de GitHub Actions.

@@ -141,12 +141,18 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
             for (index in blocks.indices) {
                 val block = blocks[index]
                 val currentStep = index + 1
+                val isWaitBlock = block.actionType == ActionType.WAIT.name
 
                 val stepLabel = if (block.customLabel.isNotBlank()) block.customLabel
                 else ActionType.values().firstOrNull { it.name == block.actionType }?.label ?: block.actionType
 
+                val waitDurationMs = if (isWaitBlock) {
+                    block.parameter.trim().toLongOrNull()?.coerceAtLeast(0L) ?: ShortcutExecutor.STEP_DELAY_MS
+                } else 0L
+
                 _banner.value = BannerInfo(
-                    message = "Paso $currentStep de $totalBlocks: $stepLabel",
+                    message = if (isWaitBlock) "Paso $currentStep de $totalBlocks: Esperando ${waitDurationMs} ms..."
+                    else "Paso $currentStep de $totalBlocks: $stepLabel",
                     isSuccess = true,
                     shortcutTitle = shortcut.title,
                     currentBlockIndex = currentStep,
@@ -154,16 +160,26 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
                     isExecuting = true
                 )
 
-                // Ejecutar el bloque actual
-                val result = executor.executeSingleBlock(block.actionType, block.parameter)
-                executedResults.add(result.message)
-                if (!result.success) {
-                    allSuccess = false
+                if (isWaitBlock) {
+                    delay(waitDurationMs)
+                    executedResults.add("Espera de ${waitDurationMs} ms")
+                } else {
+                    // Ejecutar el bloque actual
+                    val result = executor.executeSingleBlock(block.actionType, block.parameter)
+                    executedResults.add(result.message)
+                    if (!result.success) {
+                        allSuccess = false
+                    }
                 }
 
-                // Pausa entre bloques de exactamente 1 segundo con 3 milisegundos (1003 ms)
+                // Pausa entre bloques:
+                // Si el bloque actual no es WAIT y el siguiente tampoco es WAIT,
+                // se aplica el retardo por defecto de 1 segundo con 3 milisegundos (1003 ms).
                 if (index < blocks.lastIndex) {
-                    delay(ShortcutExecutor.STEP_DELAY_MS)
+                    val nextBlock = blocks[index + 1]
+                    if (!isWaitBlock && nextBlock.actionType != ActionType.WAIT.name) {
+                        delay(ShortcutExecutor.STEP_DELAY_MS)
+                    }
                 }
             }
 

@@ -138,6 +138,17 @@ static int l_share(lua_State* L) {
     return 0;
 }
 
+// Lua: speak(text)
+static int l_speak(lua_State* L) {
+    const char* text = luaL_optstring(L, 1, "");
+    if (g_ctx && g_ctx->env) {
+        jstring jText = g_ctx->env->NewStringUTF(text);
+        callVoidMethod("onSpeak", "(Ljava/lang/String;)V", jText);
+        g_ctx->env->DeleteLocalRef(jText);
+    }
+    return 0;
+}
+
 // Lua: get_hour() -> int
 static int l_get_hour(lua_State* L) {
     jint hour = 0;
@@ -184,6 +195,19 @@ static int l_print(lua_State* L) {
     return 0;
 }
 
+// Handler de errores usando Lua Debug Library (debug.traceback)
+static int l_error_handler(lua_State* L) {
+    const char* msg = lua_tostring(L, 1);
+    if (msg) {
+        luaL_traceback(L, L, msg, 1);
+    } else if (!lua_isnoneornil(L, 1)) {
+        if (!luaL_callmeta(L, 1, "__tostring")) {
+            lua_pushliteral(L, "(error object is not a string)");
+        }
+    }
+    return 1;
+}
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_executor_LuaShortcutEngine_nativeExecuteScript(
     JNIEnv* env,
@@ -201,7 +225,7 @@ Java_com_example_executor_LuaShortcutEngine_nativeExecuteScript(
         return env->NewStringUTF("Error: Fallo al inicializar el estado de Lua 5.4.7");
     }
 
-    // Open standard Lua 5.4.7 libraries
+    // Open standard Lua 5.4.7 libraries (incluye ldebug.c y ldblib.c / debug library)
     luaL_openlibs(L);
 
     // Set execution context
@@ -220,6 +244,7 @@ Java_com_example_executor_LuaShortcutEngine_nativeExecuteScript(
     lua_register(L, "message", l_message);
     lua_register(L, "sound_settings", l_sound_settings);
     lua_register(L, "share", l_share);
+    lua_register(L, "speak", l_speak);
     lua_register(L, "get_hour", l_get_hour);
     lua_register(L, "print", l_print);
 
@@ -227,23 +252,37 @@ Java_com_example_executor_LuaShortcutEngine_nativeExecuteScript(
     lua_pushstring(L, LUA_RELEASE);
     lua_setglobal(L, "_LUA_VERSION");
 
-    int status = luaL_dostring(L, scriptChars);
+    // Empujar la función error_handler (usando Lua Debug Library para traceback)
+    lua_pushcfunction(L, l_error_handler);
+    int errHandlerIdx = lua_gettop(L);
+
+    // Cargar el script
+    int loadStatus = luaL_loadstring(L, scriptChars);
     env->ReleaseStringUTFChars(jScript, scriptChars);
 
     std::string resultStr;
-    if (status != LUA_OK) {
+    if (loadStatus != LUA_OK) {
         const char* err = lua_tostring(L, -1);
-        resultStr = std::string("Error en Lua 5.4.7: ") + (err ? err : "Error de sintaxis o ejecución");
-        lua_pop(L, 1);
+        resultStr = std::string("Error de sintaxis Lua 5.4.7: ") + (err ? err : "Error de sintaxis");
+        lua_pop(L, 2); // pop error y error handler
     } else {
-        std::string printed = ctx.output.str();
-        if (!printed.empty()) {
-            resultStr = printed;
-        } else if (lua_gettop(L) > 0 && lua_isstring(L, -1)) {
-            resultStr = lua_tostring(L, -1);
+        // Ejecutar protegido con traceback de Lua Debug Library
+        int execStatus = lua_pcall(L, 0, LUA_MULTRET, errHandlerIdx);
+        if (execStatus != LUA_OK) {
+            const char* err = lua_tostring(L, -1);
+            resultStr = std::string("Error Lua [Debug Traceback]:\n") + (err ? err : "Error de ejecución");
+            lua_pop(L, 1);
         } else {
-            resultStr = "Script Lua 5.4.7 ejecutado con éxito";
+            std::string printed = ctx.output.str();
+            if (!printed.empty()) {
+                resultStr = printed;
+            } else if (lua_gettop(L) > errHandlerIdx && lua_isstring(L, -1)) {
+                resultStr = lua_tostring(L, -1);
+            } else {
+                resultStr = "Script Lua 5.4.7 ejecutado con éxito";
+            }
         }
+        lua_remove(L, errHandlerIdx); // remover handler de error
     }
 
     lua_close(L);

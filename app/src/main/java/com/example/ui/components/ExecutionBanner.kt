@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -54,12 +56,23 @@ fun ExecutionBanner(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clip(RoundedCornerShape(26.dp))
+                    .border(
+                        width = 1.dp,
+                        brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                            listOf(
+                                Color.White.copy(alpha = 0.3f),
+                                Color.White.copy(alpha = 0.08f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(26.dp)
+                    )
                     .testTag("execution_banner")
                     .clickable { onDismiss() },
-                shape = RoundedCornerShape(24.dp),
-                color = Color(0xFF1E2433),
-                shadowElevation = 8.dp,
-                tonalElevation = 6.dp
+                shape = RoundedCornerShape(26.dp),
+                color = Color(0xFF181E29),
+                shadowElevation = 14.dp,
+                tonalElevation = 8.dp
             ) {
                 Row(
                     modifier = Modifier

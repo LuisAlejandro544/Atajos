@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ShortcutDao {
-    @Query("SELECT * FROM shortcuts ORDER BY isFavorite DESC, executionCount DESC, id ASC")
+    @Query("SELECT * FROM shortcuts ORDER BY isFavorite DESC, id ASC")
     fun getAllShortcuts(): Flow<List<ShortcutEntity>>
 
-    @Query("SELECT * FROM shortcuts WHERE isFavorite = 1 ORDER BY executionCount DESC, id ASC")
+    @Query("SELECT * FROM shortcuts WHERE isFavorite = 1 ORDER BY id ASC")
     fun getFavoriteShortcuts(): Flow<List<ShortcutEntity>>
 
     @Query("SELECT * FROM shortcuts WHERE category = :category ORDER BY isFavorite DESC, id ASC")

@@ -12,6 +12,8 @@ enum class ActionType(val label: String, val defaultParam: String, val paramLabe
     SEND_MESSAGE("Mensaje Rápido", "¡Hola! Te escribo en un momento.", "Mensaje a enviar"),
     SOUND_SETTINGS("Ajustes de Sonido", "", "Abre el panel de audio del sistema"),
     SHARE_TEXT("Compartir Texto", "¡Mira este atajo increíble!", "Texto a compartir"),
+    SPEAK("Texto a Voz", "Secuencia de atajos completada", "Texto que leerá la voz del sistema"),
+    WAIT("Esperar (Pausa)", "1003", "Tiempo de espera en milisegundos (ej: 1003 o 2500)"),
     LUA_SCRIPT("Script en Lua", "local hora = get_hour()\nif hora >= 20 then\n  flashlight()\n  return 'Hora nocturna: linterna'\nelse\n  copy('¡Hola desde Lua!')\n  return 'Hora diurna: texto copiado'\nend", "Código Lua a ejecutar")
 }
 

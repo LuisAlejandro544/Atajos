@@ -14,9 +14,11 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.provider.AlarmClock
 import android.provider.Settings
+import android.speech.tts.TextToSpeech
 import com.example.data.model.ActionBlock
 import com.example.data.model.ActionType
 import com.example.data.model.ShortcutEntity
+import java.util.Locale
 
 data class ExecutionResult(
     val success: Boolean,
@@ -26,6 +28,32 @@ data class ExecutionResult(
 class ShortcutExecutor(private val context: Context) {
 
     private val luaEngine by lazy { LuaShortcutEngine(context, this) }
+
+    private var tts: TextToSpeech? = null
+    private var isTtsInitialized = false
+    private val pendingSpeechQueue = mutableListOf<String>()
+
+    init {
+        try {
+            tts = TextToSpeech(context.applicationContext) { status ->
+                if (status == TextToSpeech.SUCCESS) {
+                    isTtsInitialized = true
+                    try {
+                        tts?.language = Locale.getDefault()
+                    } catch (_: Exception) {}
+                    // Process any queued speech
+                    synchronized(pendingSpeechQueue) {
+                        for (text in pendingSpeechQueue) {
+                            tts?.speak(text, TextToSpeech.QUEUE_ADD, null, "shortcut_tts_${System.currentTimeMillis()}")
+                        }
+                        pendingSpeechQueue.clear()
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            isTtsInitialized = false
+        }
+    }
 
     companion object {
         private var isFlashlightOn = false
@@ -45,12 +73,19 @@ class ShortcutExecutor(private val context: Context) {
                 ActionType.SEND_MESSAGE.name -> sendMessage(parameter)
                 ActionType.SOUND_SETTINGS.name -> openSoundSettings()
                 ActionType.SHARE_TEXT.name -> shareText(parameter)
+                ActionType.SPEAK.name -> speakText(parameter)
+                ActionType.WAIT.name -> executeWait(parameter)
                 ActionType.LUA_SCRIPT.name -> luaEngine.executeScript(parameter)
                 else -> ExecutionResult(false, "Acción desconocida")
             }
         } catch (e: Exception) {
             ExecutionResult(false, "Error al ejecutar: ${e.localizedMessage ?: "Fallo desconocido"}")
         }
+    }
+
+    private fun executeWait(parameter: String): ExecutionResult {
+        val ms = parameter.trim().toLongOrNull()?.coerceAtLeast(0L) ?: STEP_DELAY_MS
+        return ExecutionResult(true, "Espera de ${ms} ms")
     }
 
     fun resolveBlocks(shortcut: ShortcutEntity): List<ActionBlock> {
@@ -191,6 +226,30 @@ class ShortcutExecutor(private val context: Context) {
         }
         context.startActivity(chooser)
         return ExecutionResult(true, "Compartiendo texto")
+    }
+
+    fun speakText(text: String): ExecutionResult {
+        val messageToSpeak = text.trim().ifEmpty { "Atajo ejecutado" }
+        return try {
+            if (tts == null) {
+                ExecutionResult(false, "Servicio de Texto a Voz no disponible en el sistema")
+            } else if (!isTtsInitialized) {
+                synchronized(pendingSpeechQueue) {
+                    pendingSpeechQueue.add(messageToSpeak)
+                }
+                ExecutionResult(true, "Voz en inicialización: texto puesto en cola")
+            } else {
+                val utteranceId = "shortcut_tts_${System.currentTimeMillis()}"
+                val result = tts?.speak(messageToSpeak, TextToSpeech.QUEUE_ADD, null, utteranceId)
+                if (result == TextToSpeech.ERROR) {
+                    ExecutionResult(false, "Error al emitir voz con el motor del sistema")
+                } else {
+                    ExecutionResult(true, "Reproduciendo voz: \"${messageToSpeak.take(30)}${if (messageToSpeak.length > 30) "..." else ""}\"")
+                }
+            }
+        } catch (e: Exception) {
+            ExecutionResult(false, "Excepción al reproducir voz: ${e.localizedMessage ?: "Error"}")
+        }
     }
 
     private fun triggerHapticFeedback() {

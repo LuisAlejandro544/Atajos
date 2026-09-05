@@ -1,16 +1,6 @@
 name: Build Debug APK (Sin Caché)
 
 on:
-  push:
-    branches:
-      - main
-      - master
-    tags:
-      - '*'
-  pull_request:
-    branches:
-      - main
-      - master
   workflow_dispatch:
 
 concurrency:
@@ -50,6 +40,15 @@ jobs:
 
       - name: 📥 Descargar y preparar fuentes de Lua 5.4.7 puro
         run: ./scripts/setup_lua.sh
+
+      - name: 🐞 Configurar y verificar Lua Debug Library
+        run: ./scripts/setup_lua_debug.sh
+
+      - name: 🔍 Descargar y preparar LeakCanary para APK Debug
+        run: ./scripts/setup_leakcanary.sh
+
+      - name: 🌐 Descargar y preparar Chucker para APK Debug
+        run: ./scripts/setup_chucker.sh
 
       - name: 🚀 Compilar APK Debug (Sin Caché)
         run: ./scripts/build_apk_debug.sh

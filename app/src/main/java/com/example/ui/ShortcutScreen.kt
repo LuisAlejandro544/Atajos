@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
@@ -51,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -66,6 +68,7 @@ fun ShortcutScreen(
     viewModel: ShortcutViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showTopMenu by remember { mutableStateOf(false) }
@@ -172,6 +175,19 @@ fun ShortcutScreen(
                                     onClick = {
                                         showTopMenu = false
                                         viewModel.resetToDefaults()
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Abrir Inspector Chucker (Red)") },
+                                    leadingIcon = {
+                                        Icon(Icons.Filled.BugReport, contentDescription = null)
+                                    },
+                                    onClick = {
+                                        showTopMenu = false
+                                        try {
+                                            val intent = com.chuckerteam.chucker.api.Chucker.getLaunchIntent(context)
+                                            context.startActivity(intent)
+                                        } catch (_: Exception) {}
                                     }
                                 )
                             }

@@ -8,9 +8,11 @@ Diseñada para ser ligera, ultra-rápida y 100% funcional en dispositivos móvil
 
 ## 🚀 Características Principales
 
-- **Atajos Multi-Bloque en Cadena**:
-  - Encadena múltiples acciones en un solo atajo (por ejemplo: activar linterna, copiar texto de aviso y abrir mapas).
-  - Pausa exacta y calibrada de **1003 ms** entre bloques para garantizar que Android procese cada Intent sin colisiones ni descartes de eventos.
+- **Atajos Multi-Bloque en Cadena y Bloque de Espera**:
+  - Encadena múltiples acciones en un solo atajo (por ejemplo: activar linterna, esperar tiempo personalizado, copiar texto de aviso y abrir mapas).
+  - Pausa exacta y calibrada por defecto de **1003 ms** entre bloques para garantizar que Android procese cada Intent sin colisiones ni descartes de eventos.
+  - Bloque de acción **"Esperar (Pausa)" (`WAIT`)**: permite definir tiempos de espera personalizados en milisegundos para atajos que requieran pausas más largas o más cortas que el valor estándar.
+  - **Orden de cuadrícula estable**: los atajos conservan su posición exacta en pantalla tras ser ejecutados, evitando saltos molestos hacia la parte superior.
 - **Motor de Scripting Lua 5.4.7 Puro (Nativo en C)**:
   - Compilado nativamente para arquitecturas móviles (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`) mediante Android NDK y CMake (`libnative-lua.so`).
   - Sin intérpretes lentos ni wrappers de terceros; ejecuta directamente el motor oficial de PUC-Rio.
@@ -26,14 +28,25 @@ Diseñada para ser ligera, ultra-rápida y 100% funcional en dispositivos móvil
     - `map(destino)`: Inicia navegación en mapas.
     - `timer(minutos)`: Configura temporizador en el reloj del sistema.
     - `message(texto)` / `message(tel, texto)`: Abre selector o envío de mensaje.
-    - `share(texto)`: Comparte contenido mediante el menú del sistema.
     - `sound_settings()`: Abre el panel de volumen y audio.
+    - `share(texto)`: Comparte contenido mediante el menú del sistema.
+    - `speak(texto)`: Lee en voz alta un texto utilizando el motor de Texto a Voz configurado en el sistema operativo.
     - `get_hour()`: Retorna la hora actual del día (0-23).
     - `print(...)`: Registra y formatea mensajes capturados en el banner.
-- **Interfaz iOS-Inspired con Material Design 3**:
-  - Banner superior de ejecución paso a paso con barra de progreso fluida.
-  - Cuadrícula adaptable de tarjetas de atajos con gradientes, colores personalizables e iconos temáticos.
-  - Selector de categorías y barra de búsqueda en tiempo real.
+- **Síntesis de Voz Nativa del Sistema (Text-to-Speech)**:
+  - Bloque visual `SPEAK` ("Texto a Voz") que reproduce anuncios y confirmaciones habladas en español y según el motor configurado por el usuario (Google TTS, Samsung TTS, etc.).
+- **Herramientas de Depuración Integradas (Mobile-First Debugging)**:
+  - **LeakCanary (2.14)**: App complementaria *"Leaks"* generada en el teléfono para inspeccionar fugas de memoria sin necesidad de PC.
+  - **Chucker (4.1.0)**: Interfaz de inspección de peticiones de red accesible desde la barra de notificaciones y desde el menú contextual superior.
+  - **Lua Debug Library (5.4.7)**: Introspección nativa en C++ con `debug.traceback` para reportar archivos y líneas exactas en caso de errores en scripts.
+  - Scripts modulares independientes en `./scripts/` (`setup_leakcanary.sh`, `setup_chucker.sh`, `setup_lua_debug.sh`) integrados en el flujo de compilación de GitHub Actions.
+- **Interfaz iOS-Inspired Ultra HD con Material Design 3**:
+  - Tarjetas de atajos con gradientes multicapa de 3 paradas cromáticas y bordes con brillo de luz especular (*Border Glow*).
+  - Sombras volumétricas coloreadas proyectadas con el tono ambiental de cada atajo (`ambientColor` y `spotColor`).
+  - Badges de iconos translúcidos con efecto de vidrio esmerilado (*Glassmorphism*).
+  - Rediseño ergonómico de bloques de acción en el modal de edición: tarjetas modulares con acentos de color y selector compacto desplegable (*Dropdown Picker*).
+  - Banner superior de ejecución flotante estilo píldora con micro-borde brillante y barra de progreso fluida.
+  - Cuadrícula adaptable con soporte para favoritos fijos y búsqueda en tiempo real.
   - Haptic feedback (vibración háptica) en cada acción.
 - **Persistencia Local Segura**:
   - Base de datos Room con migraciones controladas y convertidores de tipos JSON.

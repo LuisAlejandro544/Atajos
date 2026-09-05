@@ -21,14 +21,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.HourglassTop
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -38,6 +42,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -208,13 +213,15 @@ fun ShortcutEditSheet(
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
+                            val hasCustomWait = actionBlocks.any { it.actionType == ActionType.WAIT.name }
+                            val waitBadgeText = if (hasCustomWait) "${actionBlocks.size} pasos (con espera personalizada)" else "${actionBlocks.size} pasos (espera 1s 3ms)"
                             Box(
                                 modifier = Modifier
                                     .background(Color.Black.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text(
-                                    text = "${actionBlocks.size} pasos (espera 1s 3ms)",
+                                    text = waitBadgeText,
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold,
@@ -338,17 +345,40 @@ fun ShortcutEditSheet(
                     ActionType.OPEN_URL
                 }
 
-                Card(
+                // Asignar color temático al bloque estilo Apple Shortcuts
+                val blockColor = when (currentActionType) {
+                    ActionType.FLASHLIGHT -> Color(0xFFFF9500)
+                    ActionType.OPEN_URL -> Color(0xFF007AFF)
+                    ActionType.COPY_TEXT -> Color(0xFF34C759)
+                    ActionType.MAP_NAV -> Color(0xFF00C7BE)
+                    ActionType.SET_TIMER -> Color(0xFFFF2D55)
+                    ActionType.SEND_MESSAGE -> Color(0xFF30B0C7)
+                    ActionType.SOUND_SETTINGS -> Color(0xFF5856D6)
+                    ActionType.SHARE_TEXT -> Color(0xFF007AFF)
+                    ActionType.SPEAK -> Color(0xFFFF375F)
+                    ActionType.WAIT -> Color(0xFFFF9F0A)
+                    ActionType.LUA_SCRIPT -> Color(0xFFAF52DE)
+                }
+
+                var isPickerExpanded by remember { mutableStateOf(false) }
+
+                Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 5.dp)
+                        .padding(vertical = 6.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .border(
+                            width = 1.dp,
+                            color = blockColor.copy(alpha = 0.45f),
+                            shape = RoundedCornerShape(18.dp)
+                        )
                         .testTag("action_block_card_$index"),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-                    )
+                    shape = RoundedCornerShape(18.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shadowElevation = 3.dp
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        // Header del bloque con número coloreado, título y botones de orden
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -357,35 +387,52 @@ fun ShortcutEditSheet(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Box(
                                     modifier = Modifier
-                                        .size(24.dp)
-                                        .background(MaterialTheme.colorScheme.primary, CircleShape),
+                                        .size(28.dp)
+                                        .background(blockColor, CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         text = "${index + 1}",
-                                        color = MaterialTheme.colorScheme.onPrimary,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold
+                                        color = Color.White,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.ExtraBold
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = currentActionType.label,
-                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
-                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    Text(
+                                        text = "PASO ${index + 1}",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = blockColor,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 0.8.sp,
+                                            fontSize = 10.sp
+                                        )
+                                    )
+                                    Text(
+                                        text = currentActionType.label,
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp
+                                        )
+                                    )
+                                }
                             }
 
-                            Row {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (index > 0) {
                                     IconButton(
                                         onClick = {
                                             val item = actionBlocks.removeAt(index)
                                             actionBlocks.add(index - 1, item)
                                         },
-                                        modifier = Modifier.size(28.dp)
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), CircleShape)
                                     ) {
-                                        Icon(Icons.Filled.ArrowUpward, contentDescription = "Subir", modifier = Modifier.size(18.dp))
+                                        Icon(Icons.Filled.ArrowUpward, contentDescription = "Subir", modifier = Modifier.size(16.dp))
                                     }
+                                    Spacer(modifier = Modifier.width(4.dp))
                                 }
                                 if (index < actionBlocks.lastIndex) {
                                     IconButton(
@@ -393,47 +440,111 @@ fun ShortcutEditSheet(
                                             val item = actionBlocks.removeAt(index)
                                             actionBlocks.add(index + 1, item)
                                         },
-                                        modifier = Modifier.size(28.dp)
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), CircleShape)
                                     ) {
-                                        Icon(Icons.Filled.ArrowDownward, contentDescription = "Bajar", modifier = Modifier.size(18.dp))
+                                        Icon(Icons.Filled.ArrowDownward, contentDescription = "Bajar", modifier = Modifier.size(16.dp))
                                     }
+                                    Spacer(modifier = Modifier.width(4.dp))
                                 }
                                 if (actionBlocks.size > 1) {
                                     IconButton(
                                         onClick = { actionBlocks.removeAt(index) },
-                                        modifier = Modifier.size(28.dp)
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f), CircleShape)
                                     ) {
                                         Icon(
                                             Icons.Filled.Delete,
                                             contentDescription = "Eliminar bloque",
                                             tint = MaterialTheme.colorScheme.error,
-                                            modifier = Modifier.size(18.dp)
+                                            modifier = Modifier.size(16.dp)
                                         )
                                     }
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                        // Type selector for this block
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            ActionType.values().forEach { act ->
-                                FilterChip(
-                                    selected = currentActionType == act,
-                                    onClick = {
-                                        actionBlocks[index] = block.copy(
-                                            actionType = act.name,
-                                            parameter = if (block.parameter.isBlank()) act.defaultParam else block.parameter
+                        // Selector elegante de acción estilo Píldora / Dropdown iOS
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable { isPickerExpanded = true }
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(12.dp)
+                                                .background(blockColor, CircleShape)
                                         )
-                                    },
-                                    label = { Text(act.label, fontSize = 11.sp) }
-                                )
+                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Text(
+                                            text = currentActionType.label,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                        )
+                                    }
+                                    Icon(
+                                        imageVector = Icons.Filled.KeyboardArrowDown,
+                                        contentDescription = "Cambiar tipo de acción",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            DropdownMenu(
+                                expanded = isPickerExpanded,
+                                onDismissRequest = { isPickerExpanded = false },
+                                modifier = Modifier.fillMaxWidth(0.85f)
+                            ) {
+                                ActionType.values().forEach { act ->
+                                    val isSelected = currentActionType == act
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = act.label,
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        },
+                                        trailingIcon = {
+                                            if (isSelected) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Check,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                            }
+                                        },
+                                        onClick = {
+                                            isPickerExpanded = false
+                                            actionBlocks[index] = block.copy(
+                                                actionType = act.name,
+                                                parameter = if (block.parameter.isBlank()) act.defaultParam else block.parameter
+                                            )
+                                        }
+                                    )
+                                }
                             }
                         }
 
@@ -441,7 +552,7 @@ fun ShortcutEditSheet(
                             currentActionType != ActionType.FLASHLIGHT &&
                             currentActionType != ActionType.SOUND_SETTINGS
                         ) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
                             val isLua = currentActionType == ActionType.LUA_SCRIPT
                             OutlinedTextField(
                                 value = block.parameter,
@@ -452,6 +563,7 @@ fun ShortcutEditSheet(
                                 singleLine = !isLua,
                                 minLines = if (isLua) 4 else 1,
                                 maxLines = if (isLua) 10 else 1,
+                                shape = RoundedCornerShape(12.dp),
                                 textStyle = if (isLua) androidx.compose.ui.text.TextStyle(
                                     fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
                                     fontSize = 12.sp
@@ -462,29 +574,35 @@ fun ShortcutEditSheet(
                     }
                 }
 
-                // Visual Indicator of the 1003 ms wait between blocks
+                // Indicador visual de espera entre bloques
                 if (index < actionBlocks.lastIndex) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.HourglassTop,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Pausa de 1 segundo con 3 ms",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold
+                    val nextBlock = actionBlocks[index + 1]
+                    val isNextWait = nextBlock.actionType == ActionType.WAIT.name
+                    val isCurrentWait = block.actionType == ActionType.WAIT.name
+
+                    if (!isCurrentWait && !isNextWait) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.HourglassTop,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
                             )
-                        )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Pausa estándar: 1 segundo con 3 ms",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            )
+                        }
                     }
                 }
             }

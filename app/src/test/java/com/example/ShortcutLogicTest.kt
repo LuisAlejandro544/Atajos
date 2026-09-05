@@ -28,6 +28,14 @@ class ShortcutLogicTest {
         val lua = ActionType.LUA_SCRIPT
         assertEquals("Script en Lua", lua.label)
         assertTrue(lua.defaultParam.contains("get_hour"))
+
+        val wait = ActionType.WAIT
+        assertEquals("Esperar (Pausa)", wait.label)
+        assertEquals("1003", wait.defaultParam)
+
+        val speak = ActionType.SPEAK
+        assertEquals("Texto a Voz", speak.label)
+        assertTrue(speak.paramLabel.contains("voz"))
     }
 
     @Test

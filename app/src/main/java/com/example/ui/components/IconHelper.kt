@@ -5,8 +5,10 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.VolumeUp
@@ -28,6 +30,8 @@ object ShortcutIconHelper {
         ShortcutIconItem("SOUND", "Sonido", Icons.Filled.VolumeUp),
         ShortcutIconItem("MESSAGE", "Mensaje", Icons.Filled.Chat),
         ShortcutIconItem("SHARE", "Compartir", Icons.Filled.Share),
+        ShortcutIconItem("SPEAK", "Texto a Voz", Icons.Filled.RecordVoiceOver),
+        ShortcutIconItem("WAIT", "Pausa", Icons.Filled.HourglassTop),
         ShortcutIconItem("CODE", "Código Lua", Icons.Filled.Code)
     )
 

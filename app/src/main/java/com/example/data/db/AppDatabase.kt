@@ -14,7 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [ShortcutEntity::class], version = 3, exportSchema = false)
+@Database(entities = [ShortcutEntity::class], version = 4, exportSchema = false)
 @TypeConverters(ActionBlockConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun shortcutDao(): ShortcutDao
@@ -28,7 +28,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "atajos_database_v3"
+                    "atajos_database_v4"
                 )
                 .fallbackToDestructiveMigration()
                 .addCallback(AppDatabaseCallback(scope))
@@ -149,6 +149,16 @@ abstract class AppDatabase : RoomDatabase() {
                     parameter = "local hora = get_hour()\nif hora >= 19 or hora < 7 then\n  flashlight()\n  return 'Noche (hora ' .. hora .. '): linterna'\nelse\n  copy('¡Buen día desde script Lua!')\n  return 'Día (hora ' .. hora .. '): saludo copiado'\nend",
                     isFavorite = true,
                     category = "Productividad"
+                ),
+                ShortcutEntity(
+                    title = "Aviso de Voz",
+                    description = "Lee un mensaje con la voz del sistema",
+                    colorHex = "#FF2D55",
+                    iconKey = "SPEAK",
+                    actionType = ActionType.SPEAK.name,
+                    parameter = "Atajo ejecutado correctamente",
+                    isFavorite = true,
+                    category = "Utilidades"
                 )
             )
             dao.insertAll(defaults)

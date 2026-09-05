@@ -2,6 +2,7 @@ package com.example.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -77,29 +79,55 @@ fun ShortcutCard(
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val baseColor = parseColorSafe(shortcut.colorHex)
-    val gradient = Brush.linearGradient(
+
+    // Gradiente Ultra HD con 3 paradas de color y saturación viva estilo iOS
+    val gradient = Brush.verticalGradient(
         colors = listOf(
+            baseColor.copy(
+                red = (baseColor.red * 1.12f).coerceIn(0f, 1f),
+                green = (baseColor.green * 1.12f).coerceIn(0f, 1f),
+                blue = (baseColor.blue * 1.12f).coerceIn(0f, 1f)
+            ),
             baseColor,
-            baseColor.copy(red = (baseColor.red * 0.8f).coerceIn(0f, 1f),
-                               green = (baseColor.green * 0.8f).coerceIn(0f, 1f),
-                               blue = (baseColor.blue * 0.8f).coerceIn(0f, 1f))
+            baseColor.copy(
+                red = (baseColor.red * 0.76f).coerceIn(0f, 1f),
+                green = (baseColor.green * 0.76f).coerceIn(0f, 1f),
+                blue = (baseColor.blue * 0.76f).coerceIn(0f, 1f)
+            )
         )
     )
 
     val scale by animateFloatAsState(
-        targetValue = if (isExecuting) 0.96f else 1f,
+        targetValue = if (isExecuting) 0.95f else 1f,
         label = "scale"
     )
 
     Surface(
         modifier = modifier
             .scale(scale)
-            .height(155.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .height(158.dp)
+            .shadow(
+                elevation = 10.dp,
+                shape = RoundedCornerShape(24.dp),
+                ambientColor = baseColor.copy(alpha = 0.55f),
+                spotColor = baseColor.copy(alpha = 0.85f)
+            )
+            .clip(RoundedCornerShape(24.dp))
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.35f),
+                        Color.White.copy(alpha = 0.08f),
+                        Color.Transparent
+                    )
+                ),
+                shape = RoundedCornerShape(24.dp)
+            )
             .clickable { onExecute() }
             .testTag("shortcut_card_${shortcut.id}"),
-        shape = RoundedCornerShape(22.dp),
-        shadowElevation = 4.dp
+        shape = RoundedCornerShape(24.dp),
+        color = Color.Transparent
     ) {
         Box(
             modifier = Modifier
@@ -116,13 +144,16 @@ fun ShortcutCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Icon Badge
+                    // Icon Badge con efecto Glassmorphism y micro-borde
                     Box(
                         modifier = Modifier
-                            .size(42.dp)
-                            .background(
-                                color = Color.White.copy(alpha = 0.22f),
-                                shape = RoundedCornerShape(12.dp)
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color.White.copy(alpha = 0.24f))
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = 0.35f),
+                                shape = RoundedCornerShape(14.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -140,7 +171,9 @@ fun ShortcutCard(
                                 imageVector = Icons.Filled.Star,
                                 contentDescription = "Favorito",
                                 tint = Color(0xFFFFD60A),
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier
+                                    .size(19.dp)
+                                    .padding(end = 2.dp)
                             )
                         }
 
@@ -149,13 +182,14 @@ fun ShortcutCard(
                                 onClick = { showMenu = true },
                                 modifier = Modifier
                                     .size(36.dp)
+                                    .background(Color.White.copy(alpha = 0.12f), CircleShape)
                                     .testTag("shortcut_options_${shortcut.id}")
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.MoreVert,
                                     contentDescription = "Opciones",
-                                    tint = Color.White.copy(alpha = 0.85f),
-                                    modifier = Modifier.size(20.dp)
+                                    tint = Color.White,
+                                    modifier = Modifier.size(19.dp)
                                 )
                             }
 
@@ -223,34 +257,35 @@ fun ShortcutCard(
                         Text(
                             text = shortcut.title,
                             style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 color = Color.White,
                                 fontSize = 16.sp,
-                                lineHeight = 19.sp
+                                lineHeight = 20.sp,
+                                letterSpacing = (-0.2).sp
                             ),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.height(3.dp))
                         Text(
                             text = shortcut.description,
                             style = MaterialTheme.typography.bodySmall.copy(
-                                color = Color.White.copy(alpha = 0.78f),
-                                fontSize = 12.sp
+                                color = Color.White.copy(alpha = 0.85f),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Normal
                             ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
 
-                    // Play Button / Indicator
+                    // Play Button / Indicator con botón translúcido cristal y micro-borde
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
-                            .background(
-                                color = Color.White.copy(alpha = 0.28f),
-                                shape = CircleShape
-                            )
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.28f))
+                            .border(1.dp, Color.White.copy(alpha = 0.4f), CircleShape)
                             .clickable { onExecute() }
                             .testTag("run_shortcut_${shortcut.id}"),
                         contentAlignment = Alignment.Center
