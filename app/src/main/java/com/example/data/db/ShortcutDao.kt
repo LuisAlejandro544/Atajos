@@ -41,6 +41,9 @@ interface ShortcutDao {
     @Query("UPDATE shortcuts SET executionCount = executionCount + 1 WHERE id = :id")
     suspend fun incrementExecutionCount(id: Long)
 
+    @Query("DELETE FROM shortcuts WHERE isCustom = 0")
+    suspend fun deleteDefaults()
+
     @Query("DELETE FROM shortcuts")
     suspend fun deleteAll()
 }

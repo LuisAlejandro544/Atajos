@@ -1,12 +1,27 @@
-feat: nuevos bloques de ejecución Abrir App (con selector de apps instaladas), Abrir URL y control de Volumen deslizable con bindings Lua
+fix: persistencia de atajos de usuario, selector completo de apps/juegos, UX superior en editor y eliminación de dependencias de Google
 
-- Bloque 'Abrir Aplicación' (OPEN_APP): permite seleccionar directamente cualquier aplicación instalada en el dispositivo mediante un selector visual con buscador en tiempo real, resolviendo las aplicaciones con Intent launcher y extrayendo su nombre y paquete.
-- Bloque 'Ajustar Volumen' (SET_VOLUME): integra un control deslizante interactivo (Slider 0-100%) con indicador visual dinámico de decibelios/silencio y botones de acceso rápido (Mute, 30%, 70%, 100%) optimizados para teléfonos móviles.
-- Bloque 'Abrir Sitio Web' (OPEN_URL): ejecución de URLs mediante navegador predeterminado y gestión robusta de enlaces con esquema automático.
-- Bindings nativos en Lua: adición de las funciones 'open_app(pkg)' y 'set_volume(percent)' en el motor C++ (native-lua.cpp) y puente JNI (LuaShortcutEngine.kt) para su invocación en scripts avanzados.
-- Catálogo de íconos y personalización visual: nuevos identificadores y elementos gráficos para aplicaciones ('APPS') y control de volumen ('VOLUME') con paletas de color dedicadas al estilo Material 3.
-- Integración de herramientas Debug in-app para desarrollo móvil:
-  * Infinum DbInspector 6.0.0: inspección y edición visual de bases de datos SQLite/Room (.db) y consultas SQL interactivas en pantalla.
-  * Hyperion-Android 0.9.38: menú de depuración lateral accesible mediante gesto de deslizamiento con módulos de medición de vistas (Measurement) y registro de bloqueos (Crash).
-  * ANR-WatchDog 1.4.0: monitoreo continuo del hilo principal (UI Thread) para detectar y registrar bloqueos antes de que se produzca un ANR.
-  * Scripts de descarga y preparación modular (setup_dbinspector.sh, setup_hyperion.sh, setup_anr_watchdog.sh) en el workflow CI/CD de GitHub Actions para el APK Debug.
+- Persistencia de atajos personalizados: incorporación del campo 'isCustom' en ShortcutEntity y actualización de ShortcutRepository para preservar los atajos creados por el usuario al reiniciar valores predeterminados (Room versión 5 con MIGRATION_4_5 y deleteDefaults).
+- Selector completo de aplicaciones y juegos: declaración de QUERY_ALL_PACKAGES y bloque <queries> en AndroidManifest.xml, integrando queryIntentActivities y getInstalledApplications con deduplicación por paquete para listar todas las aplicaciones y juegos del dispositivo sin omitir ninguno.
+- Rediseño de ergonomía y disposición en el editor de atajos (ShortcutEditSheet):
+  * Reubicación de Nombre, Descripción, Color de tarjeta, Ícono, Categoría y Favoritos a la parte superior de la pantalla para edición inmediata.
+  * Eliminación del gesto de cierre accidental por deslizamiento vertical (swipe-to-dismiss); el menú ahora solo se cierra mediante el botón 'X'.
+  * Modernización estética de controles eliminando círculos desalineados y reemplazándolos por esquinas redondeadas armoniosas (RoundedCornerShape / squircle) en badges, botones de orden y paleta de colores.
+- Limpieza de dependencias: eliminación completa de plugins y librerías de Google Services y Firebase del proyecto.
+
+feat: notificaciones nativas prioritarias con bypass DND, variables dinámicas ({hora}, {fecha}, {bateria}), control táctil de brillo de pantalla y favoritos con 1 click
+
+- Notificaciones nativas prioritarias con bypass de No Molestar (DND): nuevo bloque de acción NOTIFICATION que genera notificaciones en canales de máxima importancia (IMPORTANCE_HIGH, PRIORITY_MAX, CATEGORY_ALARM y setBypassDnd(true)), asegurando que las alertas de atajos se muestren en pantalla aunque el usuario tenga el modo No Molestar activado.
+- Motor de variables dinámicas en tiempo real (VariableResolver): resolución de etiquetas dinámicas {hora}, {hora_segundos}, {fecha}, {dia}, {bateria} y {portapapeles} tanto en notificaciones como en el bloque de Texto a Voz (SPEAK).
+- Chips táctiles de variables dinámicas: botones en el editor (ShortcutEditSheet) para insertar variables dinámicas en un solo toque sin teclear llaves.
+- Control de brillo de pantalla (SET_BRIGHTNESS): nuevo bloque con deslizador continuo (0-100%), indicador en tiempo real, presets de acceso rápido táctil (20%, 50%, 80%, 100%) y gestión de permisos con Settings.System (WRITE_SETTINGS).
+- Conmutador directo de favoritos en tarjetas (1 click): botón de estrella táctil integrado en la tarjeta de cada atajo para alternar el estado de favorito de forma inmediata sin desplegar menús.
+- Actualización de atajos por defecto: integración de 'Notificación de Estado' y 'Brillo Óptimo' en la base de datos Room.
+
+feat: soporte para sonidos de notificaciones personalizados (Pop Audio CC0 y original), preescucha interactiva y script de conversión a OGG sin delay
+
+- Selector de sonido en el bloque de notificación: incorporación de selector interactivo en ShortcutEditSheet para alternar entre el sonido original del sistema y el nuevo sonido 'Pop Notification' (CC0 de GabrielAraujo).
+- Preescucha interactiva de sonido: botón de reproducción directa (Play) en el editor de atajos para probar el audio elegido antes de guardar o ejecutar la acción.
+- Canales de notificación duales con bypass DND: canales independientes en NotificationHelper (shortcuts_priority_channel y shortcuts_priority_channel_pop) con configuración de AudioAttributes (USAGE_ALARM/IMPORTANCE_HIGH) para asegurar que el sonido se emita incluso bajo modo No Molestar.
+- Script de procesamiento y conversión de audio sin delay (scripts/convert_audio.sh): script automatizado con ffmpeg que convierte archivos WAV a formato Ogg Vorbis de ultra baja latencia (.ogg) sin pérdida perceptible y con respuesta instantánea para notificaciones, integrado en el ciclo de compilación de Gradle (tarea convertAudio / preBuild) y en el script de compilación scripts/build_apk_debug.sh.
+- Gestión de licencias de recursos: inclusión de atribución y licencia Creative Commons 0 (audio_assets/LICENSE.txt) para el sonido de notificación Pop de GabrielAraujo (https://freesound.org/s/242502/).
+

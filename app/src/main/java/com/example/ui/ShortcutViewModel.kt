@@ -258,7 +258,8 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
                         actions = actions,
                         parameter = primaryParam,
                         category = category,
-                        isFavorite = isFavorite
+                        isFavorite = isFavorite,
+                        isCustom = true
                     )
                 )
             } else {
@@ -274,7 +275,8 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
                         actions = actions,
                         parameter = primaryParam,
                         category = category,
-                        isFavorite = isFavorite
+                        isFavorite = isFavorite,
+                        isCustom = true
                     )
                 )
             }
@@ -410,6 +412,55 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
                     parameter = "local hora = get_hour()\nif hora >= 19 or hora < 7 then\n  flashlight()\n  return 'Noche (hora ' .. hora .. '): linterna'\nelse\n  copy('¡Buen día desde script Lua!')\n  return 'Día (hora ' .. hora .. '): saludo copiado'\nend",
                     isFavorite = true,
                     category = "Productividad"
+                ),
+                ShortcutEntity(
+                    title = "Aviso de Voz",
+                    description = "Lee un mensaje con la voz del sistema",
+                    colorHex = "#FF2D55",
+                    iconKey = "SPEAK",
+                    actionType = ActionType.SPEAK.name,
+                    parameter = "Atajo ejecutado a las {hora}. Batería al {bateria} por ciento.",
+                    isFavorite = true,
+                    category = "Utilidades"
+                ),
+                ShortcutEntity(
+                    title = "Notificación de Estado",
+                    description = "Aviso prioritario con hora y batería",
+                    colorHex = "#FF9500",
+                    iconKey = "NOTIFICATION",
+                    actionType = ActionType.NOTIFICATION.name,
+                    actions = listOf(
+                        ActionBlock(
+                            actionType = ActionType.NOTIFICATION.name,
+                            parameter = "sound:pop|¡Atención! Son las {hora} ({dia}) y tu batería está al {bateria}%.",
+                            customLabel = "Lanzar Notificación con Pop y Variables"
+                        ),
+                        ActionBlock(
+                            actionType = ActionType.SPEAK.name,
+                            parameter = "Aviso recibido a las {hora}",
+                            customLabel = "Confirmación por voz"
+                        )
+                    ),
+                    parameter = "sound:pop|¡Atención! Son las {hora} ({dia}) y tu batería está al {bateria}%.",
+                    isFavorite = true,
+                    category = "Utilidades"
+                ),
+                ShortcutEntity(
+                    title = "Brillo Óptimo",
+                    description = "Fija el brillo de pantalla al 80%",
+                    colorHex = "#007AFF",
+                    iconKey = "BRIGHTNESS",
+                    actionType = ActionType.SET_BRIGHTNESS.name,
+                    actions = listOf(
+                        ActionBlock(
+                            actionType = ActionType.SET_BRIGHTNESS.name,
+                            parameter = "80",
+                            customLabel = "Ajustar brillo al 80%"
+                        )
+                    ),
+                    parameter = "80",
+                    isFavorite = false,
+                    category = "Ajustes"
                 )
             )
             repository.resetDefaults(defaults)

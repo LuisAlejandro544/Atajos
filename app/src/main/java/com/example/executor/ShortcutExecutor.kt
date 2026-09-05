@@ -78,6 +78,8 @@ class ShortcutExecutor(private val context: Context) {
                 ActionType.SOUND_SETTINGS.name -> openSoundSettings()
                 ActionType.SHARE_TEXT.name -> shareText(parameter)
                 ActionType.SPEAK.name -> speakText(parameter)
+                ActionType.NOTIFICATION.name -> showNotification(parameter)
+                ActionType.SET_BRIGHTNESS.name -> setBrightness(parameter)
                 ActionType.WAIT.name -> executeWait(parameter)
                 ActionType.LUA_SCRIPT.name -> luaEngine.executeScript(parameter)
                 else -> ExecutionResult(false, "Acción desconocida")
@@ -277,7 +279,8 @@ class ShortcutExecutor(private val context: Context) {
     }
 
     fun speakText(text: String): ExecutionResult {
-        val messageToSpeak = text.trim().ifEmpty { "Atajo ejecutado" }
+        val rawMessage = text.trim().ifEmpty { "Atajo ejecutado" }
+        val messageToSpeak = VariableResolver.resolve(rawMessage, context)
         return try {
             if (tts == null) {
                 ExecutionResult(false, "Servicio de Texto a Voz no disponible en el sistema")
@@ -297,6 +300,75 @@ class ShortcutExecutor(private val context: Context) {
             }
         } catch (e: Exception) {
             ExecutionResult(false, "Excepción al reproducir voz: ${e.localizedMessage ?: "Error"}")
+        }
+    }
+
+    private fun showNotification(parameter: String): ExecutionResult {
+        val (soundType, rawTemplate) = if (parameter.startsWith("sound:")) {
+            val pipeIndex = parameter.indexOf('|')
+            if (pipeIndex != -1) {
+                val sound = parameter.substring(6, pipeIndex).trim()
+                val text = parameter.substring(pipeIndex + 1)
+                Pair(sound, text)
+            } else {
+                Pair(NotificationHelper.SOUND_DEFAULT, parameter)
+            }
+        } else {
+            Pair(NotificationHelper.SOUND_DEFAULT, parameter)
+        }
+
+        val template = rawTemplate.trim().ifEmpty { "Atajo completado a las {hora} | Batería: {bateria}%" }
+        val resolved = VariableResolver.resolve(template, context)
+        val success = NotificationHelper.showNotification(
+            context = context,
+            title = "Atajo Ejecutado",
+            message = resolved,
+            soundType = soundType
+        )
+        return if (success) {
+            val preview = if (resolved.length > 30) resolved.take(28) + "..." else resolved
+            val soundLabel = if (soundType == NotificationHelper.SOUND_POP) " [Pop]" else ""
+            ExecutionResult(true, "Notificación$soundLabel: \"$preview\"")
+        } else {
+            ExecutionResult(false, "No se pudo mostrar la notificación (verifica permisos del sistema)")
+        }
+    }
+
+    private fun setBrightness(parameter: String): ExecutionResult {
+        val clean = parameter.trim().removeSuffix("%")
+        val percent = clean.toIntOrNull()?.coerceIn(0, 100) ?: 80
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.System.canWrite(context)) {
+                val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                    data = Uri.parse("package:" + context.packageName)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                try {
+                    context.startActivity(intent)
+                } catch (_: Exception) {}
+                return ExecutionResult(
+                    false,
+                    "Permiso requerido: concede permiso en la pantalla de ajustes de brillo."
+                )
+            }
+        }
+
+        return try {
+            Settings.System.putInt(
+                context.contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+            )
+            val brightness255 = ((percent / 100f) * 255).roundToInt().coerceIn(1, 255)
+            Settings.System.putInt(
+                context.contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS,
+                brightness255
+            )
+            ExecutionResult(true, "Brillo ajustado al $percent%")
+        } catch (e: Exception) {
+            ExecutionResult(false, "Error al ajustar brillo: ${e.localizedMessage ?: "Fallo"}")
         }
     }
 

@@ -22,6 +22,12 @@ Plan de evolución técnica y funcional para la aplicación de atajos y automati
 - [x] Bloque de acción **"Ajustar Volumen" (`SET_VOLUME`)**: control deslizable táctil (*Slider*) con escala porcentual (0-100%), feedback dinámico y accesos rápidos ergonómicos para teléfonos móviles.
 - [x] Bloque de acción **"Abrir Sitio Web" (`OPEN_URL`)**: apertura directa de enlaces en el navegador predeterminado.
 - [x] Motor de síntesis de voz (Texto a Voz / TTS) nativo del sistema operativo Android integrado como bloque visual (`SPEAK`) y como función nativa en Lua (`speak(texto)`).
+- [x] Bloque de acción **"Mostrar Notificación" (`NOTIFICATION`)**: notificaciones nativas de alta prioridad con bypass de modo No Molestar (`setBypassDnd(true)`).
+- [x] Selector de **Sonido de Notificación**: opción entre el sonido original del dispositivo o el sonido 'Pop Notification' (CC0 de GabrielAraujo), preescucha interactiva en tiempo real y script de conversión automatizado a Ogg Vorbis sin delay (`convert_audio.sh`).
+- [x] Soporte de **Variables Dinámicas en Tiempo Real** (`VariableResolver`) para `{hora}`, `{hora_segundos}`, `{fecha}`, `{dia}`, `{bateria}` y `{portapapeles}` en notificaciones y texto a voz con chips de inserción rápida en el editor.
+- [x] Bloque de acción **"Brillo de Pantalla" (`SET_BRIGHTNESS`)**: control táctil con slider manual (0-100%), visualización en tiempo real y presets rápidos.
+- [x] Conmutador directo de favoritos en tarjetas (1-click) sin requerir apertura de menús secundarios.
+- [x] Persistencia garantizada de atajos personalizados creados por el usuario con campo `isCustom` en Room Database.
 - [x] Herramientas de depuración móvil integradas:
   * **Infinum DbInspector (6.0.0)**: explorador visual y editor interactivo de archivos de base de datos `.db` (Room/SQLite) en pantalla.
   * **Hyperion-Android (0.9.38)**: cajón lateral de depuración accesible por gesto táctil con módulos de medición de vistas y reporte de fallos.

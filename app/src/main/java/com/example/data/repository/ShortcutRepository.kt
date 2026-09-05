@@ -19,7 +19,7 @@ class ShortcutRepository(private val dao: ShortcutDao) {
     suspend fun incrementExecution(id: Long) = dao.incrementExecutionCount(id)
 
     suspend fun resetDefaults(defaultShortcuts: List<ShortcutEntity>) {
-        dao.deleteAll()
-        dao.insertAll(defaultShortcuts)
+        dao.deleteDefaults()
+        dao.insertAll(defaultShortcuts.map { it.copy(isCustom = false) })
     }
 }

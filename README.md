@@ -14,7 +14,13 @@ Diseñada para ser ligera, ultra-rápida y 100% funcional en dispositivos móvil
   - Bloque de acción **"Esperar (Pausa)" (`WAIT`)**: permite definir tiempos de espera personalizados en milisegundos para atajos que requieran pausas más largas o más cortas que el valor estándar.
   - Bloque de acción **"Abrir Aplicación" (`OPEN_APP`)**: selector interactivo con buscador en vivo que lista todas las aplicaciones instaladas en el dispositivo móvil para abrirlas al instante.
   - Bloque de acción **"Ajustar Volumen" (`SET_VOLUME`)**: control deslizante interactivo (*Slider 0-100%*) con indicador visual de decibelios y botones de acceso rápido (*Mute, 30%, 70%, 100%*) adaptados a dedos en pantalla táctil.
+  - Bloque de acción **"Brillo de Pantalla" (`SET_BRIGHTNESS`)**: control táctil con deslizador manual (*Slider 0-100%*), porcentaje en vivo y botones de presets (*20%, 50%, 80%, 100%*) para adaptar la pantalla al instante según el entorno.
   - Bloque de acción **"Abrir Sitio Web" (`OPEN_URL`)**: lanzamiento fluido de direcciones URL en el navegador predeterminado del sistema.
+  - Bloque de acción **"Mostrar Notificación" (`NOTIFICATION`)**: notificaciones nativas de alta prioridad configuradas con bypass del modo No Molestar (*Bypass DND*), asegurando que los avisos cruciales se muestren en cualquier circunstancia.
+  - **Selector de Sonido de Notificación y Preescucha**: permite alternar entre el sonido original del dispositivo o el sonido *Pop Notification* (licencia CC0 de GabrielAraujo), con botón de prueba directa en el editor para escuchar la muestra antes de guardar.
+  - **Pipeline Automatizado de Audio sin Delay (`scripts/convert_audio.sh`)**: script de optimización que convierte archivos de audio a formato Ogg Vorbis (`.ogg`) sin pérdida perceptible y con respuesta acústica instantánea (cero latencia) durante la compilación del APK.
+  - **Motor de Variables Dinámicas en Tiempo Real**: tanto las notificaciones como los bloques de Texto a Voz admiten etiquetas evaluadas al momento de ejecución: `{hora}`, `{hora_segundos}`, `{fecha}`, `{dia}`, `{bateria}` y `{portapapeles}`. Incluye chips táctiles en el editor para insertarlas con un toque sin escribir llaves.
+  - **Acceso Directo a Favoritos en Tarjeta (1-Click)**: botón de estrella interactivo sobre cada tarjeta para marcar o desmarcar favoritos inmediatamente sin necesidad de ingresar al menú de opciones.
   - **Orden de cuadrícula estable**: los atajos conservan su posición exacta en pantalla tras ser ejecutados, evitando saltos molestos hacia la parte superior.
 - **Motor de Scripting Lua 5.4.7 Puro (Nativo en C)**:
   - Compilado nativamente para arquitecturas móviles (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`) mediante Android NDK y CMake (`libnative-lua.so`).

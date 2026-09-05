@@ -18,11 +18,15 @@ echo ">> [2/4] Verificando dependencias de CMake y NDK..."
 bash "${SCRIPTS_DIR}/setup_cmake.sh"
 
 echo ""
-echo ">> [3/4] Asegurando fuentes oficiales de Lua 5.4.7..."
+echo ">> [3/5] Asegurando fuentes oficiales de Lua 5.4.7..."
 bash "${SCRIPTS_DIR}/setup_lua.sh"
 
 echo ""
-echo ">> [4/4] Compilando APK Debug (sin caché de compilación)..."
+echo ">> [4/5] Convirtiendo y preparando recursos de audio (OGG sin delay)..."
+bash "${SCRIPTS_DIR}/convert_audio.sh"
+
+echo ""
+echo ">> [5/5] Compilando APK Debug (sin caché de compilación)..."
 if [ -f "./gradlew" ]; then
     chmod +x ./gradlew
     ./gradlew :app:assembleDebug --no-daemon --no-build-cache --stacktrace

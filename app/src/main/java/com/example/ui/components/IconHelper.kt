@@ -3,11 +3,13 @@ package com.example.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.BrightnessHigh
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Share
@@ -26,6 +28,8 @@ object ShortcutIconHelper {
     val availableIcons = listOf(
         ShortcutIconItem("FLASH", "Linterna", Icons.Filled.Bolt),
         ShortcutIconItem("APPS", "Aplicación", Icons.Filled.Apps),
+        ShortcutIconItem("NOTIFICATION", "Notificación", Icons.Filled.Notifications),
+        ShortcutIconItem("BRIGHTNESS", "Brillo", Icons.Filled.BrightnessHigh),
         ShortcutIconItem("VOLUME", "Volumen", Icons.Filled.Tune),
         ShortcutIconItem("MAP", "Ubicación", Icons.Filled.Place),
         ShortcutIconItem("TIMER", "Temporizador", Icons.Filled.Timer),

@@ -165,15 +165,26 @@ fun ShortcutCard(
                         )
                     }
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (shortcut.isFavorite) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        IconButton(
+                            onClick = onToggleFavorite,
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    if (shortcut.isFavorite) Color(0xFFFFD60A).copy(alpha = 0.28f)
+                                    else Color.White.copy(alpha = 0.16f)
+                                )
+                                .testTag("toggle_favorite_${shortcut.id}")
+                        ) {
                             Icon(
-                                imageVector = Icons.Filled.Star,
-                                contentDescription = "Favorito",
-                                tint = Color(0xFFFFD60A),
-                                modifier = Modifier
-                                    .size(19.dp)
-                                    .padding(end = 2.dp)
+                                imageVector = if (shortcut.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                                contentDescription = if (shortcut.isFavorite) "Quitar de favoritos" else "Marcar como favorito",
+                                tint = if (shortcut.isFavorite) Color(0xFFFFD60A) else Color.White,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
 
@@ -181,8 +192,9 @@ fun ShortcutCard(
                             IconButton(
                                 onClick = { showMenu = true },
                                 modifier = Modifier
-                                    .size(36.dp)
-                                    .background(Color.White.copy(alpha = 0.12f), CircleShape)
+                                    .size(34.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(Color.White.copy(alpha = 0.18f))
                                     .testTag("shortcut_options_${shortcut.id}")
                             ) {
                                 Icon(
@@ -283,9 +295,9 @@ fun ShortcutCard(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(11.dp))
                             .background(Color.White.copy(alpha = 0.28f))
-                            .border(1.dp, Color.White.copy(alpha = 0.4f), CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(11.dp))
                             .clickable { onExecute() }
                             .testTag("run_shortcut_${shortcut.id}"),
                         contentAlignment = Alignment.Center

@@ -14,7 +14,9 @@ enum class ActionType(val label: String, val defaultParam: String, val paramLabe
     SEND_MESSAGE("Mensaje Rápido", "¡Hola! Te escribo en un momento.", "Mensaje a enviar"),
     SOUND_SETTINGS("Ajustes de Sonido", "", "Abre el panel de audio del sistema"),
     SHARE_TEXT("Compartir Texto", "¡Mira este atajo increíble!", "Texto a compartir"),
-    SPEAK("Texto a Voz", "Secuencia de atajos completada", "Texto que leerá la voz del sistema"),
+    SPEAK("Texto a Voz", "Secuencia de atajos completada a las {hora}", "Texto que leerá la voz del sistema"),
+    NOTIFICATION("Mostrar Notificación", "Atajo completado a las {hora} | Batería: {bateria}%", "Texto de la notificación (admite {hora}, {fecha}, {bateria}, {portapapeles})"),
+    SET_BRIGHTNESS("Brillo de Pantalla", "80", "Nivel de brillo en porcentaje (0-100%)"),
     WAIT("Esperar (Pausa)", "1003", "Tiempo de espera en milisegundos (ej: 1003 o 2500)"),
     LUA_SCRIPT("Script en Lua", "local hora = get_hour()\nif hora >= 20 then\n  flashlight()\n  return 'Hora nocturna: linterna'\nelse\n  copy('¡Hola desde Lua!')\n  return 'Hora diurna: texto copiado'\nend", "Código Lua a ejecutar")
 }
@@ -33,5 +35,6 @@ data class ShortcutEntity(
     val isFavorite: Boolean = false,
     val category: String = "General",
     val executionCount: Int = 0,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val isCustom: Boolean = false
 )

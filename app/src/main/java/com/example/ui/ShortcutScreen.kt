@@ -71,7 +71,10 @@ fun ShortcutScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { false }
+    )
     var showTopMenu by remember { mutableStateOf(false) }
 
     val categories = listOf("Todos", "Favoritos", "Utilidades", "Productividad", "Comunicación", "Viajes")

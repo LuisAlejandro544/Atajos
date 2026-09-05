@@ -33,8 +33,14 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │   └── workflows/
 │       ├── build_debug.yml                   # Compilación manual de APK Debug (workflow_dispatch)
 │       └── override_commit_message.yml       # Sincronización automática de mensaje desde commit_message.txt
+├── audio_assets/
+│   ├── LICENSE.txt                           # Atribución y licencia Creative Commons 0 (CC0)
+│   └── raw/
+│       ├── 242502__gabrielaraujo__pop-upnotification.wav # Audio original
+│       └── pop_notification.wav              # Audio de referencia
 ├── scripts/
 │   ├── build_apk_debug.sh                    # Compilación limpia del APK Debug sin caché
+│   ├── convert_audio.sh                      # Conversión automatizada de audio a OGG sin delay
 │   ├── generate_keystore.sh                  # Generación y verificación del keystore de depuración
 │   ├── setup_cmake.sh                        # Configuración de CMake 3.22.1 y NDK 27
 │   ├── setup_lua.sh                          # Descarga y extracción de fuentes oficiales de Lua 5.4.7
@@ -55,6 +61,10 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │       │   │   ├── CMakeLists.txt            # Compilación de Lua y del puente JNI
 │       │   │   ├── native-lua.cpp            # Bindings JNI entre Kotlin y Lua 5.4.7
 │       │   │   └── lua/                      # Código fuente oficial en C de Lua 5.4.7
+│       │   ├── res/
+│       │   │   ├── raw/
+│       │   │   │   └── pop_notification.ogg  # Sonido Pop Vorbis Q7 (sin delay) para notificaciones
+│       │   │   └── values/strings.xml
 │       │   ├── java/com/example/
 │       │   │   ├── MainActivity.kt           # Host Activity con enableEdgeToEdge
 │       │   │   ├── data/
@@ -69,6 +79,8 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │       │   │   │       └── ShortcutRepository.kt # Abstracción de datos para el ViewModel
 │       │   │   ├── executor/
 │       │   │   │   ├── ShortcutExecutor.kt   # Gestor de secuencias y espera fija de 1003 ms
+│       │   │   │   ├── NotificationHelper.kt # Gestor de notificaciones nativas con bypass No Molestar
+│       │   │   │   ├── VariableResolver.kt   # Motor de resolución dinámica ({hora}, {bateria}, etc.)
 │       │   │   │   └── LuaShortcutEngine.kt  # Enlace Kotlin con la librería nativa libnative-lua.so
 │       │   │   └── ui/
 │       │   │       ├── ShortcutScreen.kt     # Pantalla principal (TopBar, categorías, Grid)

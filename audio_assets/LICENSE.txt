@@ -1,0 +1,13 @@
+Información de Licencia de Archivos de Audio
+============================================
+
+Archivo: 242502__gabrielaraujo__pop-upnotification.wav / pop_notification.ogg
+Autor: GabrielAraujo
+Fuente: https://freesound.org/s/242502/
+Licencia: Creative Commons 0 (CC0 - Dominio Público)
+
+Texto de atribución original:
+"Pop-up/notification.wav by GabrielAraujo -- https://freesound.org/s/242502/ -- License: Creative Commons 0"
+
+Uso en la app:
+Sonido para notificaciones nativas de atajos en formato Ogg Vorbis de ultra baja latencia (sin retraso de decodificación).
