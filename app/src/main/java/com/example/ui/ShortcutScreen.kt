@@ -58,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import com.example.ui.components.ExecutionBanner
 import com.example.ui.components.ShortcutCard
 import com.example.ui.components.ShortcutEditSheet
@@ -188,6 +189,39 @@ fun ShortcutScreen(
                                             val intent = com.chuckerteam.chucker.api.Chucker.getLaunchIntent(context)
                                             context.startActivity(intent)
                                         } catch (_: Exception) {}
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Ver Fugas LeakCanary") },
+                                    leadingIcon = {
+                                        Icon(Icons.Filled.BugReport, contentDescription = null)
+                                    },
+                                    onClick = {
+                                        showTopMenu = false
+                                        try {
+                                            val intent = android.content.Intent().apply {
+                                                setClassName(context.packageName, "leakcanary.internal.activity.LeakActivity")
+                                                flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+                                            }
+                                            context.startActivity(intent)
+                                        } catch (_: Exception) {}
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Probar solicitud de Red (Chucker)") },
+                                    leadingIcon = {
+                                        Icon(Icons.Filled.Refresh, contentDescription = null)
+                                    },
+                                    onClick = {
+                                        showTopMenu = false
+                                        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                                            try {
+                                                val req = okhttp3.Request.Builder()
+                                                    .url("https://httpbin.org/get?app=shortcuts")
+                                                    .build()
+                                                com.example.NetworkClientProvider.okHttpClient.newCall(req).execute().close()
+                                            } catch (_: Exception) {}
+                                        }
                                     }
                                 )
                             }

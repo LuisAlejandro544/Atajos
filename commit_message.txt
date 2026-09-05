@@ -1,14 +1,6 @@
-feat: orden estable de atajos, bloque de espera configurable y automatizaciones CI/CD
+fix: escala visual fija inalterable y configuración de herramientas de depuración LeakCanary y Chucker
 
-- Interfaz de usuario: se eliminó la reordenación automática que subía los atajos al ejecutarlos; ahora conservan su posición fija en la cuadrícula (orden estable por favoritos e ID).
-- Motor de ejecución: se añadió el nuevo bloque de acción 'WAIT' ("Esperar (Pausa)") que permite definir tiempos de espera personalizados en milisegundos entre pasos, sustituyendo la pausa por defecto de 1003 ms si el atajo lo requiere.
-- Modal de edición: se integró el bloque 'WAIT' con configuración de tiempo en milisegundos, insignia de pasos y mejoras en el indicador visual entre bloques.
-- GitHub Actions: se configuró el workflow 'build_debug.yml' para ejecución manual mediante 'workflow_dispatch'.
-- GitHub Actions: se incorporó el workflow 'override_commit_message.yml' que sincroniza y reescribe el mensaje del último commit a partir del contenido de 'commit_message.txt'.
-- Síntesis de voz (TTS): integración del motor nativo del sistema 'TextToSpeech' de Android con el nuevo bloque de acción 'SPEAK' ("Texto a Voz") y soporte directo en Lua mediante el binding nativo 'speak(texto)'.
-- Herramientas de depuración integradas: inclusión de LeakCanary (detección de fugas de memoria con app propia 'Leaks' en el móvil) y Chucker (auditor de red con interfaz y notificaciones en el móvil).
-- Lua Debug Library: integración del manejador de errores con introspección y 'debug.traceback' en C++ ('native-lua.cpp') para reportar archivos y números de línea exactos en errores de scripts.
-- Flujos CI/CD: creación de scripts modulares independientes ('scripts/setup_leakcanary.sh', 'scripts/setup_chucker.sh' y 'scripts/setup_lua_debug.sh') ejecutados obligatoriamente en '.github/workflows/build_debug.yml'.
-- Interfaz Ultra HD e inspiración iOS: tarjetas de atajos con gradientes verticales de triple parada, sombras volumétricas con tinte dinámico de color, bordes con brillo especular (Specular Border Glow) y badges de iconos con efecto Glassmorphism.
-- Rediseño de bloques de acción: reemplazo de la fila horizontal de botones por tarjetas modulares con encabezados codificados por color y selector desplegable compacto tipo píldora (Dropdown Picker) para configurar las acciones de forma rápida y ergonómica.
-- Documentación: actualización integral de AGENTS.md, AI_CONTEXT.md, README.md, ROADMAP.md y STRUCTURE.md.
+- Escala visual inalterable (LocalDensity fixed): se fijó el factor de escala tipográfica (fontScale = 1.0f) a nivel global en 'MyApplicationTheme' mediante CompositionLocalProvider(LocalDensity), garantizando que las proporciones, tamaños de tarjetas, textos y modales mantengan siempre su geometría exacta sin deformarse por los ajustes de tamaño de fuente del sistema operativo del dispositivo.
+- Configuración de depuración e inspección de red: creación de la clase de aplicación personalizada 'ShortcutsApp' que inicializa OkHttpClient junto con 'ChuckerInterceptor' para registrar todas las peticiones HTTP y mostrar sus notificaciones e interfaz de depuración en el teléfono.
+- Permiso de notificaciones en AndroidManifest: adición explícita del permiso 'POST_NOTIFICATIONS' para asegurar la visualización inmediata de alertas de LeakCanary y Chucker en Android 13+.
+- Accesos directos de depuración en el menú principal: integración en el menú superior de accesos para abrir el inspector de red de Chucker, lanzar la pantalla de fugas de LeakCanary y ejecutar una solicitud de prueba HTTP en tiempo real para verificar el inspector en el dispositivo.
