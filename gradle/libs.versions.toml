@@ -42,6 +42,9 @@ credentials = "1.5.0"
 googleid = "1.1.1"
 leakcanary = "2.14"
 chucker = "4.1.0"
+dbinspector = "6.0.0"
+hyperion = "0.9.38"
+anrwatchdog = "1.4.0"
 
 
 [libraries]
@@ -102,6 +105,11 @@ googleid = { group = "com.google.android.libraries.identity.googleid", name = "g
 leakcanary-android = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanary" }
 chucker-debug = { group = "com.github.chuckerteam.chucker", name = "library", version.ref = "chucker" }
 chucker-release = { group = "com.github.chuckerteam.chucker", name = "library-no-op", version.ref = "chucker" }
+dbinspector = { group = "com.infinum.dbinspector", name = "dbinspector", version.ref = "dbinspector" }
+hyperion-core = { group = "com.willowtreeapps.hyperion", name = "hyperion-core", version.ref = "hyperion" }
+hyperion-measurement = { group = "com.willowtreeapps.hyperion", name = "hyperion-measurement", version.ref = "hyperion" }
+hyperion-crash = { group = "com.willowtreeapps.hyperion", name = "hyperion-crash", version.ref = "hyperion" }
+anrwatchdog = { group = "com.github.anrwatchdog", name = "anrwatchdog", version.ref = "anrwatchdog" }
 
 
 [plugins]

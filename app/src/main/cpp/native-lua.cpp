@@ -71,6 +71,27 @@ static int l_open_url(lua_State* L) {
     return 0;
 }
 
+// Lua: open_app(package_name)
+static int l_open_app(lua_State* L) {
+    const char* pkg = luaL_optstring(L, 1, "");
+    if (g_ctx && g_ctx->env) {
+        jstring jPkg = g_ctx->env->NewStringUTF(pkg);
+        callVoidMethod("onOpenApp", "(Ljava/lang/String;)V", jPkg);
+        g_ctx->env->DeleteLocalRef(jPkg);
+    }
+    return 0;
+}
+
+// Lua: set_volume(percent)
+static int l_set_volume(lua_State* L) {
+    int percent = 70;
+    if (lua_gettop(L) >= 1) {
+        percent = (int)luaL_checkinteger(L, 1);
+    }
+    callVoidMethod("onSetVolume", "(I)V", (jint)percent);
+    return 0;
+}
+
 // Lua: map(query)
 static int l_map(lua_State* L) {
     const char* q = luaL_optstring(L, 1, "");
@@ -239,6 +260,8 @@ Java_com_example_executor_LuaShortcutEngine_nativeExecuteScript(
     lua_register(L, "flashlight", l_flashlight);
     lua_register(L, "copy", l_copy);
     lua_register(L, "open_url", l_open_url);
+    lua_register(L, "open_app", l_open_app);
+    lua_register(L, "set_volume", l_set_volume);
     lua_register(L, "map", l_map);
     lua_register(L, "timer", l_timer);
     lua_register(L, "message", l_message);

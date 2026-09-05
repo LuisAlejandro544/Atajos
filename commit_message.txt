@@ -1,6 +1,12 @@
-fix: escala visual fija inalterable y configuración de herramientas de depuración LeakCanary y Chucker
+feat: nuevos bloques de ejecución Abrir App (con selector de apps instaladas), Abrir URL y control de Volumen deslizable con bindings Lua
 
-- Escala visual inalterable (LocalDensity fixed): se fijó el factor de escala tipográfica (fontScale = 1.0f) a nivel global en 'MyApplicationTheme' mediante CompositionLocalProvider(LocalDensity), garantizando que las proporciones, tamaños de tarjetas, textos y modales mantengan siempre su geometría exacta sin deformarse por los ajustes de tamaño de fuente del sistema operativo del dispositivo.
-- Configuración de depuración e inspección de red: creación de la clase de aplicación personalizada 'ShortcutsApp' que inicializa OkHttpClient junto con 'ChuckerInterceptor' para registrar todas las peticiones HTTP y mostrar sus notificaciones e interfaz de depuración en el teléfono.
-- Permiso de notificaciones en AndroidManifest: adición explícita del permiso 'POST_NOTIFICATIONS' para asegurar la visualización inmediata de alertas de LeakCanary y Chucker en Android 13+.
-- Accesos directos de depuración en el menú principal: integración en el menú superior de accesos para abrir el inspector de red de Chucker, lanzar la pantalla de fugas de LeakCanary y ejecutar una solicitud de prueba HTTP en tiempo real para verificar el inspector en el dispositivo.
+- Bloque 'Abrir Aplicación' (OPEN_APP): permite seleccionar directamente cualquier aplicación instalada en el dispositivo mediante un selector visual con buscador en tiempo real, resolviendo las aplicaciones con Intent launcher y extrayendo su nombre y paquete.
+- Bloque 'Ajustar Volumen' (SET_VOLUME): integra un control deslizante interactivo (Slider 0-100%) con indicador visual dinámico de decibelios/silencio y botones de acceso rápido (Mute, 30%, 70%, 100%) optimizados para teléfonos móviles.
+- Bloque 'Abrir Sitio Web' (OPEN_URL): ejecución de URLs mediante navegador predeterminado y gestión robusta de enlaces con esquema automático.
+- Bindings nativos en Lua: adición de las funciones 'open_app(pkg)' y 'set_volume(percent)' en el motor C++ (native-lua.cpp) y puente JNI (LuaShortcutEngine.kt) para su invocación en scripts avanzados.
+- Catálogo de íconos y personalización visual: nuevos identificadores y elementos gráficos para aplicaciones ('APPS') y control de volumen ('VOLUME') con paletas de color dedicadas al estilo Material 3.
+- Integración de herramientas Debug in-app para desarrollo móvil:
+  * Infinum DbInspector 6.0.0: inspección y edición visual de bases de datos SQLite/Room (.db) y consultas SQL interactivas en pantalla.
+  * Hyperion-Android 0.9.38: menú de depuración lateral accesible mediante gesto de deslizamiento con módulos de medición de vistas (Measurement) y registro de bloqueos (Crash).
+  * ANR-WatchDog 1.4.0: monitoreo continuo del hilo principal (UI Thread) para detectar y registrar bloqueos antes de que se produzca un ANR.
+  * Scripts de descarga y preparación modular (setup_dbinspector.sh, setup_hyperion.sh, setup_anr_watchdog.sh) en el workflow CI/CD de GitHub Actions para el APK Debug.

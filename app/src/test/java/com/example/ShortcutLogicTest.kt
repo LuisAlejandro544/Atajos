@@ -36,6 +36,13 @@ class ShortcutLogicTest {
         val speak = ActionType.SPEAK
         assertEquals("Texto a Voz", speak.label)
         assertTrue(speak.paramLabel.contains("voz"))
+
+        val openApp = ActionType.OPEN_APP
+        assertEquals("Abrir Aplicación", openApp.label)
+
+        val setVolume = ActionType.SET_VOLUME
+        assertEquals("Ajustar Volumen", setVolume.label)
+        assertEquals("70", setVolume.defaultParam)
     }
 
     @Test

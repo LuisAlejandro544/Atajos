@@ -40,7 +40,10 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │   ├── setup_lua.sh                          # Descarga y extracción de fuentes oficiales de Lua 5.4.7
 │   ├── setup_lua_debug.sh                    # Verificación de Lua Debug Library e integración con native-lua.cpp
 │   ├── setup_leakcanary.sh                   # Descarga y configuración de LeakCanary 2.14 para el APK Debug
-│   └── setup_chucker.sh                      # Descarga y configuración de Chucker 4.1.0 para el APK Debug
+│   ├── setup_chucker.sh                      # Descarga y configuración de Chucker 4.1.0 para el APK Debug
+│   ├── setup_dbinspector.sh                  # Descarga y configuración de Infinum DbInspector 6.0.0 (.db Room)
+│   ├── setup_hyperion.sh                     # Descarga y configuración de Hyperion-Android 0.9.38
+│   └── setup_anr_watchdog.sh                 # Descarga y configuración de ANR-WatchDog 1.4.0 (UI Thread)
 ├── commit_message.txt                        # Mensaje de commit actual descriptivo en español
 ├── .env.example                               # Variables de entorno seguras
 ├── app/
@@ -72,9 +75,9 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │       │   │       ├── ShortcutViewModel.kt  # Gestión de estado, filtros y corrutinas
 │       │   │       ├── components/
 │       │   │       │   ├── ExecutionBanner.kt    # Banner tipo iOS flotante con barra de progreso
-│       │   │       │   ├── IconHelper.kt         # Catálogo de iconos y paleta de colores
+│       │   │       │   ├── IconHelper.kt         # Catálogo de iconos (APPS, VOLUME, etc.) y paleta de colores
 │       │   │       │   ├── ShortcutCard.kt       # Tarjeta con insignia de pasos y haptics
-│       │   │       │   └── ShortcutEditSheet.kt  # Modal para crear/editar bloques y código Lua
+│       │   │       │   └── ShortcutEditSheet.kt  # Modal con selector de apps (AppPickerDialog), slider de volumen y editor Lua
 │       │   │       └── theme/
 │       │   │           ├── Color.kt          # Paleta base
 │       │   │           ├── Theme.kt          # Material 3 Dynamic Theme

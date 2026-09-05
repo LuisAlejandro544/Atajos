@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,24 +10,33 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.VolumeDown
+import androidx.compose.material.icons.filled.VolumeMute
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -42,6 +52,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
@@ -58,14 +70,168 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import kotlin.math.roundToInt
 import com.example.data.model.ActionBlock
 import com.example.data.model.ActionType
 import com.example.data.model.ShortcutEntity
 import java.util.UUID
+
+data class InstalledAppItem(
+    val name: String,
+    val packageName: String
+)
+
+@Composable
+fun AppPickerDialog(
+    apps: List<InstalledAppItem>,
+    onSelectApp: (InstalledAppItem) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredApps = remember(searchQuery, apps) {
+        if (searchQuery.isBlank()) {
+            apps
+        } else {
+            val q = searchQuery.trim().lowercase()
+            apps.filter { it.name.lowercase().contains(q) || it.packageName.lowercase().contains(q) }
+        }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(520.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Seleccionar App",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                        )
+                        Text(
+                            text = "${filteredApps.size} apps encontradas",
+                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.outline)
+                        )
+                    }
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Filled.Close, contentDescription = "Cerrar")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Buscar aplicación o paquete...") },
+                    leadingIcon = {
+                        Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Filled.Close, contentDescription = "Limpiar")
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                if (filteredApps.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No se encontraron aplicaciones instaladas",
+                            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.outline)
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        items(filteredApps, key = { it.packageName }) { app ->
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .clickable { onSelectApp(app) },
+                                shape = RoundedCornerShape(14.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .background(
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                                CircleShape
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = app.name.take(1).uppercase(),
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = app.name,
+                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                                        )
+                                        Text(
+                                            text = app.packageName,
+                                            style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.outline),
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,6 +294,47 @@ fun ShortcutEditSheet(
     }
 
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val installedApps = remember(context) {
+        try {
+            val pm = context.packageManager
+            val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
+                addCategory(Intent.CATEGORY_LAUNCHER)
+            }
+            val list = pm.queryIntentActivities(mainIntent, 0)
+            list.map { resolveInfo ->
+                InstalledAppItem(
+                    name = resolveInfo.loadLabel(pm).toString(),
+                    packageName = resolveInfo.activityInfo.packageName
+                )
+            }.distinctBy { it.packageName }.sortedBy { it.name.lowercase() }
+        } catch (_: Exception) {
+            emptyList<InstalledAppItem>()
+        }
+    }
+    var appPickerTargetIndex by remember { mutableStateOf<Int?>(null) }
+
+    if (appPickerTargetIndex != null) {
+        val targetIdx = appPickerTargetIndex!!
+        AppPickerDialog(
+            apps = installedApps,
+            onSelectApp = { selectedApp ->
+                if (targetIdx in actionBlocks.indices) {
+                    val current = actionBlocks[targetIdx]
+                    actionBlocks[targetIdx] = current.copy(
+                        parameter = selectedApp.packageName,
+                        customLabel = if (current.customLabel.isBlank() || current.customLabel.startsWith("Abrir")) {
+                            "Abrir ${selectedApp.name}"
+                        } else {
+                            current.customLabel
+                        }
+                    )
+                }
+                appPickerTargetIndex = null
+            },
+            onDismiss = { appPickerTargetIndex = null }
+        )
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -348,13 +555,15 @@ fun ShortcutEditSheet(
                 // Asignar color temático al bloque estilo Apple Shortcuts
                 val blockColor = when (currentActionType) {
                     ActionType.FLASHLIGHT -> Color(0xFFFF9500)
+                    ActionType.OPEN_APP -> Color(0xFF5856D6)
                     ActionType.OPEN_URL -> Color(0xFF007AFF)
-                    ActionType.COPY_TEXT -> Color(0xFF34C759)
+                    ActionType.SET_VOLUME -> Color(0xFF34C759)
+                    ActionType.COPY_TEXT -> Color(0xFF30B0C7)
                     ActionType.MAP_NAV -> Color(0xFF00C7BE)
                     ActionType.SET_TIMER -> Color(0xFFFF2D55)
-                    ActionType.SEND_MESSAGE -> Color(0xFF30B0C7)
-                    ActionType.SOUND_SETTINGS -> Color(0xFF5856D6)
-                    ActionType.SHARE_TEXT -> Color(0xFF007AFF)
+                    ActionType.SEND_MESSAGE -> Color(0xFF0A84FF)
+                    ActionType.SOUND_SETTINGS -> Color(0xFFBF5AF2)
+                    ActionType.SHARE_TEXT -> Color(0xFF32D74B)
                     ActionType.SPEAK -> Color(0xFFFF375F)
                     ActionType.WAIT -> Color(0xFFFF9F0A)
                     ActionType.LUA_SCRIPT -> Color(0xFFAF52DE)
@@ -548,28 +757,206 @@ fun ShortcutEditSheet(
                             }
                         }
 
-                        if (currentActionType.paramLabel.isNotEmpty() &&
-                            currentActionType != ActionType.FLASHLIGHT &&
-                            currentActionType != ActionType.SOUND_SETTINGS
-                        ) {
-                            Spacer(modifier = Modifier.height(10.dp))
-                            val isLua = currentActionType == ActionType.LUA_SCRIPT
-                            OutlinedTextField(
-                                value = block.parameter,
-                                onValueChange = { newParam ->
-                                    actionBlocks[index] = block.copy(parameter = newParam)
-                                },
-                                label = { Text(currentActionType.paramLabel, fontSize = 12.sp) },
-                                singleLine = !isLua,
-                                minLines = if (isLua) 4 else 1,
-                                maxLines = if (isLua) 10 else 1,
-                                shape = RoundedCornerShape(12.dp),
-                                textStyle = if (isLua) androidx.compose.ui.text.TextStyle(
-                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                                    fontSize = 12.sp
-                                ) else MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                        when (currentActionType) {
+                            ActionType.FLASHLIGHT, ActionType.SOUND_SETTINGS -> {
+                                // No requieren parámetros adicionales
+                            }
+                            ActionType.OPEN_APP -> {
+                                val selectedApp = installedApps.firstOrNull { it.packageName == block.parameter }
+                                val displayName = selectedApp?.name ?: if (block.parameter.isNotBlank()) block.parameter else "Toca para elegir app..."
+
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .clickable { appPickerTargetIndex = index }
+                                        .border(1.dp, blockColor.copy(alpha = 0.5f), RoundedCornerShape(14.dp)),
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(14.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.weight(1f),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(36.dp)
+                                                    .background(blockColor.copy(alpha = 0.15f), CircleShape),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(Icons.Filled.Apps, contentDescription = null, tint = blockColor, modifier = Modifier.size(20.dp))
+                                            }
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                            Column {
+                                                Text(
+                                                    text = displayName,
+                                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = if (block.parameter.isBlank()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                )
+                                                if (block.parameter.isNotBlank()) {
+                                                    Text(
+                                                        text = block.parameter,
+                                                        style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.outline),
+                                                        maxLines = 1
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        Button(
+                                            onClick = { appPickerTargetIndex = index },
+                                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                            shape = RoundedCornerShape(10.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = blockColor),
+                                            modifier = Modifier.height(34.dp)
+                                        ) {
+                                            Text(if (block.parameter.isBlank()) "Elegir" else "Cambiar", fontSize = 12.sp)
+                                        }
+                                    }
+                                }
+                            }
+                            ActionType.SET_VOLUME -> {
+                                val currentVolume = block.parameter.trim().removeSuffix("%").toIntOrNull()?.coerceIn(0, 100) ?: 70
+                                val volIcon = when {
+                                    currentVolume == 0 -> Icons.Filled.VolumeMute
+                                    currentVolume <= 40 -> Icons.Filled.VolumeDown
+                                    else -> Icons.Filled.VolumeUp
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .border(1.dp, blockColor.copy(alpha = 0.4f), RoundedCornerShape(14.dp)),
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(14.dp)
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(volIcon, contentDescription = null, tint = blockColor, modifier = Modifier.size(20.dp))
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = "Nivel de volumen",
+                                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                                                )
+                                            }
+                                            Box(
+                                                modifier = Modifier
+                                                    .background(blockColor.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                                            ) {
+                                                Text(
+                                                    text = "$currentVolume%",
+                                                    style = MaterialTheme.typography.labelMedium.copy(
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = blockColor
+                                                    )
+                                                )
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(6.dp))
+
+                                        Slider(
+                                            value = currentVolume.toFloat(),
+                                            onValueChange = { newVal ->
+                                                actionBlocks[index] = block.copy(parameter = newVal.roundToInt().toString())
+                                            },
+                                            valueRange = 0f..100f,
+                                            colors = SliderDefaults.colors(
+                                                thumbColor = blockColor,
+                                                activeTrackColor = blockColor
+                                            ),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text("0% (Silencio)", style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.outline, fontSize = 10.sp))
+                                            Text("50%", style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.outline, fontSize = 10.sp))
+                                            Text("100% (Máx)", style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.outline, fontSize = 10.sp))
+                                        }
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        // Presets rápidos para un toque rápido en teléfono móvil
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            listOf(0 to "Mute", 30 to "30%", 70 to "70%", 100 to "100%").forEach { (presetVal, label) ->
+                                                val isPresetActive = currentVolume == presetVal
+                                                Surface(
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .clip(RoundedCornerShape(8.dp))
+                                                        .clickable {
+                                                            actionBlocks[index] = block.copy(parameter = presetVal.toString())
+                                                        }
+                                                        .border(
+                                                            width = 1.dp,
+                                                            color = if (isPresetActive) blockColor else MaterialTheme.colorScheme.outlineVariant,
+                                                            shape = RoundedCornerShape(8.dp)
+                                                        ),
+                                                    color = if (isPresetActive) blockColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                                    shape = RoundedCornerShape(8.dp)
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier.padding(vertical = 6.dp),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Text(
+                                                            text = label,
+                                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                                fontWeight = if (isPresetActive) FontWeight.Bold else FontWeight.Normal,
+                                                                color = if (isPresetActive) blockColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                                fontSize = 11.sp
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else -> {
+                                Spacer(modifier = Modifier.height(10.dp))
+                                val isLua = currentActionType == ActionType.LUA_SCRIPT
+                                OutlinedTextField(
+                                    value = block.parameter,
+                                    onValueChange = { newParam ->
+                                        actionBlocks[index] = block.copy(parameter = newParam)
+                                    },
+                                    label = { Text(currentActionType.paramLabel, fontSize = 12.sp) },
+                                    singleLine = !isLua,
+                                    minLines = if (isLua) 4 else 1,
+                                    maxLines = if (isLua) 10 else 1,
+                                    shape = RoundedCornerShape(12.dp),
+                                    textStyle = if (isLua) androidx.compose.ui.text.TextStyle(
+                                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                                        fontSize = 12.sp
+                                    ) else MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
                         }
                     }
                 }

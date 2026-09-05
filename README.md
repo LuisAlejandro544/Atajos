@@ -9,9 +9,12 @@ Diseñada para ser ligera, ultra-rápida y 100% funcional en dispositivos móvil
 ## 🚀 Características Principales
 
 - **Atajos Multi-Bloque en Cadena y Bloque de Espera**:
-  - Encadena múltiples acciones en un solo atajo (por ejemplo: activar linterna, esperar tiempo personalizado, copiar texto de aviso y abrir mapas).
+  - Encadena múltiples acciones en un solo atajo (por ejemplo: activar linterna, esperar tiempo personalizado, ajustar volumen multimedia al 70%, abrir una aplicación específica y lanzar mapas).
   - Pausa exacta y calibrada por defecto de **1003 ms** entre bloques para garantizar que Android procese cada Intent sin colisiones ni descartes de eventos.
   - Bloque de acción **"Esperar (Pausa)" (`WAIT`)**: permite definir tiempos de espera personalizados en milisegundos para atajos que requieran pausas más largas o más cortas que el valor estándar.
+  - Bloque de acción **"Abrir Aplicación" (`OPEN_APP`)**: selector interactivo con buscador en vivo que lista todas las aplicaciones instaladas en el dispositivo móvil para abrirlas al instante.
+  - Bloque de acción **"Ajustar Volumen" (`SET_VOLUME`)**: control deslizante interactivo (*Slider 0-100%*) con indicador visual de decibelios y botones de acceso rápido (*Mute, 30%, 70%, 100%*) adaptados a dedos en pantalla táctil.
+  - Bloque de acción **"Abrir Sitio Web" (`OPEN_URL`)**: lanzamiento fluido de direcciones URL en el navegador predeterminado del sistema.
   - **Orden de cuadrícula estable**: los atajos conservan su posición exacta en pantalla tras ser ejecutados, evitando saltos molestos hacia la parte superior.
 - **Motor de Scripting Lua 5.4.7 Puro (Nativo en C)**:
   - Compilado nativamente para arquitecturas móviles (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`) mediante Android NDK y CMake (`libnative-lua.so`).
@@ -22,6 +25,8 @@ Diseñada para ser ligera, ultra-rápida y 100% funcional en dispositivos móvil
     - Enteros nativos de 64 bits y operadores a nivel de bits (`&`, `|`, `~`, `>>`, `<<`).
     - Manipulación completa de cadenas, tablas y funciones matemáticas.
   - Funciones de Android integradas mediante bindings JNI:
+    - `open_app(paquete)`: Abre cualquier app instalada en el dispositivo mediante su identificador de paquete.
+    - `set_volume(porcentaje)`: Modifica directamente el volumen del flujo multimedia (0 a 100%).
     - `flashlight()` / `flashlight(bool)`: Controla la linterna física.
     - `copy(texto)`: Copia contenido al portapapeles.
     - `open_url(url)`: Abre enlaces en el navegador web.
@@ -36,10 +41,13 @@ Diseñada para ser ligera, ultra-rápida y 100% funcional en dispositivos móvil
 - **Síntesis de Voz Nativa del Sistema (Text-to-Speech)**:
   - Bloque visual `SPEAK` ("Texto a Voz") que reproduce anuncios y confirmaciones habladas en español y según el motor configurado por el usuario (Google TTS, Samsung TTS, etc.).
 - **Herramientas de Depuración Integradas (Mobile-First Debugging)**:
+  - **Infinum DbInspector (6.0.0)**: Interfaz gráfica autónoma en el dispositivo para inspeccionar y editar directamente los archivos de base de datos SQLite y Room (`.db`), ver tablas, columnas, registros y ejecutar consultas SQL en tiempo real.
+  - **Hyperion-Android (0.9.38)**: Menú lateral de inspección de interfaz activable con gesto deslizante o agitación del teléfono, con plugins de medición dimensional en pantalla (*Measurement*) y capturador de fallos (*Crash*).
+  - **ANR-WatchDog (1.4.0)**: Guardián de rendimiento del hilo principal (UI Thread) para detectar bloqueos antes de que congelen la app.
   - **LeakCanary (2.14)**: App complementaria *"Leaks"* generada en el teléfono para inspeccionar fugas de memoria sin necesidad de PC.
   - **Chucker (4.1.0)**: Interfaz de inspección de peticiones de red accesible desde la barra de notificaciones y desde el menú contextual superior.
   - **Lua Debug Library (5.4.7)**: Introspección nativa en C++ con `debug.traceback` para reportar archivos y líneas exactas en caso de errores en scripts.
-  - Scripts modulares independientes en `./scripts/` (`setup_leakcanary.sh`, `setup_chucker.sh`, `setup_lua_debug.sh`) integrados en el flujo de compilación de GitHub Actions.
+  - Scripts modulares independientes en `./scripts/` (`setup_dbinspector.sh`, `setup_hyperion.sh`, `setup_anr_watchdog.sh`, `setup_leakcanary.sh`, `setup_chucker.sh`, `setup_lua_debug.sh`) integrados en el flujo de compilación de GitHub Actions.
 - **Interfaz iOS-Inspired Ultra HD con Material Design 3**:
   - Tarjetas de atajos con gradientes multicapa de 3 paradas cromáticas y bordes con brillo de luz especular (*Border Glow*).
   - Sombras volumétricas coloreadas proyectadas con el tono ambiental de cada atajo (`ambientColor` y `spotColor`).

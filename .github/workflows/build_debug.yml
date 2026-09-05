@@ -50,6 +50,15 @@ jobs:
       - name: 🌐 Descargar y preparar Chucker para APK Debug
         run: ./scripts/setup_chucker.sh
 
+      - name: 🗄️ Descargar y preparar DbInspector para APK Debug
+        run: ./scripts/setup_dbinspector.sh
+
+      - name: 🎛️ Descargar y preparar Hyperion para APK Debug
+        run: ./scripts/setup_hyperion.sh
+
+      - name: 🛡️ Descargar y preparar ANR-WatchDog para APK Debug
+        run: ./scripts/setup_anr_watchdog.sh
+
       - name: 🚀 Compilar APK Debug (Sin Caché)
         run: ./scripts/build_apk_debug.sh
 

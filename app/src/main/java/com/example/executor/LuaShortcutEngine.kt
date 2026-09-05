@@ -86,6 +86,18 @@ class LuaShortcutEngine(
     }
 
     @Suppress("unused")
+    fun onOpenApp(packageName: String) {
+        val result = executor.executeSingleBlock("OPEN_APP", packageName)
+        logs.add(result.message)
+    }
+
+    @Suppress("unused")
+    fun onSetVolume(percent: Int) {
+        val result = executor.executeSingleBlock("SET_VOLUME", percent.toString())
+        logs.add(result.message)
+    }
+
+    @Suppress("unused")
     fun onMap(query: String) {
         val result = executor.executeSingleBlock("MAP_NAV", query)
         logs.add(result.message)

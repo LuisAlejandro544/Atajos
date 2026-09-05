@@ -10,6 +10,23 @@ class ShortcutsApp : Application() {
     override fun onCreate() {
         super.onCreate()
         initNetworkClient()
+        initAnrWatchDog()
+    }
+
+    private fun initAnrWatchDog() {
+        try {
+            // ANR-WatchDog vigila el hilo de interfaz (UI Thread) y registra trazas completas si hay bloqueos
+            val watchdogClass = Class.forName("com.github.anrwatchdog.ANRWatchDog")
+            val constructor = watchdogClass.getConstructor(Int::class.javaPrimitiveType)
+            val watchdogInstance = constructor.newInstance(4000) // 4 segundos de umbral antes de ANR
+            val startMethod = watchdogClass.getMethod("start")
+            startMethod.invoke(watchdogInstance)
+            Log.d("ShortcutsApp", "ANR-WatchDog inicializado exitosamente (umbral: 4000ms).")
+        } catch (_: ClassNotFoundException) {
+            // Ausente en variantes release si no estuviera incluido
+        } catch (e: Throwable) {
+            Log.w("ShortcutsApp", "No se pudo iniciar ANR-WatchDog: ${e.message}")
+        }
     }
 
     private fun initNetworkClient() {

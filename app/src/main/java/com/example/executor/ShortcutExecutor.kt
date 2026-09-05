@@ -7,6 +7,7 @@ import android.content.Intent
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.VibrationEffect
@@ -19,6 +20,7 @@ import com.example.data.model.ActionBlock
 import com.example.data.model.ActionType
 import com.example.data.model.ShortcutEntity
 import java.util.Locale
+import kotlin.math.roundToInt
 
 data class ExecutionResult(
     val success: Boolean,
@@ -66,7 +68,9 @@ class ShortcutExecutor(private val context: Context) {
         return try {
             when (actionTypeStr) {
                 ActionType.FLASHLIGHT.name -> toggleFlashlight()
+                ActionType.OPEN_APP.name -> openApp(parameter)
                 ActionType.OPEN_URL.name -> openUrl(parameter)
+                ActionType.SET_VOLUME.name -> setVolume(parameter)
                 ActionType.COPY_TEXT.name -> copyToClipboard(parameter)
                 ActionType.MAP_NAV.name -> openMapNavigation(parameter)
                 ActionType.SET_TIMER.name -> setTimer(parameter)
@@ -124,6 +128,33 @@ class ShortcutExecutor(private val context: Context) {
             ExecutionResult(false, "Flash inaccesible: ${e.message}")
         } catch (e: Exception) {
             ExecutionResult(false, "Error con linterna: ${e.message}")
+        }
+    }
+
+    private fun openApp(packageNameParam: String): ExecutionResult {
+        val pkg = packageNameParam.trim()
+        if (pkg.isEmpty()) {
+            return ExecutionResult(false, "No se seleccionó ninguna aplicación")
+        }
+        return try {
+            val pm = context.packageManager
+            val intent = pm.getLaunchIntentForPackage(pkg)?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            if (intent != null) {
+                context.startActivity(intent)
+                val label = try {
+                    val appInfo = pm.getApplicationInfo(pkg, 0)
+                    pm.getApplicationLabel(appInfo).toString()
+                } catch (_: Exception) {
+                    pkg
+                }
+                ExecutionResult(true, "Abriendo $label")
+            } else {
+                ExecutionResult(false, "App no disponible o desinstalada: $pkg")
+            }
+        } catch (e: Exception) {
+            ExecutionResult(false, "Error al abrir app: ${e.localizedMessage ?: "Fallo"}")
         }
     }
 
@@ -212,6 +243,23 @@ class ShortcutExecutor(private val context: Context) {
         }
         context.startActivity(intent)
         return ExecutionResult(true, "Ajustes de sonido abiertos")
+    }
+
+    private fun setVolume(percentParam: String): ExecutionResult {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            ?: return ExecutionResult(false, "Control de volumen no disponible")
+
+        val cleanParam = percentParam.trim().removeSuffix("%")
+        val percent = cleanParam.toIntOrNull()?.coerceIn(0, 100) ?: 70
+        val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        val targetVol = ((percent / 100f) * maxVol).roundToInt().coerceIn(0, maxVol)
+
+        return try {
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetVol, AudioManager.FLAG_SHOW_UI)
+            ExecutionResult(true, "Volumen ajustado al $percent%")
+        } catch (e: Exception) {
+            ExecutionResult(false, "Error al configurar volumen: ${e.localizedMessage ?: "Fallo"}")
+        }
     }
 
     private fun shareText(text: String): ExecutionResult {

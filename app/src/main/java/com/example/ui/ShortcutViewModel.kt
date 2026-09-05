@@ -368,6 +368,19 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
                     category = "Navegación"
                 ),
                 ShortcutEntity(
+                    title = "Ajustar Volumen",
+                    description = "Fija volumen multimedia al 70%",
+                    colorHex = "#34C759",
+                    iconKey = "VOLUME",
+                    actionType = ActionType.SET_VOLUME.name,
+                    actions = listOf(
+                        ActionBlock(actionType = ActionType.SET_VOLUME.name, parameter = "70", customLabel = "Volumen al 70%")
+                    ),
+                    parameter = "70",
+                    isFavorite = false,
+                    category = "Utilidades"
+                ),
+                ShortcutEntity(
                     title = "Mensaje Rápido",
                     description = "Copia y abre envío",
                     colorHex = "#00C7BE",

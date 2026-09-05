@@ -17,10 +17,19 @@ Plan de evolución técnica y funcional para la aplicación de atajos y automati
 - [x] Ordenamiento de atajos estable en la interfaz (los atajos ya no se mueven hacia arriba al ejecutarse).
 - [x] Integración de **Lua 5.4.7 puro** en código C oficial compilado con Android NDK 27 y CMake 3.22.1 (`libnative-lua.so`), sin intérpretes ni wrappers en Java.
 - [x] Soporte para características avanzadas de Lua 5.4 (`<const>`, `<close>`, enteros nativos de 64 bits, recolección generacional).
-- [x] Puente JNI de APIs de Android expuestas a Lua (`flashlight`, `copy`, `open_url`, `map`, `timer`, `message`, `sound_settings`, `share`, `speak`, `get_hour`, `print`).
+- [x] Puente JNI de APIs de Android expuestas a Lua (`open_app`, `set_volume`, `flashlight`, `copy`, `open_url`, `map`, `timer`, `message`, `sound_settings`, `share`, `speak`, `get_hour`, `print`).
+- [x] Bloque de acción **"Abrir Aplicación" (`OPEN_APP`)**: selector visual de aplicaciones instaladas en el dispositivo con buscador en vivo y resolución de actividades de lanzamiento.
+- [x] Bloque de acción **"Ajustar Volumen" (`SET_VOLUME`)**: control deslizable táctil (*Slider*) con escala porcentual (0-100%), feedback dinámico y accesos rápidos ergonómicos para teléfonos móviles.
+- [x] Bloque de acción **"Abrir Sitio Web" (`OPEN_URL`)**: apertura directa de enlaces en el navegador predeterminado.
 - [x] Motor de síntesis de voz (Texto a Voz / TTS) nativo del sistema operativo Android integrado como bloque visual (`SPEAK`) y como función nativa en Lua (`speak(texto)`).
-- [x] Herramientas de depuración móvil integradas: LeakCanary 2.14 (app 'Leaks' para análisis de memoria), Chucker 4.1.0 (inspector de red HTTP en pantalla) y Lua Debug Library 5.4.7 (`debug.traceback`).
-- [x] Scripts modulares de preparación (`setup_leakcanary.sh`, `setup_chucker.sh`, `setup_lua_debug.sh`) integrados en el pipeline CI/CD de GitHub Actions.
+- [x] Herramientas de depuración móvil integradas:
+  * **Infinum DbInspector (6.0.0)**: explorador visual y editor interactivo de archivos de base de datos `.db` (Room/SQLite) en pantalla.
+  * **Hyperion-Android (0.9.38)**: cajón lateral de depuración accesible por gesto táctil con módulos de medición de vistas y reporte de fallos.
+  * **ANR-WatchDog (1.4.0)**: monitorización continua del UI Thread para capturar y registrar bloqueos antes de que se produzca un ANR.
+  * **LeakCanary (2.14)**: app 'Leaks' para análisis autónomo de memoria y fugas en el dispositivo.
+  * **Chucker (4.1.0)**: inspector de tráfico de red HTTP en pantalla y notificaciones.
+  * **Lua Debug Library (5.4.7)**: introspección nativa en C++ con `debug.traceback`.
+- [x] Scripts modulares de preparación (`setup_dbinspector.sh`, `setup_hyperion.sh`, `setup_anr_watchdog.sh`, `setup_leakcanary.sh`, `setup_chucker.sh`, `setup_lua_debug.sh`) integrados en el pipeline CI/CD de GitHub Actions.
 - [x] Interfaz Ultra HD e inspiración iOS: gradientes multicapa, sombras volumétricas con tinte ambiental, bordes con brillo especular y badges con Glassmorphism.
 - [x] Rediseño ergonómico de bloques de acción: tarjetas con acento cromático temático y selector desplegable compacto tipo píldora (Dropdown Picker) sustituyendo el carrusel horizontal.
 - [x] Editor de código multi-línea con fuente monoespaciada para scripts en el modal de edición.

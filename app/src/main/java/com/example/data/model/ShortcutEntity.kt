@@ -5,7 +5,9 @@ import androidx.room.PrimaryKey
 
 enum class ActionType(val label: String, val defaultParam: String, val paramLabel: String) {
     FLASHLIGHT("Alternar Linterna", "", "Sin parámetros necesarios"),
+    OPEN_APP("Abrir Aplicación", "", "Paquete o aplicación a abrir"),
     OPEN_URL("Abrir Sitio Web", "https://google.com", "URL a abrir (ej: https://...)"),
+    SET_VOLUME("Ajustar Volumen", "70", "Nivel de volumen en porcentaje (0-100%)"),
     COPY_TEXT("Copiar al Portapapeles", "Texto importante de ejemplo", "Texto a copiar"),
     MAP_NAV("Navegar en Mapas", "Estación Central", "Destino o dirección"),
     SET_TIMER("Ajustar Temporizador", "5", "Minutos para el temporizador"),
