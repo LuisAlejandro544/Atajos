@@ -1,0 +1,33 @@
+package com.example.data.model
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+enum class ActionType(val label: String, val defaultParam: String, val paramLabel: String) {
+    FLASHLIGHT("Alternar Linterna", "", "Sin parámetros necesarios"),
+    OPEN_URL("Abrir Sitio Web", "https://google.com", "URL a abrir (ej: https://...)"),
+    COPY_TEXT("Copiar al Portapapeles", "Texto importante de ejemplo", "Texto a copiar"),
+    MAP_NAV("Navegar en Mapas", "Estación Central", "Destino o dirección"),
+    SET_TIMER("Ajustar Temporizador", "5", "Minutos para el temporizador"),
+    SEND_MESSAGE("Mensaje Rápido", "¡Hola! Te escribo en un momento.", "Mensaje a enviar"),
+    SOUND_SETTINGS("Ajustes de Sonido", "", "Abre el panel de audio del sistema"),
+    SHARE_TEXT("Compartir Texto", "¡Mira este atajo increíble!", "Texto a compartir"),
+    LUA_SCRIPT("Script en Lua", "local hora = get_hour()\nif hora >= 20 then\n  flashlight()\n  return 'Hora nocturna: linterna'\nelse\n  copy('¡Hola desde Lua!')\n  return 'Hora diurna: texto copiado'\nend", "Código Lua a ejecutar")
+}
+
+@Entity(tableName = "shortcuts")
+data class ShortcutEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val title: String,
+    val description: String,
+    val colorHex: String,
+    val iconKey: String,
+    val actionType: String,
+    val actions: List<ActionBlock> = emptyList(),
+    val parameter: String = "",
+    val isFavorite: Boolean = false,
+    val category: String = "General",
+    val executionCount: Int = 0,
+    val createdAt: Long = System.currentTimeMillis()
+)

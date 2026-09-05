@@ -1,0 +1,6 @@
+{
+  "name": "Atajos",
+  "description": "Crea y ejecuta atajos rápidos y acciones automáticas en tu teléfono con un solo toque.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

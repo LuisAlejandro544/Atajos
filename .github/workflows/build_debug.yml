@@ -1,0 +1,63 @@
+name: Build Debug APK (Sin Caché)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-debug:
+    name: Compilar APK Debug
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: ☕ Configurar Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: 📱 Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 🔑 Dar permisos de ejecución a los scripts
+        run: |
+          chmod +x scripts/*.sh
+          if [ -f "./gradlew" ]; then chmod +x ./gradlew; fi
+
+      - name: 🔐 Generar o verificar Android Debug Keystore
+        run: ./scripts/generate_keystore.sh
+
+      - name: 🛠️ Instalar y configurar CMake 3.22.1 y NDK 27
+        run: ./scripts/setup_cmake.sh
+
+      - name: 📥 Descargar y preparar fuentes de Lua 5.4.7 puro
+        run: ./scripts/setup_lua.sh
+
+      - name: 🚀 Compilar APK Debug (Sin Caché)
+        run: ./scripts/build_apk_debug.sh
+
+      - name: 📦 Subir APK Debug como Artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
