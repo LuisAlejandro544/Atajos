@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -26,7 +28,9 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material3.DropdownMenu
@@ -40,11 +44,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,12 +63,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.example.debug.DebugActivity
 import com.example.ui.components.ExecutionBanner
 import com.example.ui.components.ShortcutCard
 import com.example.ui.components.ShortcutEditSheet
+import com.example.ui.components.TtsEngineSettingsDialog
 import com.example.ui.components.dialogs.UserPromptDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,11 +83,8 @@ fun ShortcutScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val installedApps by viewModel.installedApps.collectAsStateWithLifecycle()
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-        confirmValueChange = { false }
-    )
     var showTopMenu by remember { mutableStateOf(false) }
+    var showTtsSettingsDialog by remember { mutableStateOf(false) }
 
     val categories = listOf("Todos", "Favoritos", "Utilidades", "Productividad", "Comunicación", "Viajes")
 
@@ -177,6 +181,16 @@ fun ShortcutScreen(
                                 onDismissRequest = { showTopMenu = false }
                             ) {
                                 DropdownMenuItem(
+                                    text = { Text("Síntesis de Voz (Piper TTS)") },
+                                    leadingIcon = {
+                                        Icon(Icons.Filled.RecordVoiceOver, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                                    },
+                                    onClick = {
+                                        showTopMenu = false
+                                        showTtsSettingsDialog = true
+                                    }
+                                )
+                                DropdownMenuItem(
                                     text = { Text("Telemetría & Historial Debug") },
                                     leadingIcon = {
                                         Icon(Icons.Filled.Timeline, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -206,6 +220,22 @@ fun ShortcutScreen(
                                         showTopMenu = false
                                         try {
                                             val intent = com.chuckerteam.chucker.api.Chucker.getLaunchIntent(context)
+                                            context.startActivity(intent)
+                                        } catch (_: Exception) {}
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Abrir DbInspector (Base de datos)") },
+                                    leadingIcon = {
+                                        Icon(Icons.Filled.Storage, contentDescription = null)
+                                    },
+                                    onClick = {
+                                        showTopMenu = false
+                                        try {
+                                            val intent = Intent().apply {
+                                                setClassName(context.packageName, "com.infinum.dbinspector.ui.databases.DatabasesActivity")
+                                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                            }
                                             context.startActivity(intent)
                                         } catch (_: Exception) {}
                                     }
@@ -400,28 +430,44 @@ fun ShortcutScreen(
             )
         }
 
-        // Bottom Sheet for Create / Edit
+        // Modal de Creación / Edición de Atajo (Solo se cierra con la X)
         if (uiState.isSheetOpen) {
-            ShortcutEditSheet(
-                sheetState = sheetState,
-                initialShortcut = uiState.editingShortcut,
-                installedApps = installedApps,
-                onDismiss = { viewModel.closeSheet() },
-                onSave = { title, description, colorHex, iconKey, actions, category, isFavorite ->
-                    viewModel.saveShortcut(
-                        title = title,
-                        description = description,
-                        colorHex = colorHex,
-                        iconKey = iconKey,
-                        actions = actions,
-                        category = category,
-                        isFavorite = isFavorite
+            Dialog(
+                onDismissRequest = { /* No-op: Se cierra exclusivamente con el botón X */ },
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    dismissOnBackPress = false,
+                    dismissOnClickOutside = false
+                )
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding()
+                        .navigationBarsPadding(),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    ShortcutEditSheet(
+                        initialShortcut = uiState.editingShortcut,
+                        installedApps = installedApps,
+                        onDismiss = { viewModel.closeSheet() },
+                        onSave = { title, description, colorHex, iconKey, actions, category, isFavorite ->
+                            viewModel.saveShortcut(
+                                title = title,
+                                description = description,
+                                colorHex = colorHex,
+                                iconKey = iconKey,
+                                actions = actions,
+                                category = category,
+                                isFavorite = isFavorite
+                            )
+                        },
+                        onDelete = { shortcut ->
+                            viewModel.deleteShortcut(shortcut)
+                        }
                     )
-                },
-                onDelete = { shortcut ->
-                    viewModel.deleteShortcut(shortcut)
                 }
-            )
+            }
         }
 
         // Modal de Interacción con el Usuario ("Preguntar antes de continuar")
@@ -433,6 +479,14 @@ fun ShortcutScreen(
                 config = prompt.config,
                 onConfirm = { prompt.onResponse(true) },
                 onCancel = { prompt.onResponse(false) }
+            )
+        }
+
+        // Modal de Configuración de Motores de Síntesis de Voz (Piper TTS)
+        if (showTtsSettingsDialog) {
+            TtsEngineSettingsDialog(
+                onDismissRequest = { showTtsSettingsDialog = false },
+                context = context
             )
         }
     }

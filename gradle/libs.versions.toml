@@ -46,6 +46,7 @@ dbinspector = "6.0.0"
 hyperion = "0.9.38"
 anrwatchdog = "1.4.0"
 exifinterface = "1.3.7"
+onnxruntime = "1.18.0"
 
 
 [libraries]
@@ -112,6 +113,7 @@ hyperion-measurement = { group = "com.willowtreeapps.hyperion", name = "hyperion
 hyperion-crash = { group = "com.willowtreeapps.hyperion", name = "hyperion-crash", version.ref = "hyperion" }
 anrwatchdog = { group = "com.github.anrwatchdog", name = "anrwatchdog", version.ref = "anrwatchdog" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+onnxruntime-android = { group = "com.microsoft.onnxruntime", name = "onnxruntime-android", version.ref = "onnxruntime" }
 
 
 [plugins]

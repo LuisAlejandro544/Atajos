@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -25,19 +26,16 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SheetState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -60,10 +58,8 @@ import com.example.data.model.InstalledAppItem
 import com.example.data.model.ShortcutEntity
 import com.example.ui.components.dialogs.AppPickerDialog
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShortcutEditSheet(
-    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     initialShortcut: ShortcutEntity? = null,
     installedApps: List<InstalledAppItem> = emptyList(),
     onDismiss: () -> Unit,
@@ -131,22 +127,22 @@ fun ShortcutEditSheet(
         )
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        containerColor = MaterialTheme.colorScheme.surface
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 32.dp)
+                .padding(bottom = 24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Header
+            // Header con botón X explícito
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -154,10 +150,15 @@ fun ShortcutEditSheet(
                     text = if (initialShortcut == null) "Nuevo Atajo Multi-Bloque" else "Editar Atajo",
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
                 )
-                IconButton(onClick = onDismiss) {
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.testTag("close_edit_sheet_button")
+                ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = "Cerrar"
+                        contentDescription = "Cerrar",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(28.dp)
                     )
                 }
             }

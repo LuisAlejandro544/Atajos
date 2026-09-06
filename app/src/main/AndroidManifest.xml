@@ -34,6 +34,8 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.example"
             android:theme="@style/Theme.MyApplication">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,12 +44,14 @@
             </intent-filter>
         </activity>
 
-        <!-- App complementaria de Telemetría y Debug con acceso directo desde el Launcher -->
+        <!-- App complementaria de Telemetría y Debug con acceso directo desde el Launcher y taskAffinity aislada -->
         <activity
             android:name=".debug.DebugActivity"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:label="Telemetría Atajos"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.example.debug"
             android:theme="@style/Theme.MyApplication">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

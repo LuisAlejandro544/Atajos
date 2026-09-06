@@ -5,6 +5,37 @@ echo "=========================================================="
 echo "🧪 [4/4] Instalación y Prueba de Estrés en Android 10 (32-bit)"
 echo "=========================================================="
 
+# Auto-detección del Android SDK y configuración robusta de PATH
+ANDROID_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+if [ -z "${ANDROID_ROOT}" ]; then
+    if [ -d "/usr/local/lib/android/sdk" ]; then
+        ANDROID_ROOT="/usr/local/lib/android/sdk"
+    elif [ -d "/opt/android/sdk" ]; then
+        ANDROID_ROOT="/opt/android/sdk"
+    elif [ -d "${HOME}/Android/Sdk" ]; then
+        ANDROID_ROOT="${HOME}/Android/Sdk"
+    fi
+fi
+
+if [ -n "${ANDROID_ROOT}" ]; then
+    export ANDROID_HOME="${ANDROID_ROOT}"
+    export ANDROID_SDK_ROOT="${ANDROID_ROOT}"
+    export PATH="${ANDROID_ROOT}/platform-tools:${ANDROID_ROOT}/emulator:${PATH}"
+fi
+
+# Localizar binario de adb
+ADB_CMD=""
+if command -v adb >/dev/null 2>&1; then
+    ADB_CMD="$(command -v adb)"
+elif [ -n "${ANDROID_ROOT:-}" ] && [ -x "${ANDROID_ROOT}/platform-tools/adb" ]; then
+    ADB_CMD="${ANDROID_ROOT}/platform-tools/adb"
+fi
+
+if [ -z "${ADB_CMD}" ]; then
+    echo "❌ Error crítico: No se encontró 'adb' en PATH ni en Android SDK."
+    exit 1
+fi
+
 APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
 PACKAGE_NAME="com.example"
 
@@ -14,7 +45,7 @@ if [ ! -f "${APK_PATH}" ]; then
 fi
 
 echo ">> [Paso 1/6] Instalando APK Debug en el emulador de 32 bits..."
-adb install -r -t "${APK_PATH}"
+"${ADB_CMD}" install -r -t "${APK_PATH}"
 echo "✅ APK instalado satisfactoriamente en el entorno de 32 bits."
 
 echo ""

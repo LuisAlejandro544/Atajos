@@ -297,6 +297,7 @@ fun ActionBlockCard(
                     SpeakBlockEditor(
                         parameter = block.parameter,
                         blockColor = blockColor,
+                        context = context,
                         onParameterChange = { newParam ->
                             onBlockChange(block.copy(parameter = newParam))
                         }

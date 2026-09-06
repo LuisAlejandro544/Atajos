@@ -40,7 +40,7 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
    │           ├── AudioActionHandler (Volumen multimedia y ajustes de audio)
    │           ├── NavigationActionHandler (Apertura de apps, URLs web y mapas)
    │           ├── CommunicationActionHandler (Portapapeles, mensajes, compartir, temporizador)
-   │           └── TtsManager (Gestión de TextToSpeech nativo con cola segura)
+   │           └── TtsManager (Enrutador multi-motor: Piper VITS, eSpeak-NG, Sistema)
    ├── NotificationHelper (Canales de notificación duales con bypass DND y sonido Pop)
    ├── VariableResolver (Resolución dinámica de {hora}, {dia}, {bateria}, {portapapeles})
    └── LuaShortcutEngine (Kotlin JNI Interface)
@@ -84,9 +84,11 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │   │   ├── start_emulator.sh                 # Arranque con KVM y sincronización de arranque con sys.boot_completed
 │   │   ├── start_web_tunnel.sh               # Inicia servidor x11vnc y túnel HTTPS Cloudflare para control móvil
 │   │   └── test_32bit.sh                     # Instalación de APK, pruebas de heap RAM, librerías 32-bit y screenshot
-│   └── lua/
-│       ├── setup_lua.sh                      # Descarga y extracción de fuentes oficiales de Lua 5.4.7
-│       └── setup_lua_debug.sh                # Verificación de Lua Debug Library e integración con native-lua.cpp
+│   ├── lua/
+│   │   ├── setup_lua.sh                      # Descarga y extracción de fuentes oficiales de Lua 5.4.7
+│   │   └── setup_lua_debug.sh                # Verificación de Lua Debug Library e integración con native-lua.cpp
+│   └── tts/
+│       └── setup_piper.sh                    # Descarga y verificación de activos y modelos Piper TTS
 ├── commit_message.txt                        # Mensaje de commit actual descriptivo en español
 ├── .env.example                               # Variables de entorno seguras
 ├── app/
@@ -96,7 +98,8 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │       ├── main/
 │       │   ├── AndroidManifest.xml           # Declaración de permisos de hardware (Flash, Vibración, Audio)
 │       │   ├── assets/
-│       │   │   └── espeakdata.zip            # Datos fonéticos y diccionarios para síntesis eSpeak
+│       │   │   ├── espeakdata.zip            # Datos fonéticos y diccionarios para síntesis eSpeak
+│       │   │   └── piper/                    # Modelo VITS es_ES-carlfm-x_low empaquetado (ONNX + JSON)
 │       │   ├── jniLibs/                      # Binarios nativos precompilados de TTS eSpeak
 │       │   │   ├── arm64-v8a/libttsespeak.so
 │       │   │   ├── armeabi-v7a/libttsespeak.so
@@ -104,7 +107,7 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │       │   │   └── x86_64/libttsespeak.so
 │       │   ├── cpp/                          # Capa Nativa C / C++
 │       │   │   ├── CMakeLists.txt            # Compilación de Lua y del puente JNI nativo
-│       │   │   ├── native-lua.cpp            # Bindings JNI entre Kotlin y Lua 5.4.7 con traceback
+│       │   │   ├── native-lua.cpp            # Bindings JNI entre Kotlin y Lua 5.4.7 con traceback y soporte TTS
 │       │   │   └── lua/                      # Código fuente oficial en C de Lua 5.4.7 (lapi, ldo, lvm, etc.)
 │       │   ├── res/
 │       │   │   ├── raw/
@@ -120,6 +123,12 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │       │   │       │   └── ImageCompressor.kt # Utilidad de compresión y procesamiento de imágenes
 │       │   │       ├── espeak/
 │       │   │       │   └── EspeakManager.kt  # Gestor de desempaquetado de assets y ciclo de voz eSpeak
+│       │   │       ├── piper/
+│       │   │       │   ├── PiperTtsManager.kt # Inferencia neuronal VITS en CPU con ONNX Runtime y AudioTrack
+│       │   │       │   └── PiperVoice.kt     # Definición y catálogo de modelos neuronales
+│       │   │       ├── tts/
+│       │   │       │   ├── TtsEngineType.kt  # Enum de motores (PIPER, ESPEAK, SYSTEM)
+│       │   │       │   └── TtsPreferences.kt # Almacén persistente de preferencias de voz y velocidad
 │       │   │       ├── data/
 │       │   │       │   ├── DefaultShortcuts.kt # Catálogo desacoplado de atajos predeterminados del sistema
 │       │   │       │   ├── db/
@@ -151,7 +160,7 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │       │   │       │       ├── AudioActionHandler.kt  # Volumen multimedia y ajustes de sonido
 │       │   │       │       ├── NavigationActionHandler.kt # Lanzamiento de apps, URLs web y Maps
 │       │   │       │       ├── CommunicationActionHandler.kt # Portapapeles, mensajes, compartir y timer
-│       │   │       │       ├── TtsManager.kt      # Encapsulación de TextToSpeech nativo y cola segura
+│       │   │       │       ├── TtsManager.kt      # Enrutador multiespecífico (Piper, eSpeak, Sistema) y fallback
 │       │   │       │       └── UserInteractionNotificationHelper.kt # Notificaciones interactivas de confirmación
 │       │   │       └── ui/
 │       │   │           ├── ShortcutScreen.kt     # Pantalla principal (TopBar, categorías, Grid de tarjetas)
@@ -162,6 +171,7 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │       │   │           │   ├── IconHelper.kt         # Catálogo de iconos vectoriales y paleta de colores
 │       │   │           │   ├── ShortcutCard.kt       # Tarjeta de atajo con glassmorphism y haptics
 │       │   │           │   ├── ShortcutEditSheet.kt  # BottomSheet orquestador de creación y edición
+│       │   │           │   ├── TtsEngineSettingsDialog.kt # Diálogo de configuración y prueba de motores TTS
 │       │   │           │   ├── dialogs/
 │       │   │           │   │   ├── AppPickerDialog.kt # Diálogo de selección de apps con buscador
 │       │   │           │   │   └── UserPromptDialog.kt # Modal interactivo con validación de palabra clave
@@ -169,7 +179,7 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │       │   │           │       ├── VolumeBlockEditor.kt # Editor de volumen con presets
 │       │   │           │       ├── BrightnessBlockEditor.kt # Editor táctil de brillo
 │       │   │           │       ├── NotificationBlockEditor.kt # Editor de sonido y variables de notificación
-│       │   │           │       ├── SpeakBlockEditor.kt # Editor de texto TTS con inserción de variables
+│       │   │           │       ├── SpeakBlockEditor.kt # Editor TTS con selección de motor, voz y variables
 │       │   │           │       ├── LuaScriptBlockEditor.kt # Editor monoespaciado para código Lua
 │       │   │           │       └── UserInteractionBlockEditor.kt # Editor del bloque de interacción (Notificación / Modal)
 │       │   │           └── theme/

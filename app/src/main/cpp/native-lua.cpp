@@ -159,13 +159,30 @@ static int l_share(lua_State* L) {
     return 0;
 }
 
-// Lua: speak(text)
+// Lua: speak(text, [engine], [voice])
 static int l_speak(lua_State* L) {
     const char* text = luaL_optstring(L, 1, "");
+    const char* engine = luaL_optstring(L, 2, "");
+    const char* voice = luaL_optstring(L, 3, "");
     if (g_ctx && g_ctx->env) {
         jstring jText = g_ctx->env->NewStringUTF(text);
-        callVoidMethod("onSpeak", "(Ljava/lang/String;)V", jText);
+        jstring jEngine = g_ctx->env->NewStringUTF(engine);
+        jstring jVoice = g_ctx->env->NewStringUTF(voice);
+        callVoidMethod("onSpeak", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", jText, jEngine, jVoice);
         g_ctx->env->DeleteLocalRef(jText);
+        g_ctx->env->DeleteLocalRef(jEngine);
+        g_ctx->env->DeleteLocalRef(jVoice);
+    }
+    return 0;
+}
+
+// Lua: set_tts_engine(engine)
+static int l_set_tts_engine(lua_State* L) {
+    const char* engine = luaL_optstring(L, 1, "PIPER");
+    if (g_ctx && g_ctx->env) {
+        jstring jEngine = g_ctx->env->NewStringUTF(engine);
+        callVoidMethod("onSetTtsEngine", "(Ljava/lang/String;)V", jEngine);
+        g_ctx->env->DeleteLocalRef(jEngine);
     }
     return 0;
 }
@@ -268,6 +285,7 @@ Java_com_example_executor_LuaShortcutEngine_nativeExecuteScript(
     lua_register(L, "sound_settings", l_sound_settings);
     lua_register(L, "share", l_share);
     lua_register(L, "speak", l_speak);
+    lua_register(L, "set_tts_engine", l_set_tts_engine);
     lua_register(L, "get_hour", l_get_hour);
     lua_register(L, "print", l_print);
 

@@ -1,15 +1,31 @@
-feat(ci): agregar emulación interactiva de Android 10 (32-bit) con streaming web noVNC y túnel Cloudflare
+fix(ui, debug): corregir cierre involuntario en creador de atajos e independizar tarea de DebugActivity
 
-- Reorganización de scripts bash en subcarpetas temáticas especializadas:
-  * scripts/apk/: 'build_apk_debug.sh' para compilación limpia del APK Debug sin dependencias de caché.
-  * scripts/build/: 'generate_keystore.sh' y 'setup_cmake.sh' para entorno de construcción nativo.
-  * scripts/lua/: 'setup_lua.sh' y 'setup_lua_debug.sh' para fuentes de Lua puro 5.4.7 e introspección de debug.
-  * scripts/audio/: 'convert_audio.sh' para transcodificación Vorbis OGG de cero latencia.
-  * scripts/debug/: 'setup_leakcanary.sh', 'setup_chucker.sh', 'setup_dbinspector.sh', 'setup_hyperion.sh' y 'setup_anr_watchdog.sh'.
-  * scripts/emulator/: 'setup_emulator_32bit.sh', 'setup_novnc.sh', 'start_emulator.sh', 'start_web_tunnel.sh' y 'test_32bit.sh'.
+- Editor/Creador de Atajos:
+  * Reemplazo de ModalBottomSheet por Dialog de pantalla completa con Surface contenedora y padding de barras del sistema (statusBars y navigationBars).
+  * Eliminación de temporizadores y gestos táctiles de arrastre hacia arriba/abajo ('swipe-to-dismiss') que provocaban el cierre automático o accidental al desplazarse.
+  * Restricción estricta de cierre: el formulario ahora permanece siempre activo y únicamente se descarta al pulsar explícitamente el botón 'X' (o al guardar/eliminar el atajo).
 
-- Implementación del workflow interactivo de GitHub Actions ('emulate_android10_32bit.yml'):
-  * Activación manual ('workflow_dispatch') con parámetro configurable 'interactive_minutes' (por defecto 15 minutos).
-  * Creación y arranque acelerado con KVM de un dispositivo virtual Android 10 (API 29) arquitectura pura de 32 bits (x86).
-  * Pruebas de estrés y diagnóstico: instalación de APK Debug, comprobación de heap RAM (32-bit), carga de librerías JNI nativas ('libnative-lua.so'), lanzamiento de MainActivity y DebugActivity, y captura de pantalla.
-  * Streaming web interactivo en vivo: despliegue de pantalla virtual Xvfb, servidor x11vnc, cliente HTML5 noVNC y túnel seguro Cloudflare ('trycloudflare.com') para navegar y controlar la app en vivo con el dedo desde un teléfono móvil sin necesidad de PC ni ADB local.
+- Herramienta de Telemetría y Depuración (DebugActivity):
+  * Configuración de 'taskAffinity="com.example.debug"' y 'launchMode="singleTask"' en AndroidManifest.xml para aislar completamente la pila de tareas de DebugActivity respecto a MainActivity.
+  * Eliminación de la interferencia al salir y reingresar a la aplicación original ('Atajos'), evitando que aparezca la pantalla de debug y eliminando la necesidad de forzar el cierre en segundo plano.
+  * Corrección de los Intents de arranque en QuickInspectorsRow: llamada oficial mediante Chucker.getLaunchIntent() (con fallback al paquete interno), ruta exacta de DbInspector ('com.infinum.dbinspector.ui.databases.DatabasesActivity') e integración directa de LeakCanary ('leakcanary.internal.activity.LeakActivity') con avisos Toast en caso de error.
+  * Incorporación de acceso directo a DbInspector en el menú contextual superior de la pantalla principal.
+
+- Integración de Síntesis de Voz Neuronal Offline Piper TTS (VITS):
+  * Adición de dependencia oficial 'onnxruntime-android' (1.19.2) en Gradle y catálogo TOML para inferencia en CPU local acelerada en Android.
+  * Implementación de PiperTtsManager con motor de fonemización nativo en español, mapeo de fonemas a IDs numéricos y reproducción continua con AudioTrack en PCM Float / 16-bit.
+  * Modelo en español empaquetado y listo para uso 100% offline ('es_ES-carlfm-x_low' a 16 kHz) en assets/piper/.
+  * Soporte de catálogo descargable para voces de alta resolución ('es_ES-davefx-medium' y 'es_ES-sharvard-medium' a 22.05 kHz) con monitoreo visual de progreso y descarga asíncrona mediante OkHttp.
+  * Enrutador centralizado TtsManager con soporte multi-motor y fallback automático: Piper TTS, eSpeak-NG y Síntesis del Sistema Android.
+  * Preferencias persistentes (TtsPreferences) y enum TtsEngineType para selección global de motor, voz preferida, velocidad y tono.
+  * Interfaz de usuario: nuevo diálogo de configuración 'TtsEngineSettingsDialog' accesible desde el menú principal de Atajos y desde DebugActivity con botón de preescucha en tiempo real.
+  * Editor de bloques de acción 'SpeakBlockEditor': selector de motor (Predeterminado, Piper, eSpeak, Sistema) y selección de voz para bloques individuales con botón de prueba rápida y chips de variables dinámicas.
+  * Extensión de bindings Lua: soporte ampliado en C++/JNI para 'speak(texto, motor, voz)' y nueva función nativa 'set_tts_engine(motor)'.
+  * Panel de diagnóstico y benchmark en DebugActivity: tarjeta 'TtsDiagnosticsCard' para medir latencia de inferencia y estado de modelos neuronales.
+  * Script de automatización 'scripts/tts/setup_piper.sh' para verificación y aprovisionamiento de modelos.
+
+- Corrección de Ejecución del Emulador Android 10 (32-bit x86) en GitHub Actions:
+  * Resolución del error 'emulator: command not found': exportación explícita de rutas de Android SDK ('$ANDROID_ROOT/emulator', 'platform-tools', 'cmdline-tools') tanto a '$GITHUB_PATH' en el workflow como mediante auto-detección dinámica en todos los scripts del emulador.
+  * Localización robusta del ejecutable 'emulator' y 'adb' con verificación previa de existencia y reporte detallado de rutas y variables de entorno ante posibles ausencias.
+  * Prevención de bloqueos indefinidos en 'adb wait-for-device': redirección completa de salida del emulador a '/tmp/emulator.log', verificación de vitalidad del proceso ('kill -0 $EMULATOR_PID') tras 3 segundos y bucle de sondeo con timeout explícito (120s para ADB y 300s para 'sys.boot_completed') que muestra los logs en consola de inmediato si el proceso muere.
+  * Persistencia de 'DISPLAY=:99' en '$GITHUB_ENV' durante la inicialización de noVNC y Xvfb para garantizar renderizado continuo en los pasos subsiguientes.

@@ -47,6 +47,14 @@ Plan de evolución técnica y funcional para la aplicación de atajos y automati
 - [x] Interfaz Ultra HD e inspiración iOS: gradientes multicapa, sombras volumétricas con tinte ambiental, bordes con brillo especular y badges con Glassmorphism.
 - [x] Rediseño ergonómico de bloques de acción: tarjetas con acento cromático temático y selector desplegable compacto tipo píldora (Dropdown Picker) sustituyendo el carrusel horizontal.
 - [x] Editor de código multi-línea con fuente monoespaciada para scripts en el modal de edición.
+- [x] Integración de **Síntesis Neuronal Offline Piper TTS (VITS)**:
+  * Inferencia local acelerada en CPU con **ONNX Runtime** (`onnxruntime-android`).
+  * Modelo en español empaquetado ('es_ES-carlfm-x_low' a 16 kHz) y voces descargables ('davefx' y 'sharvard' a 22.05 kHz).
+  * Diálogo de configuración global `TtsEngineSettingsDialog` con preescucha en vivo.
+  * Selector por bloque de acción `SpeakBlockEditor` (Predeterminado, Piper, eSpeak, Sistema).
+  * Nuevas funciones nativas de Lua: `speak(texto, motor, voz)` y `set_tts_engine(motor)`.
+  * Banco de diagnóstico y telemetría de latencia en `DebugActivity`.
+  * Script automatizado de verificación `scripts/tts/setup_piper.sh`.
 - [x] Suite de pruebas unitarias locales para ejecución secuencial y modelos de datos.
 - [x] Flujos CI/CD en GitHub Actions: compilación manual de APK Debug (`workflow_dispatch`) y reescritura de mensaje de commit desde `commit_message.txt`.
 

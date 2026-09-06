@@ -28,6 +28,9 @@ fi
 
 echo ">> [4/4] Iniciando Display Virtual Xvfb (:99) y gestor de ventanas ligero..."
 export DISPLAY=:99
+if [ -n "${GITHUB_ENV:-}" ] && [ -f "${GITHUB_ENV}" ]; then
+    echo "DISPLAY=:99" >> "${GITHUB_ENV}"
+fi
 Xvfb :99 -screen 0 800x1280x24 -retro &
 sleep 2
 

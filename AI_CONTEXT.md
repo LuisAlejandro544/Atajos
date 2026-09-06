@@ -43,7 +43,14 @@ Construir una aplicación nativa para Android en Kotlin y Jetpack Compose que em
    - **Abrir Aplicación (`OPEN_APP`)**: Diálogo visual (`AppPickerDialog`) con lista en memoria de aplicaciones instaladas obtenida mediante `PackageManager.queryIntentActivities(Intent.ACTION_MAIN, CATEGORY_LAUNCHER)` y buscador en tiempo real. Ejecuta el lanzamiento de la app seleccionada mediante `getLaunchIntentForPackage`.
    - **Ajustar Volumen (`SET_VOLUME`)**: Control deslizante interactivo (`Slider` de Jetpack Compose 0-100%) con indicador visual de decibelios y presets táctiles inmediatos (Mute, 30%, 70%, 100%) accionado por `AudioManager.STREAM_MUSIC`.
    - **Abrir Sitio Web (`OPEN_URL`)**: Manejo de enlaces y lanzamiento en el navegador por omisión con adición automática de esquemas si el usuario introduce una dirección corta.
-   - **Síntesis de Voz Nativa del Sistema (`SPEAK`)**: Implementada con `android.speech.tts.TextToSpeech`, aprovechando los paquetes de idiomas y motores de voz que el usuario ya tenga configurados en su dispositivo Android (Google TTS, Samsung TTS, etc.). Expuesta en Lua mediante `speak("texto")` y con soporte de variables dinámicas.
+   - **Síntesis de Voz Neuronal Offline (Piper TTS - VITS) y Sistema (`SPEAK`)**:
+     - Inferencia local en CPU con **ONNX Runtime** (`onnxruntime-android`), 100% offline y privada.
+     - Enrutador centralizado `TtsManager` con soporte tri-motor (Piper TTS, eSpeak-NG y Sistema Android).
+     - Modelo empaquetado en español (`es_ES-carlfm-x_low` a 16 kHz) y voces descargables ('davefx' y 'sharvard' a 22.05 kHz).
+     - Configuración global (`TtsEngineSettingsDialog`) y selector por bloque (`SpeakBlockEditor`).
+     - Bindings Lua: `speak(texto, motor, voz)` y `set_tts_engine(motor)`.
+     - Diagnóstico y medición de latencia en `DebugActivity`.
+     - Implementación con `android.speech.tts.TextToSpeech` como fallback seguro.
    - **Notificaciones Nativas con Bypass DND y Selector de Sonido (`NOTIFICATION`)**: Notificaciones prioritarias de sistema con `IMPORTANCE_HIGH`, `PRIORITY_MAX`, categoría alarma y `setBypassDnd(true)` para mostrar alertas incluso en modo No Molestar. Incluye selector para alternar entre el sonido original del sistema o el sonido 'Pop Notification' (CC0 de GabrielAraujo) en formato OGG Vorbis de latencia cero, con botón de preescucha interactiva en el editor.
    - **Pipeline de Audio sin Delay (`scripts/convert_audio.sh`)**: Conversión automática a OGG Vorbis con ffmpeg en el ciclo de compilación.
    - **Motor de Variables Dinámicas en Tiempo Real (`VariableResolver`)**: Sustitución dinámica de `{hora}`, `{hora_segundos}`, `{fecha}`, `{dia}`, `{bateria}` y `{portapapeles}` con chips táctiles en el editor.
