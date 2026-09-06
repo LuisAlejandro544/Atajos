@@ -345,7 +345,9 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
         iconKey: String,
         actions: List<ActionBlock>,
         category: String,
-        isFavorite: Boolean
+        isFavorite: Boolean,
+        triggerType: String = com.example.data.model.TriggerType.MANUAL.name,
+        backgroundImageUri: String? = null
     ) {
         viewModelScope.launch {
             val primaryAction = actions.firstOrNull()?.actionType ?: ActionType.OPEN_URL.name
@@ -366,7 +368,9 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
                         parameter = primaryParam,
                         category = category,
                         isFavorite = isFavorite,
-                        isCustom = true
+                        isCustom = true,
+                        triggerType = triggerType,
+                        backgroundImageUri = backgroundImageUri
                     )
                 )
             } else {
@@ -383,7 +387,9 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
                         parameter = primaryParam,
                         category = category,
                         isFavorite = isFavorite,
-                        isCustom = true
+                        isCustom = true,
+                        triggerType = triggerType,
+                        backgroundImageUri = backgroundImageUri
                     )
                 )
             }

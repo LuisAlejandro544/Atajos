@@ -10,43 +10,46 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 
 ```
 [ UI (Jetpack Compose) ]
-   ├── ShortcutScreen (Grid, Filtros, TopBar, Menú de herramientas)
+   ├── ShortcutScreen (Grid de 2 columnas, Filtros, TopBar, Menú de depuración)
    ├── components/
-   │     ├── ShortcutCard (Efectos hápticos, Glassmorphism, Insignias)
-   │     ├── ExecutionBanner (Banner flotante con indicador de progreso)
-   │     ├── ActionBlockCard (Tarjeta de bloque individual con reordenación)
-   │     ├── ShortcutEditSheet (Modal principal orquestador de edición)
+   │     ├── ShortcutCard (Fondo con foto o gradiente, cápsula unificada de cristal, insignias)
+   │     ├── ExecutionBanner (Banner flotante con indicador de progreso de ejecución)
+   │     ├── ActionBlockCard (Tarjeta de bloque de acción con reordenación y picker modal)
+   │     ├── ShortcutEditSheet (Modal principal: selector de foto, disparadores, bloques)
    │     ├── dialogs/
-   │     │     ├── AppPickerDialog (Selector asíncrono de apps)
-   │     │     └── UserPromptDialog (Modal de interacción con el usuario y validación de palabras clave)
+   │     │     ├── ActionTypePickerDialog (Modal BottomSheet estilizado para elegir tipo de acción)
+   │     │     ├── AppPickerDialog (Selector asíncrono de aplicaciones instaladas)
+   │     │     └── UserPromptDialog (Modal de confirmación interactiva con el usuario)
    │     └── editors/ (Editores especializados: Volumen, Brillo, Notificación, TTS, Lua, Interacción)
-   ├── ShortcutViewModel (Gestión de estado reactivo StateFlow, prompts y orquestación)
+   ├── ShortcutViewModel (Gestión de estado reactivo StateFlow, ejecución y persistencia)
    └── debug/
-         ├── DebugActivity (App complementaria de Telemetría e Historial en Launcher)
-         └── telemetry/ (TelemetryManager y modelos de rendimiento por paso)
+         ├── DebugActivity (Herramienta complementaria de Telemetría e Historial)
+         └── telemetry/ (TelemetryManager y métricas de rendimiento por paso)
               │ ▲
               ▼ │ Coroutines / Dispatchers.IO
 [ Repositorios & Datos ]
-   ├── InstalledAppsRepository (Consulta asíncrona de aplicaciones instaladas)
-   ├── ShortcutRepository (Abstracción reactiva Flow sobre Room)
-   ├── DefaultShortcuts (Catálogo curado de atajos predeterminados)
-   └── Room Database (AppDatabase, ShortcutDao, TypeConverters)
+   ├── InstalledAppsRepository (Consulta asíncrona de aplicaciones del lanzador)
+   ├── ShortcutRepository (Abstracción reactiva Flow sobre Room Database)
+   ├── DefaultShortcuts (Catálogo curado de atajos predeterminados del sistema)
+   └── Room Database (AppDatabase v6 con MIGRATION_5_6, ShortcutDao, TypeConverters)
               │ ▲
               ▼ │ Intent Dispatch / Execution
-[ Dominio / Ejecución ]
-   ├── ShortcutExecutor (Coordinador de secuencias, cadencia fija de 1003 ms)
+[ Dominio / Ejecución & Triggers ]
+   ├── trigger/
+   │     └── PowerTriggerReceiver (BroadcastReceiver para conexión y desconexión de cargador)
+   ├── ShortcutExecutor (Coordinador de secuencias de acción, cadencia de 1003 ms)
    │     └── handlers/ (Manejadores modulares desacoplados)
-   │           ├── DeviceActionHandler (Linterna, brillo y retroalimentación háptica)
-   │           ├── AudioActionHandler (Volumen multimedia y ajustes de audio)
-   │           ├── NavigationActionHandler (Apertura de apps, URLs web y mapas)
-   │           ├── CommunicationActionHandler (Portapapeles, mensajes, compartir, temporizador)
-   │           └── TtsManager (Enrutador multi-motor: Piper VITS, eSpeak-NG, Sistema)
-   ├── NotificationHelper (Canales de notificación duales con bypass DND y sonido Pop)
-   ├── VariableResolver (Resolución dinámica de {hora}, {dia}, {bateria}, {portapapeles})
-   └── LuaShortcutEngine (Kotlin JNI Interface)
+   │           ├── DeviceActionHandler (Linterna, brillo de pantalla y retroalimentación háptica)
+   │           ├── AudioActionHandler (Control de volumen multimedia y ajustes de audio)
+   │           ├── NavigationActionHandler (Apertura de apps instaladas, enlaces web y mapas)
+   │           ├── CommunicationActionHandler (Portapapeles, mensajes SMS/WhatsApp, compartir, temporizador)
+   │           └── TtsManager (Síntesis de voz nativa del sistema Android con cola segura)
+   ├── NotificationHelper (Notificaciones de canal dual con bypass DND y sonido Pop Vorbis Q7)
+   ├── VariableResolver (Variables dinámicas: {hora}, {dia}, {bateria}, {portapapeles})
+   └── LuaShortcutEngine (Interfaz JNI con libnative-lua.so)
               │ ▲
               ▼ │ JNI Callbacks (flashlight, copy, map, speak, timer, message, etc.)
-        [ libnative-lua.so ] (Lua 5.4.7 C Native Engine con traceback)
+        [ libnative-lua.so ] (Lua 5.4.7 C Native Engine con traceback y ldebug)
 ```
 
 ---
@@ -58,190 +61,149 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 ├── .github/
 │   └── workflows/
 │       ├── build_debug.yml                   # Compilación manual de APK Debug (workflow_dispatch)
-│       ├── emulate_android10_32bit.yml       # Emulación de Android 10 (32-bit x86) y pruebas automatizadas (manual)
+│       ├── emulate_android10_32bit.yml       # Emulación de Android 10 (32-bit x86) y streaming interactivo noVNC
 │       └── override_commit_message.yml       # Sincronización automática de mensaje desde commit_message.txt
 ├── audio_assets/
 │   ├── LICENSE.txt                           # Atribución y licencia Creative Commons 0 (CC0)
 │   └── raw/
-│       └── 242502__gabrielaraujo__pop-upnotification.wav # Audio original (fuente WAV de alta fidelidad)
+│       └── 242502__gabrielaraujo__pop-upnotification.wav # Audio fuente WAV sin delay
 ├── scripts/
 │   ├── apk/
-│   │   └── build_apk_debug.sh                # Compilación limpia del APK Debug sin caché
+│   │   └── build_apk_debug.sh                # Compilación limpia del APK Debug sin dependencias de caché
 │   ├── audio/
-│   │   └── convert_audio.sh                  # Conversión universal de audio a OGG sin delay (Vorbis Q7)
+│   │   └── convert_audio.sh                  # Conversión de audio a OGG Vorbis Q7 sin retardo
 │   ├── build/
 │   │   ├── generate_keystore.sh              # Generación y verificación del keystore de depuración
 │   │   └── setup_cmake.sh                    # Configuración de CMake 3.22.1 y NDK 27
 │   ├── debug/
-│   │   ├── setup_anr_watchdog.sh             # Descarga y configuración de ANR-WatchDog 1.4.0 (UI Thread)
-│   │   ├── setup_chucker.sh                  # Descarga y configuración de Chucker 4.1.0 para el APK Debug
-│   │   ├── setup_dbinspector.sh              # Descarga y configuración de Infinum DbInspector 6.0.0 (.db Room)
+│   │   ├── setup_anr_watchdog.sh             # Descarga y configuración de ANR-WatchDog 1.4.0
+│   │   ├── setup_chucker.sh                  # Descarga y configuración de Chucker 4.1.0 para APK Debug
+│   │   ├── setup_dbinspector.sh              # Descarga y configuración de Infinum DbInspector 6.0.0
 │   │   ├── setup_hyperion.sh                 # Descarga y configuración de Hyperion-Android 0.9.38
-│   │   └── setup_leakcanary.sh               # Descarga y configuración de LeakCanary 2.14 para el APK Debug
+│   │   └── setup_leakcanary.sh               # Descarga y configuración de LeakCanary 2.14
 │   ├── emulator/
-│   │   ├── setup_emulator_32bit.sh           # Descarga de imagen de sistema x86 y creación de AVD Android 10 (32-bit)
-│   │   ├── setup_novnc.sh                    # Configuración de pantalla virtual Xvfb, fluxbox y cliente HTML5 noVNC
-│   │   ├── start_emulator.sh                 # Arranque con KVM y sincronización de arranque con sys.boot_completed
-│   │   ├── start_web_tunnel.sh               # Inicia servidor x11vnc y túnel HTTPS Cloudflare para control móvil
-│   │   └── test_32bit.sh                     # Instalación de APK, pruebas de heap RAM, librerías 32-bit y screenshot
-│   ├── lua/
-│   │   ├── setup_lua.sh                      # Descarga y extracción de fuentes oficiales de Lua 5.4.7
-│   │   └── setup_lua_debug.sh                # Verificación de Lua Debug Library e integración con native-lua.cpp
-│   └── tts/
-│       └── setup_piper.sh                    # Descarga y verificación de activos y modelos Piper TTS
-├── commit_message.txt                        # Mensaje de commit actual descriptivo en español
+│   │   ├── setup_emulator_32bit.sh           # Descarga de imagen x86 y creación de AVD Android 10 (32-bit)
+│   │   ├── setup_novnc.sh                    # Configuración de servidor Xvfb, fluxbox y cliente HTML5 noVNC
+│   │   ├── start_emulator.sh                 # Arranque con KVM y sincronización con sys.boot_completed
+│   │   ├── start_web_tunnel.sh               # Servidor x11vnc y túnel HTTPS Cloudflare para control móvil
+│   │   └── test_32bit.sh                     # Instalación de APK, pruebas de heap 32-bit y captura de pantalla
+│   └── lua/
+│       ├── setup_lua.sh                      # Descarga y extracción de código fuente oficial de Lua 5.4.7
+│       └── setup_lua_debug.sh                # Integración de Lua Debug Library en native-lua.cpp
+├── commit_message.txt                        # Mensaje de commit actual en español
 ├── .env.example                               # Variables de entorno seguras
 ├── app/
-│   ├── build.gradle.kts                      # NDK 27, CMake 3.22.1, abiFilters y dependencias de depuración
+│   ├── build.gradle.kts                      # NDK 27, CMake 3.22.1, abiFilters, Coil y librerías de depuración
 │   ├── proguard-rules.pro                    # Reglas Proguard/R8
 │   └── src/
 │       ├── main/
-│       │   ├── AndroidManifest.xml           # Declaración de permisos de hardware (Flash, Vibración, Audio)
-│       │   ├── assets/
-│       │   │   ├── espeakdata.zip            # Datos fonéticos y diccionarios para síntesis eSpeak
-│       │   │   └── piper/                    # Modelo VITS es_ES-carlfm-x_low empaquetado (ONNX + JSON)
-│       │   ├── jniLibs/                      # Binarios nativos precompilados de TTS eSpeak
-│       │   │   ├── arm64-v8a/libttsespeak.so
-│       │   │   ├── armeabi-v7a/libttsespeak.so
-│       │   │   ├── x86/libttsespeak.so
-│       │   │   └── x86_64/libttsespeak.so
+│       │   ├── AndroidManifest.xml           # Permisos de hardware y registro de PowerTriggerReceiver
 │       │   ├── cpp/                          # Capa Nativa C / C++
-│       │   │   ├── CMakeLists.txt            # Compilación de Lua y del puente JNI nativo
-│       │   │   ├── native-lua.cpp            # Bindings JNI entre Kotlin y Lua 5.4.7 con traceback y soporte TTS
-│       │   │   └── lua/                      # Código fuente oficial en C de Lua 5.4.7 (lapi, ldo, lvm, etc.)
+│       │   │   ├── CMakeLists.txt            # Compilación de Lua y puente JNI nativo
+│       │   │   ├── native-lua.cpp            # Bindings JNI entre Kotlin y Lua 5.4.7 con traceback
+│       │   │   └── lua/                      # Código fuente en C de Lua 5.4.7 (lapi, ldo, lvm, ldebug, etc.)
 │       │   ├── res/
 │       │   │   ├── raw/
-│       │   │   │   └── pop_notification.ogg  # Sonido Pop Vorbis Q7 (sin delay) para notificaciones
+│       │   │   │   └── pop_notification.ogg  # Sonido Pop Vorbis Q7 (cero delay) para notificaciones
 │       │   │   └── values/strings.xml
-│       │   ├── java/
-│       │   │   ├── com/reecedunn/espeak/
-│       │   │   │   └── SpeechSynthesis.java  # Capa de enlace con motor de síntesis de voz alternativo eSpeak
-│       │   │   └── com/example/
-│       │   │       ├── ShortcutsApp.kt       # Application class con inicialización de utilidades
-│       │   │       ├── MainActivity.kt       # Host Activity con enableEdgeToEdge
-│       │   │       ├── util/
-│       │   │       │   └── ImageCompressor.kt # Utilidad de compresión y procesamiento de imágenes
-│       │   │       ├── espeak/
-│       │   │       │   └── EspeakManager.kt  # Gestor de desempaquetado de assets y ciclo de voz eSpeak
-│       │   │       ├── piper/
-│       │   │       │   ├── PiperTtsManager.kt # Inferencia neuronal VITS en CPU con ONNX Runtime y AudioTrack
-│       │   │       │   └── PiperVoice.kt     # Definición y catálogo de modelos neuronales
-│       │   │       ├── tts/
-│       │   │       │   ├── TtsEngineType.kt  # Enum de motores (PIPER, ESPEAK, SYSTEM)
-│       │   │       │   └── TtsPreferences.kt # Almacén persistente de preferencias de voz y velocidad
-│       │   │       ├── data/
-│       │   │       │   ├── DefaultShortcuts.kt # Catálogo desacoplado de atajos predeterminados del sistema
-│       │   │       │   ├── db/
-│       │   │       │   │   ├── AppDatabase.kt    # Base de datos Room v3 con TypeConverters
-│       │   │       │   │   └── ShortcutDao.kt    # Consultas SQL reactivas con Flow
-│       │   │       │   ├── model/
-│       │   │       │   │   ├── ActionBlock.kt    # Modelo atómico de un paso de acción
-│       │   │       │   │   ├── ActionBlockConverter.kt # Serializador JSON Room para listas de bloques
-│       │   │       │   │   ├── InstalledAppItem.kt # Modelo ligero de app instalada para el selector
-│       │   │       │   │   ├── ShortcutEntity.kt # Entidad de atajo con ActionType enum
-│       │   │       │   │   └── UserInteractionConfig.kt # Modelo de configuración para el bloque de interacción
-│       │   │       │   └── repository/
-│       │   │       │       ├── ShortcutRepository.kt # Acceso a datos Room desacoplado
-│       │   │       │       └── InstalledAppsRepository.kt # Consulta en segundo plano (IO) de apps instaladas
-│       │   │       ├── debug/
-│       │   │       │   ├── DebugActivity.kt      # Actividad de telemetría y diagnóstico con launcher propio
-│       │   │       │   └── telemetry/
-│       │   │       │       ├── TelemetryModels.kt # Entidades de registro de rendimiento por paso
-│       │   │       │       └── TelemetryManager.kt # Gestor persistente del historial y estadísticas
-│       │   │       ├── executor/
-│       │   │       │   ├── ShortcutExecutor.kt   # Orquestador secuencial con cadencia fija de 1003 ms
-│       │   │       │   ├── NotificationHelper.kt # Gestor de notificaciones nativas con canales DND
-│       │   │       │   ├── VariableResolver.kt   # Motor de variables dinámicas ({hora}, {bateria}, etc.)
-│       │   │       │   ├── UserInteractionBridge.kt # Puente asíncrono no bloqueante para pausas de confirmación
-│       │   │       │   ├── UserInteractionReceiver.kt # BroadcastReceiver de respuestas desde la barra de notificaciones
-│       │   │       │   ├── LuaShortcutEngine.kt  # Enlace Kotlin JNI con libnative-lua.so
-│       │   │       │   └── handlers/
-│       │   │       │       ├── DeviceActionHandler.kt # Linterna, control de brillo y hápticos
-│       │   │       │       ├── AudioActionHandler.kt  # Volumen multimedia y ajustes de sonido
-│       │   │       │       ├── NavigationActionHandler.kt # Lanzamiento de apps, URLs web y Maps
-│       │   │       │       ├── CommunicationActionHandler.kt # Portapapeles, mensajes, compartir y timer
-│       │   │       │       ├── TtsManager.kt      # Enrutador multiespecífico (Piper, eSpeak, Sistema) y fallback
-│       │   │       │       └── UserInteractionNotificationHelper.kt # Notificaciones interactivas de confirmación
-│       │   │       └── ui/
-│       │   │           ├── ShortcutScreen.kt     # Pantalla principal (TopBar, categorías, Grid de tarjetas)
-│       │   │           ├── ShortcutViewModel.kt  # ViewModel modularizado (estado UI, filtros y ejecución)
-│       │   │           ├── components/
-│       │   │           │   ├── ActionBlockCard.kt    # Componente de tarjeta de paso individual
-│       │   │           │   ├── ExecutionBanner.kt    # Banner flotante superior con progreso
-│       │   │           │   ├── IconHelper.kt         # Catálogo de iconos vectoriales y paleta de colores
-│       │   │           │   ├── ShortcutCard.kt       # Tarjeta de atajo con glassmorphism y haptics
-│       │   │           │   ├── ShortcutEditSheet.kt  # BottomSheet orquestador de creación y edición
-│       │   │           │   ├── TtsEngineSettingsDialog.kt # Diálogo de configuración y prueba de motores TTS
-│       │   │           │   ├── dialogs/
-│       │   │           │   │   ├── AppPickerDialog.kt # Diálogo de selección de apps con buscador
-│       │   │           │   │   └── UserPromptDialog.kt # Modal interactivo con validación de palabra clave
-│       │   │           │   └── editors/
-│       │   │           │       ├── VolumeBlockEditor.kt # Editor de volumen con presets
-│       │   │           │       ├── BrightnessBlockEditor.kt # Editor táctil de brillo
-│       │   │           │       ├── NotificationBlockEditor.kt # Editor de sonido y variables de notificación
-│       │   │           │       ├── SpeakBlockEditor.kt # Editor TTS con selección de motor, voz y variables
-│       │   │           │       ├── LuaScriptBlockEditor.kt # Editor monoespaciado para código Lua
-│       │   │           │       └── UserInteractionBlockEditor.kt # Editor del bloque de interacción (Notificación / Modal)
-│       │   │           └── theme/
-│       │   │               ├── Color.kt          # Paleta base
-│       │   │               ├── Theme.kt          # Material 3 Dynamic Theme
-│       │   │               └── Type.kt           # Tipografía
+│       │   └── java/com/example/
+│       │       ├── ShortcutsApp.kt           # Application class con registro de PowerTriggerReceiver
+│       │       ├── MainActivity.kt           # Host Activity con enableEdgeToEdge y Compose
+│       │       ├── trigger/
+│       │       │   └── PowerTriggerReceiver.kt # Detección de conexión y desconexión de cargador
+│       │       ├── util/
+│       │       │   └── ImageCompressor.kt     # Utilidad de compresión y procesamiento de imágenes
+│       │       ├── data/
+│       │       │   ├── DefaultShortcuts.kt   # Atajos predeterminados del sistema
+│       │       │   ├── db/
+│       │       │   │   ├── AppDatabase.kt    # Base de datos Room v6 con migración MIGRATION_5_6
+│       │       │   │   └── ShortcutDao.kt    # Consultas SQL reactivas Flow y filtrado por disparador
+│       │       │   ├── model/
+│       │       │   │   ├── ActionBlock.kt    # Modelo atómico de un paso de acción
+│       │       │   │   ├── ActionBlockConverter.kt # Serializador JSON Room para lista de bloques
+│       │       │   │   ├── InstalledAppItem.kt # Modelo ligero de app para el selector
+│       │       │   │   ├── ShortcutEntity.kt # Entidad de atajo (triggerType, backgroundImageUri)
+│       │       │   │   └── UserInteractionConfig.kt # Configuración para bloque de interacción
+│       │       │   └── repository/
+│       │       │       ├── ShortcutRepository.kt # Repositorio de atajos con Flow
+│       │       │       └── InstalledAppsRepository.kt # Consulta en Dispatchers.IO de apps del sistema
+│       │       ├── debug/
+│       │       │   ├── DebugActivity.kt      # Actividad de telemetría y diagnóstico
+│       │       │   └── telemetry/
+│       │       │       ├── TelemetryModels.kt # Modelos de telemetría y métricas de pasos
+│       │       │       └── TelemetryManager.kt # Historial de ejecuciones y duración en disco
+│       │       ├── executor/
+│       │       │   ├── ShortcutExecutor.kt   # Orquestador secuencial con cadencia de 1003 ms
+│       │       │   ├── NotificationHelper.kt # Gestor de notificaciones con canal dual y audio
+│       │       │   ├── VariableResolver.kt   # Motor de resolución dinámica ({hora}, {bateria}, etc.)
+│       │       │   ├── UserInteractionBridge.kt # Puente asíncrono para pausas de confirmación
+│       │       │   ├── UserInteractionReceiver.kt # BroadcastReceiver de respuestas desde notificación
+│       │       │   ├── LuaShortcutEngine.kt  # Enlace Kotlin JNI con libnative-lua.so
+│       │       │   └── handlers/
+│       │       │       ├── DeviceActionHandler.kt # Linterna, control de brillo y hápticos
+│       │       │       ├── AudioActionHandler.kt  # Volumen multimedia y sonido
+│       │       │       ├── NavigationActionHandler.kt # Lanzamiento de apps, URLs y Maps
+│       │       │       ├── CommunicationActionHandler.kt # Portapapeles, mensajes, compartir y timer
+│       │       │       ├── TtsManager.kt      # TextToSpeech nativo del sistema Android
+│       │       │       └── UserInteractionNotificationHelper.kt # Notificaciones interactivas de confirmación
+│       │       └── ui/
+│       │           ├── ShortcutScreen.kt     # Pantalla principal (Categorías, buscador, Grid espaciado)
+│       │           ├── ShortcutViewModel.kt  # ViewModel (estado UI, filtros, persistencia y ejecución)
+│       │           ├── components/
+│       │           │   ├── ActionBlockCard.kt    # Tarjeta de bloque con ActionTypePickerDialog
+│       │           │   ├── ExecutionBanner.kt    # Banner flotante superior con progreso
+│       │           │   ├── IconHelper.kt         # Catálogo de iconos vectoriales y paleta de colores
+│       │           │   ├── ShortcutCard.kt       # Tarjeta con soporte de foto, cápsula unificada e insignias
+│       │           │   ├── ShortcutEditSheet.kt  # BottomSheet: selector de foto, disparador automático y bloques
+│       │           │   ├── dialogs/
+│       │           │   │   ├── ActionTypePickerDialog.kt # Selector modal de acciones con iconos y descripciones
+│       │           │   │   ├── AppPickerDialog.kt # Diálogo de selección de apps con búsqueda en tiempo real
+│       │           │   │   └── UserPromptDialog.kt # Modal interactivo de confirmación y palabra clave
+│       │           │   └── editors/
+│       │           │       ├── VolumeBlockEditor.kt # Selector y deslizador de volumen
+│       │           │       ├── BrightnessBlockEditor.kt # Control de brillo
+│       │           │       ├── NotificationBlockEditor.kt # Editor de variables y sonido de notificación
+│       │           │       ├── SpeakBlockEditor.kt # Editor de texto TTS con variables
+│       │           │       ├── LuaScriptBlockEditor.kt # Editor de código Lua monoespaciado
+│       │           │       └── UserInteractionBlockEditor.kt # Editor de bloque interactivo
+│       │           └── theme/
+│       │               ├── Color.kt          # Paleta base Material 3
+│       │               ├── Theme.kt          # Material 3 Dynamic Theme
+│       │               └── Type.kt           # Tipografía
 │       └── test/
 │           ├── screenshots/
-│           │   └── greeting.png                      # Captura de referencia para prueba Roborazzi
+│           │   └── greeting.png
 │           └── java/com/example/
-│               ├── ExampleRobolectricTest.kt         # Tests instrumentados locales en JVM con Robolectric
-│               ├── ExampleUnitTest.kt                # Pruebas unitarias estándar JUnit
-│               ├── GreetingScreenshotTest.kt         # Verificación visual con Roborazzi
-│               └── ShortcutLogicTest.kt              # Tests unitarios para bloques, tipos y cadencia de 1003 ms
-├── metadata.json                             # Metadatos para AI Studio
-├── README.md                                 # Descripción y guía de compilación
+│               ├── ExampleRobolectricTest.kt # Tests JVM con Robolectric
+│               ├── ExampleUnitTest.kt        # Pruebas unitarias JUnit
+│               ├── GreetingScreenshotTest.kt # Verificación visual Roborazzi
+│               └── ShortcutLogicTest.kt      # Tests de lógica de atajos y cadencia de 1003 ms
+├── metadata.json                             # Metadatos para la plataforma AI Studio
+├── README.md                                 # Descripción general y guía
 ├── ROADMAP.md                                # Hitos de desarrollo
 ├── STRUCTURE.md                              # Este archivo
-├── AI_CONTEXT.md                             # Contexto y restricciones del sistema para IA
-└── AGENTS.md                                 # Guía de comportamiento y directivas para agentes
+├── AI_CONTEXT.md                             # Contexto y directivas de desarrollo
+└── AGENTS.md                                 # Reglas persistentes para agentes de IA
 ```
 
 ---
 
-## ⚡ Flujo de Ejecución de un Atajo Multi-Bloque
+## ⚡ Flujo de Ejecución de Atajos
 
-1. **Interacción de Usuario**: El usuario pulsa una tarjeta de atajo en `ShortcutScreen.kt`. La tarjeta permanece en su posición fija en la lista (orden `isFavorite DESC, id ASC`).
-2. **ViewModel**: Se activa `viewModelScope.launch` en `ShortcutViewModel.executeShortcut(shortcut)` y se registra el conteo estadístico sin alterar el orden visual.
-3. **Resolución de Bloques**: Se obtienen las acciones definidas (`ActionBlock`).
+### 1. Ejecución Manual (Desde la UI)
+1. **Interacción de Usuario**: El usuario pulsa una tarjeta de atajo en `ShortcutScreen.kt`. La tarjeta mantiene su orden visual estable (`isFavorite DESC, id ASC`).
+2. **ViewModel**: Se activa `viewModelScope.launch` en `ShortcutViewModel.executeShortcut(shortcut)`.
+3. **Resolución de Bloques**: Se procesan las acciones secuenciales (`ActionBlock`).
 4. **Ciclo Secuencial**:
    - Se actualiza el banner flotante con el paso actual: *"Paso X de Y: [Nombre]"*.
-   - Si el bloque es de tipo `WAIT`, se ejecuta una pausa personalizada de `N` milisegundos (`delay(waitMs)`), reemplazando el valor estándar.
-   - Si el bloque es `LUA_SCRIPT`, entra en acción `LuaShortcutEngine.executeScript(code)` llamando a `libnative-lua.so`.
-   - El motor nativo C de Lua 5.4.7 procesa el script y, ante invocaciones como `flashlight()`, `speak()` o `copy()`, emite callbacks JNI hacia la instancia de Kotlin.
-   - En bloques estándar de hardware o voz (`SPEAK` / TextToSpeech nativo), se despachan a través de `ShortcutExecutor.executeSingleBlock(type, param)` delegando a los handlers especializados (`DeviceActionHandler`, `AudioActionHandler`, `NavigationActionHandler`, `CommunicationActionHandler` y `TtsManager`), y se activa vibración háptica.
-   - Si quedan bloques pendientes y no se trata de una pausa explícita, se aplica la cadencia por defecto de `delay(1003L)` (`ShortcutExecutor.STEP_DELAY_MS`).
-5. **Finalización**: Se notifica en el banner el resultado final y se programa el auto-ocultamiento a los 3.5 segundos.
+   - Si el bloque es de tipo `WAIT`, se aplica la pausa personalizada configurada (`delay(waitMs)`).
+   - Si el bloque es `LUA_SCRIPT`, `LuaShortcutEngine.executeScript(code)` ejecuta el código nativo en `libnative-lua.so`.
+   - En bloques estándar de hardware o voz (`SPEAK`), se despachan a través de `ShortcutExecutor.executeSingleBlock(type, param)` delegando a los handlers especializados (`DeviceActionHandler`, `AudioActionHandler`, `NavigationActionHandler`, `CommunicationActionHandler` y `TtsManager` con el TextToSpeech nativo de Android).
+   - Entre bloques normales, se mantiene la cadencia fija de `delay(1003L)` (`ShortcutExecutor.STEP_DELAY_MS`).
+5. **Finalización**: Se emite la telemetría a `TelemetryManager` y se muestra el banner de confirmación.
 
----
-
-## 🛠️ Herramientas de Depuración Móvil Embebidas
-
-1. **LeakCanary 2.14**:
-   - Activo automáticamente en la variante Debug.
-   - Crea una aplicación e icono complementario denominado **"Leaks"** en el launcher del dispositivo móvil para auditar retenciones indebidas de Activities y memoria en tiempo real sin requerir PC ni ADB.
-2. **Chucker 4.1.0**:
-   - Inspector de red y tráfico HTTP con interfaz propia.
-   - Muestra notificaciones directas en Android al detectar tráfico y cuenta con acceso directo desde el menú de opciones superior de la app (`Abrir Inspector Chucker (Red)`).
-3. **Lua Debug Library 5.4.7**:
-   - Módulos C oficiales `ldebug.c` y `ldblib.c` compilados nativamente en `libnative-lua.so`.
-   - Utiliza un manejador de errores con `luaL_traceback` en `native-lua.cpp` que captura el archivo y número de línea exactos de cualquier fallo en los scripts Lua.
-
----
-
-## 📱 Entorno de Emulación y Verificación de 32 Bits (Android 10 x86)
-
-El repositorio incluye un flujo automatizado en GitHub Actions (`emulate_android10_32bit.yml`) activable bajo demanda (`workflow_dispatch`) para someter el APK Debug a pruebas en un entorno estricto de 32 bits y permitir control remoto interactivo:
-1. **Configuración de AVD**: Descarga de la imagen oficial del SDK `system-images;android-29;google_apis;x86` y aprovisionamiento con aceleración por hardware KVM.
-2. **Arranque y Detección**: Comprobación del estado `sys.boot_completed` y verificación de `ro.product.cpu.abi` confirmando arquitectura nativa `x86` de 32 bits.
-3. **Instalación y Verificación de Heap**: Instalación del APK Debug, arranque de `MainActivity` y `DebugActivity`, volcado de consumo de memoria RAM (`dumpsys meminfo`), inspección del logcat para descartar `UnsatisfiedLinkError` o fallos de JNI, y exportación de captura de pantalla como artefacto.
-4. **Navegación Interactiva en Tiempo Real vía Web (noVNC + Cloudflare Tunnel)**:
-   - Despliega un display virtual Xvfb con x11vnc y cliente HTML5 noVNC.
-   - Genera un enlace HTTPS temporal público (`https://...trycloudflare.com/vnc.html?autoconnect=true&resize=scale`) impreso en la consola de GitHub Actions.
-   - Permite navegar, deslizar y tocar directamente con el dedo desde la pantalla del teléfono móvil para probar la app e interactuar con Android 10 (32 bits) sin necesidad de PC. Parámetro configurable `interactive_minutes` (por defecto 15 minutos).
-
+### 2. Ejecución Automática por Disparadores (Triggers)
+1. **Detección del Sistema**: `PowerTriggerReceiver` recibe `Intent.ACTION_POWER_CONNECTED` o `Intent.ACTION_POWER_DISCONNECTED`.
+2. **Consulta a Base de Datos**: Consulta asíncrona en `Dispatchers.IO` a Room a través de `ShortcutDao.getShortcutsByTrigger(triggerType)`.
+3. **Ejecución en Segundo Plano**: Cada atajo coincidente se ejecuta secuencialmente a través de `ShortcutExecutor.executeSingleBlock()`.
+4. **Notificación**: Se notifica al usuario con sonido Pop Vorbis de baja latencia mediante `NotificationHelper.notifyShortcutExecution()`.

@@ -23,6 +23,9 @@ interface ShortcutDao {
     @Query("SELECT * FROM shortcuts WHERE id = :id LIMIT 1")
     suspend fun getShortcutById(id: Long): ShortcutEntity?
 
+    @Query("SELECT * FROM shortcuts WHERE triggerType = :triggerType")
+    suspend fun getShortcutsByTrigger(triggerType: String): List<ShortcutEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(shortcut: ShortcutEntity): Long
 

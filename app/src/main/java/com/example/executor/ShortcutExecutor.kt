@@ -56,12 +56,8 @@ class ShortcutExecutor(private val context: Context) {
         }
     }
 
-    fun speakText(
-        text: String,
-        engineOverride: com.example.tts.TtsEngineType? = null,
-        voiceOverride: String? = null
-    ): ExecutionResult {
-        return ttsManager.speak(text, engineOverride, voiceOverride)
+    fun speakText(text: String): ExecutionResult {
+        return ttsManager.speak(text)
     }
 
     private fun executeWait(parameter: String): ExecutionResult {

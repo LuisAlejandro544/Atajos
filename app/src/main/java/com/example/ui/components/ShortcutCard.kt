@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,7 +29,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,12 +44,17 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.data.model.ShortcutEntity
+import com.example.data.model.TriggerType
 
 fun parseColorSafe(hex: String, defaultColor: Color = Color(0xFF007AFF)): Color {
     return try {
@@ -80,7 +85,6 @@ fun ShortcutCard(
     var showMenu by remember { mutableStateOf(false) }
     val baseColor = parseColorSafe(shortcut.colorHex)
 
-    // Gradiente Ultra HD con 3 paradas de color y saturación viva estilo iOS
     val gradient = Brush.verticalGradient(
         colors = listOf(
             baseColor.copy(
@@ -98,92 +102,165 @@ fun ShortcutCard(
     )
 
     val scale by animateFloatAsState(
-        targetValue = if (isExecuting) 0.95f else 1f,
+        targetValue = if (isExecuting) 0.96f else 1f,
         label = "scale"
     )
 
     Surface(
         modifier = modifier
             .scale(scale)
-            .height(158.dp)
+            .height(162.dp)
             .shadow(
-                elevation = 10.dp,
-                shape = RoundedCornerShape(24.dp),
-                ambientColor = baseColor.copy(alpha = 0.55f),
-                spotColor = baseColor.copy(alpha = 0.85f)
+                elevation = 8.dp,
+                shape = RoundedCornerShape(22.dp),
+                ambientColor = baseColor.copy(alpha = 0.45f),
+                spotColor = baseColor.copy(alpha = 0.70f)
             )
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(22.dp))
             .border(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
                     colors = listOf(
                         Color.White.copy(alpha = 0.35f),
-                        Color.White.copy(alpha = 0.08f),
+                        Color.White.copy(alpha = 0.10f),
                         Color.Transparent
                     )
                 ),
-                shape = RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(22.dp)
             )
             .clickable { onExecute() }
             .testTag("shortcut_card_${shortcut.id}"),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         color = Color.Transparent
     ) {
-        Box(
-            modifier = Modifier
-                .background(gradient)
-                .padding(14.dp)
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Fondo: Foto personalizada o Gradiente vibrante
+            if (!shortcut.backgroundImageUri.isNullOrBlank()) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(shortcut.backgroundImageUri)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize()
+                )
+                // Capa oscura de contraste sobre la foto
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.30f),
+                                    Color.Black.copy(alpha = 0.58f),
+                                    Color.Black.copy(alpha = 0.88f)
+                                )
+                            )
+                        )
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(gradient)
+                )
+            }
+
+            // Contenido de la tarjeta
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(13.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Top row: Icon on left, Favorite & Menu on right
+                // Fila Superior: Ícono + Badge de Disparador | Cápsula única de acciones
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Icon Badge con efecto Glassmorphism y micro-borde Ultra HD
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.15f))
-                            .border(
-                                width = 0.75.dp,
-                                color = Color.White.copy(alpha = 0.28f),
-                                shape = RoundedCornerShape(14.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ShortcutIconHelper.getIcon(shortcut.iconKey),
-                            contentDescription = shortcut.title,
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        // Botón de Favorito: Cristal circular translúcido Ultra HD (sin cuadros opacos)
+                        // Badge de ícono
                         Box(
                             modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (shortcut.isFavorite) Color(0xFFFFD60A).copy(alpha = 0.16f)
-                                    else Color.White.copy(alpha = 0.08f)
-                                )
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White.copy(alpha = 0.18f))
                                 .border(
                                     width = 0.75.dp,
-                                    color = if (shortcut.isFavorite) Color(0xFFFFD60A).copy(alpha = 0.40f)
-                                    else Color.White.copy(alpha = 0.22f),
-                                    shape = CircleShape
+                                    color = Color.White.copy(alpha = 0.30f),
+                                    shape = RoundedCornerShape(12.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ShortcutIconHelper.getIcon(shortcut.iconKey),
+                                contentDescription = shortcut.title,
+                                tint = Color.White,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+
+                        // Badge de Disparador (si está activado)
+                        if (shortcut.triggerType == TriggerType.CHARGER_CONNECTED.name) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color.Black.copy(alpha = 0.35f))
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 6.dp, vertical = 3.dp)
+                            ) {
+                                Text(
+                                    text = "⚡ Cargador",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = Color(0xFFFFD60A),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 10.sp
+                                    )
                                 )
+                            }
+                        } else if (shortcut.triggerType == TriggerType.CHARGER_DISCONNECTED.name) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color.Black.copy(alpha = 0.35f))
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 6.dp, vertical = 3.dp)
+                            ) {
+                                Text(
+                                    text = "🔋 Batería",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = Color(0xFFFF9500),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 10.sp
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    // Cápsula Unificada de Cristal (Favorito + Menú Opciones)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.Black.copy(alpha = 0.28f))
+                            .border(
+                                width = 0.75.dp,
+                                color = Color.White.copy(alpha = 0.22f),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                    ) {
+                        // Botón Favorito
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null,
@@ -194,48 +271,46 @@ fun ShortcutCard(
                         ) {
                             Icon(
                                 imageVector = if (shortcut.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                                contentDescription = if (shortcut.isFavorite) "Quitar de favoritos" else "Marcar como favorito",
+                                contentDescription = if (shortcut.isFavorite) "Quitar de favoritos" else "Marcar favorito",
                                 tint = if (shortcut.isFavorite) Color(0xFFFFD60A) else Color.White.copy(alpha = 0.90f),
-                                modifier = Modifier.size(17.dp)
+                                modifier = Modifier.size(16.dp)
                             )
                         }
 
-                        // Botón de Opciones: Cristal circular translúcido Ultra HD
+                        // Divisor sutil
                         Box(
+                            modifier = Modifier
+                                .width(0.75.dp)
+                                .height(14.dp)
+                                .background(Color.White.copy(alpha = 0.25f))
+                        )
+
+                        // Botón Opciones (3 puntos)
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                    onClick = { showMenu = true }
+                                )
+                                .testTag("shortcut_options_${shortcut.id}"),
                             contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.08f))
-                                    .border(
-                                        width = 0.75.dp,
-                                        color = Color.White.copy(alpha = 0.22f),
-                                        shape = CircleShape
-                                    )
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null,
-                                        onClick = { showMenu = true }
-                                    )
-                                    .testTag("shortcut_options_${shortcut.id}"),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.MoreVert,
-                                    contentDescription = "Opciones",
-                                    tint = Color.White.copy(alpha = 0.90f),
-                                    modifier = Modifier.size(17.dp)
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.MoreVert,
+                                contentDescription = "Opciones",
+                                tint = Color.White.copy(alpha = 0.90f),
+                                modifier = Modifier.size(16.dp)
+                            )
 
                             DropdownMenu(
                                 expanded = showMenu,
                                 onDismissRequest = { showMenu = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Editar") },
+                                    text = { Text("Editar atajo") },
                                     leadingIcon = {
                                         Icon(Icons.Filled.Edit, contentDescription = null)
                                     },
@@ -280,70 +355,69 @@ fun ShortcutCard(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Bottom row: Titles on left, Play / Loading on right
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp)
+                // Título en ancho completo (evita cortes de palabras antiestéticos)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = shortcut.title,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            fontSize = 15.sp,
+                            lineHeight = 19.sp,
+                            letterSpacing = (-0.2).sp
+                        ),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Fila Inferior: Subtítulo / pasos a la izquierda + Micro indicador de play
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val subtitleText = shortcut.description.ifBlank {
+                            if (shortcut.actions.size > 1) "${shortcut.actions.size} pasos" else "1 acción"
+                        }
                         Text(
-                            text = shortcut.title,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                lineHeight = 20.sp,
-                                letterSpacing = (-0.2).sp
-                            ),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(modifier = Modifier.height(3.dp))
-                        Text(
-                            text = shortcut.description,
+                            text = subtitleText,
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = Color.White.copy(alpha = 0.85f),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Normal
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
                             ),
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 6.dp)
                         )
-                    }
 
-                    // Play Button / Indicator con botón circular translúcido cristal y micro-borde Ultra HD
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.16f))
-                            .border(0.75.dp, Color.White.copy(alpha = 0.35f), CircleShape)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = { onExecute() }
-                            )
-                            .testTag("run_shortcut_${shortcut.id}"),
-                        contentAlignment = Alignment.Center
-                    ) {
                         if (isExecuting) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
+                                modifier = Modifier.size(16.dp),
                                 color = Color.White,
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Icon(
-                                imageVector = Icons.Filled.PlayArrow,
-                                contentDescription = "Ejecutar atajo",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.20f))
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.35f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.PlayArrow,
+                                    contentDescription = "Ejecutar atajo",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                            }
                         }
                     }
                 }

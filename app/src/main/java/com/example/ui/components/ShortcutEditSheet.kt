@@ -1,5 +1,9 @@
 package com.example.ui.components
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,26 +20,35 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.HourglassTop
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -47,19 +60,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.data.model.ActionBlock
 import com.example.data.model.ActionType
 import com.example.data.model.InstalledAppItem
 import com.example.data.model.ShortcutEntity
+import com.example.data.model.TriggerType
 import com.example.ui.components.dialogs.AppPickerDialog
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShortcutEditSheet(
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     initialShortcut: ShortcutEntity? = null,
     installedApps: List<InstalledAppItem> = emptyList(),
     onDismiss: () -> Unit,
@@ -70,7 +89,9 @@ fun ShortcutEditSheet(
         iconKey: String,
         actions: List<ActionBlock>,
         category: String,
-        isFavorite: Boolean
+        isFavorite: Boolean,
+        triggerType: String,
+        backgroundImageUri: String?
     ) -> Unit,
     onDelete: ((ShortcutEntity) -> Unit)? = null
 ) {
@@ -82,6 +103,22 @@ fun ShortcutEditSheet(
     var selectedIconKey by remember { mutableStateOf(initialShortcut?.iconKey ?: "FLASH") }
     var category by remember { mutableStateOf(initialShortcut?.category ?: "Utilidades") }
     var isFavorite by remember { mutableStateOf(initialShortcut?.isFavorite ?: false) }
+    var triggerType by remember { mutableStateOf(initialShortcut?.triggerType ?: TriggerType.MANUAL.name) }
+    var backgroundImageUri by remember { mutableStateOf(initialShortcut?.backgroundImageUri) }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: Exception) {}
+            backgroundImageUri = uri.toString()
+        }
+    }
 
     val actionBlocks = remember {
         mutableStateListOf<ActionBlock>().apply {
@@ -127,53 +164,48 @@ fun ShortcutEditSheet(
         )
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surface
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp)
+                .padding(bottom = 32.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Header con botón X explícito
+            // Header
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (initialShortcut == null) "Nuevo Atajo Multi-Bloque" else "Editar Atajo",
+                    text = if (initialShortcut == null) "Nuevo Atajo" else "Editar Atajo",
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
                 )
-                IconButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.testTag("close_edit_sheet_button")
-                ) {
+                IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = "Cerrar",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(28.dp)
+                        contentDescription = "Cerrar"
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Tarjeta de Previsualización (Preview)
+            // Tarjeta de Previsualización (Preview) en tiempo real
             val previewColor = parseColorSafe(selectedColor)
-            val previewGradient = Brush.linearGradient(
+            val previewGradient = Brush.verticalGradient(
                 listOf(
                     previewColor,
                     previewColor.copy(
-                        red = (previewColor.red * 0.8f).coerceIn(0f, 1f),
-                        green = (previewColor.green * 0.8f).coerceIn(0f, 1f),
-                        blue = (previewColor.blue * 0.8f).coerceIn(0f, 1f)
+                        red = (previewColor.red * 0.75f).coerceIn(0f, 1f),
+                        green = (previewColor.green * 0.75f).coerceIn(0f, 1f),
+                        blue = (previewColor.blue * 0.75f).coerceIn(0f, 1f)
                     )
                 )
             )
@@ -181,13 +213,39 @@ fun ShortcutEditSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(118.dp)
+                    .height(130.dp)
                     .clip(RoundedCornerShape(20.dp))
                     .background(previewGradient)
-                    .padding(14.dp)
             ) {
+                if (!backgroundImageUri.isNullOrBlank()) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(backgroundImageUri)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.matchParentSize()
+                    )
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        Color.Black.copy(alpha = 0.35f),
+                                        Color.Black.copy(alpha = 0.65f),
+                                        Color.Black.copy(alpha = 0.88f)
+                                    )
+                                )
+                            )
+                    )
+                }
+
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(14.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(
@@ -195,7 +253,10 @@ fun ShortcutEditSheet(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
                             Box(
                                 modifier = Modifier
                                     .size(36.dp)
@@ -209,30 +270,44 @@ fun ShortcutEditSheet(
                                     modifier = Modifier.size(22.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            val hasCustomWait = actionBlocks.any { it.actionType == ActionType.WAIT.name }
-                            val waitBadgeText = if (hasCustomWait) "${actionBlocks.size} pasos (con espera personalizada)"
-                            else "${actionBlocks.size} pasos (espera 1s 3ms)"
-                            Box(
-                                modifier = Modifier
-                                    .background(Color.Black.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = waitBadgeText,
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 10.sp
+
+                            if (triggerType == TriggerType.CHARGER_CONNECTED.name) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "⚡ Cargador",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = Color(0xFFFFD60A),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 10.sp
+                                        )
                                     )
-                                )
+                                }
+                            } else if (triggerType == TriggerType.CHARGER_DISCONNECTED.name) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "🔋 Batería",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = Color(0xFFFF9500),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 10.sp
+                                        )
+                                    )
+                                }
                             }
                         }
 
                         Text(
                             text = category,
                             style = MaterialTheme.typography.labelSmall.copy(
-                                color = Color.White.copy(alpha = 0.8f),
+                                color = Color.White.copy(alpha = 0.85f),
                                 fontWeight = FontWeight.Bold
                             )
                         )
@@ -249,10 +324,10 @@ fun ShortcutEditSheet(
                         )
                         Text(
                             text = description.ifEmpty {
-                                if (actionBlocks.size > 1) "${actionBlocks.size} acciones encadenadas" else "Ejecuta acción"
+                                if (actionBlocks.size > 1) "${actionBlocks.size} pasos encadenados" else "Ejecuta acción"
                             },
                             style = MaterialTheme.typography.bodySmall.copy(
-                                color = Color.White.copy(alpha = 0.8f)
+                                color = Color.White.copy(alpha = 0.85f)
                             ),
                             maxLines = 1
                         )
@@ -267,7 +342,7 @@ fun ShortcutEditSheet(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text("Nombre del atajo") },
-                placeholder = { Text("Ej: Modo Juego, Salida & Música") },
+                placeholder = { Text("Ej: Modo Juego, Carga & Mensaje") },
                 singleLine = true,
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
@@ -281,7 +356,7 @@ fun ShortcutEditSheet(
                 value = description,
                 onValueChange = { description = it },
                 label = { Text("Descripción") },
-                placeholder = { Text("Ej: Ejecuta acciones en cadena") },
+                placeholder = { Text("Ej: Ejecuta acciones al conectar cargador") },
                 singleLine = true,
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
@@ -289,7 +364,156 @@ fun ShortcutEditSheet(
                     .testTag("shortcut_desc_input")
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // Disparador Automático (Trigger)
+            Text(
+                text = "DISPARADOR DE INICIO (TRIGGER)",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 1.sp
+                )
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Permite que el atajo se inicie automáticamente ante un evento del sistema",
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp
+                )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(
+                    Triple(TriggerType.MANUAL.name, "Manual", Icons.Filled.TouchApp),
+                    Triple(TriggerType.CHARGER_CONNECTED.name, "⚡ Al conectar cargador", Icons.Filled.Bolt),
+                    Triple(TriggerType.CHARGER_DISCONNECTED.name, "🔋 Al desconectar cargador", Icons.Filled.BatteryChargingFull)
+                ).forEach { (typeKey, label, icon) ->
+                    val isSelected = triggerType == typeKey
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { triggerType = typeKey },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        label = { Text(label, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // Foto de Fondo de la Tarjeta
+            Text(
+                text = "FOTO DE FONDO DE LA TARJETA",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 1.sp
+                )
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Personaliza la tarjeta con cualquier imagen de tu galería",
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp
+                )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (backgroundImageUri.isNullOrBlank()) {
+                OutlinedButton(
+                    onClick = {
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Image,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Seleccionar foto de fondo")
+                }
+            } else {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(context)
+                                    .data(backgroundImageUri)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(46.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Foto aplicada",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                                Text(
+                                    text = "Fondo activo en tarjeta",
+                                    style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.outline)
+                                )
+                            }
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            OutlinedButton(
+                                onClick = {
+                                    photoPickerLauncher.launch(
+                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                    )
+                                },
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text("Cambiar", fontSize = 12.sp)
+                            }
+                            IconButton(onClick = { backgroundImageUri = null }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Quitar foto",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Selector de Color
             Text(
@@ -569,7 +793,9 @@ fun ShortcutEditSheet(
                         selectedIconKey,
                         actionBlocks.toList(),
                         category,
-                        isFavorite
+                        isFavorite,
+                        triggerType,
+                        backgroundImageUri
                     )
                 },
                 modifier = Modifier

@@ -1,16 +1,35 @@
 package com.example
 
 import android.app.Application
+import android.content.Intent
+import android.content.IntentFilter
 import android.util.Log
+import com.example.trigger.PowerTriggerReceiver
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
 class ShortcutsApp : Application() {
 
+    private val powerTriggerReceiver = PowerTriggerReceiver()
+
     override fun onCreate() {
         super.onCreate()
         initNetworkClient()
         initAnrWatchDog()
+        initPowerTriggerReceiver()
+    }
+
+    private fun initPowerTriggerReceiver() {
+        try {
+            val filter = IntentFilter().apply {
+                addAction(Intent.ACTION_POWER_CONNECTED)
+                addAction(Intent.ACTION_POWER_DISCONNECTED)
+            }
+            registerReceiver(powerTriggerReceiver, filter)
+            Log.d("ShortcutsApp", "PowerTriggerReceiver registrado dinámicamente.")
+        } catch (e: Exception) {
+            Log.w("ShortcutsApp", "No se pudo registrar dinámicamente PowerTriggerReceiver: ${e.message}")
+        }
     }
 
     private fun initAnrWatchDog() {

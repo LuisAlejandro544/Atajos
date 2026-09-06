@@ -46,23 +46,11 @@ Diseñada para ser ligera, ultra-rápida y 100% funcional en dispositivos móvil
     - `message(texto)` / `message(tel, texto)`: Abre selector o envío de mensaje.
     - `sound_settings()`: Abre el panel de volumen y audio.
     - `share(texto)`: Comparte contenido mediante el menú del sistema.
-    - `speak(texto)` / `speak(texto, motor, voz)`: Lee en voz alta un texto utilizando el motor especificado ("PIPER", "ESPEAK", "SYSTEM") o el predeterminado.
-    - `set_tts_engine(motor)`: Cambia dinámicamente el motor de síntesis activo ("PIPER", "ESPEAK", "SYSTEM").
+    - `speak(texto)`: Lee en voz alta un texto utilizando el motor de Texto a Voz configurado en el sistema operativo.
     - `get_hour()`: Retorna la hora actual del día (0-23).
     - `print(...)`: Registra y formatea mensajes capturados en el banner.
-- **Síntesis de Voz Neuronal Avanzada Offline (Piper TTS - VITS)**:
-  - Motor neuronal integrado localmente mediante **ONNX Runtime** (`onnxruntime-android`), permitiendo generación de voz con redes neuronales profundas (VITS) con calidad humana, 100% offline y privada (sin conexión ni servicios en la nube).
-  - Incluye modelo en español empaquetado y listo para usar (`es_ES-carlfm-x_low` a 16 kHz) en los recursos internos de la app.
-  - Catálogo descargable en segundo plano para voces de alta resolución a 22.05 kHz (`es_ES-davefx-medium` y `es_ES-sharvard-medium`) con barra de progreso interactiva y feedback visual.
-  - Selector global de motor de voz (`TtsEngineSettingsDialog`) en el menú principal y en la app de telemetría:
-    - **Piper TTS**: Síntesis neuronal VITS local de alta fidelidad.
-    - **eSpeak-NG**: Motor acústico ultra ligero compilado en C++.
-    - **Voz del Sistema**: Motor predeterminado de Android (Google TTS, Samsung TTS, etc.).
-  - Configuración independiente por bloque de acción (`SpeakBlockEditor`): permite que cada bloque `SPEAK` elija su propio motor y voz o use el predeterminado, con preescucha directa y chips de variables dinámicas (`{hora}`, `{bateria}`, etc.).
-  - Herramienta de banco de pruebas y medición de latencia en la pantalla de telemetría (`DebugActivity`).
-  - Script automatizado de verificación y aprovisionamiento: `scripts/tts/setup_piper.sh`.
 - **Síntesis de Voz Nativa del Sistema (Text-to-Speech)**:
-  - Bloque visual `SPEAK` ("Texto a Voz") con fallback transparente al motor del sistema operativo Android en caso de ausencia o fallo de modelos neuronales.
+  - Bloque visual `SPEAK` ("Texto a Voz") que reproduce anuncios y confirmaciones habladas en español y según el motor configurado por el usuario (Google TTS, Samsung TTS, etc.).
 - **Herramientas de Depuración Integradas (Mobile-First Debugging)**:
   - **App de Telemetría e Historial de Ejecuciones (`DebugActivity`)**: Aplicación complementaria autónoma con lanzador propio en el escritorio de Android (*"Telemetría Atajos"*) al estilo de LeakCanary. Registra el historial de ejecuciones, cronometraje milimétrico paso a paso, tasa global de éxito y verificación de la cadencia fija de 1003 ms, con accesos directos a Chucker y DbInspector.
   - **Infinum DbInspector (6.0.0)**: Interfaz gráfica autónoma en el dispositivo para inspeccionar y editar directamente los archivos de base de datos SQLite y Room (`.db`), ver tablas, columnas, registros y ejecutar consultas SQL en tiempo real.

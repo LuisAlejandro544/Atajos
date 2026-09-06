@@ -15,7 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [ShortcutEntity::class], version = 5, exportSchema = false)
+@Database(entities = [ShortcutEntity::class], version = 6, exportSchema = false)
 @TypeConverters(ActionBlockConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun shortcutDao(): ShortcutDao
@@ -30,16 +30,38 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE shortcuts ADD COLUMN triggerType TEXT NOT NULL DEFAULT 'MANUAL'")
+                db.execSQL("ALTER TABLE shortcuts ADD COLUMN backgroundImageUri TEXT")
+            }
+        }
+
         fun getDatabase(context: Context, scope: CoroutineScope): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "atajos_database_v5"
+                    "atajos_database_v6"
                 )
-                .addMigrations(MIGRATION_4_5)
+                .addMigrations(MIGRATION_4_5, MIGRATION_5_6)
                 .fallbackToDestructiveMigration()
                 .addCallback(AppDatabaseCallback(scope))
+                .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+
+        fun getInstance(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "atajos_database_v6"
+                )
+                .addMigrations(MIGRATION_4_5, MIGRATION_5_6)
+                .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance

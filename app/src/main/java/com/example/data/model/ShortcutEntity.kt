@@ -22,6 +22,12 @@ enum class ActionType(val label: String, val defaultParam: String, val paramLabe
     USER_INTERACTION("Preguntar al Usuario", "{\"designType\":\"MODAL\",\"promptTitle\":\"¿Deseas continuar?\",\"promptMessage\":\"Confirma para ejecutar los siguientes pasos del atajo.\",\"inputMode\":\"BUTTONS\",\"expectedKeyword\":\"Si\",\"buttonPositiveText\":\"Continuar\",\"buttonNegativeText\":\"Cancelar\"}", "Confirmación o palabra clave antes de continuar")
 }
 
+enum class TriggerType(val label: String, val description: String) {
+    MANUAL("Manual", "Se ejecuta al pulsar la tarjeta"),
+    CHARGER_CONNECTED("Al conectar cargador", "⚡ Se dispara al enchufar el cargador"),
+    CHARGER_DISCONNECTED("Al desconectar cargador", "🔋 Se dispara al desenchufar el cargador")
+}
+
 @Entity(tableName = "shortcuts")
 data class ShortcutEntity(
     @PrimaryKey(autoGenerate = true)
@@ -37,5 +43,8 @@ data class ShortcutEntity(
     val category: String = "General",
     val executionCount: Int = 0,
     val createdAt: Long = System.currentTimeMillis(),
-    val isCustom: Boolean = false
+    val isCustom: Boolean = false,
+    val triggerType: String = TriggerType.MANUAL.name,
+    val backgroundImageUri: String? = null
 )
+

@@ -129,18 +129,9 @@ class LuaShortcutEngine(
     }
 
     @Suppress("unused")
-    fun onSpeak(text: String, engine: String = "", voice: String = "") {
-        val engineType = if (engine.isNotBlank()) com.example.tts.TtsEngineType.fromId(engine) else null
-        val voiceOverride = if (voice.isNotBlank()) voice else null
-        val result = executor.speakText(text, engineType, voiceOverride)
+    fun onSpeak(text: String) {
+        val result = executor.executeSingleBlock("SPEAK", text)
         logs.add(result.message)
-    }
-
-    @Suppress("unused")
-    fun onSetTtsEngine(engine: String) {
-        val engineType = com.example.tts.TtsEngineType.fromId(engine)
-        com.example.tts.TtsPreferences.setSelectedEngine(context, engineType)
-        logs.add("Motor TTS cambiado a: ${engineType.title}")
     }
 
     @Suppress("unused")

@@ -154,79 +154,54 @@ fun ActionBlockCard(
             Spacer(modifier = Modifier.height(10.dp))
 
             // Selector de Tipo de Acción
-            Box {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { typeDropdownOpen = true }
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
-                    color = MaterialTheme.colorScheme.surface
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { typeDropdownOpen = true }
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "Tipo de Acción",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    color = MaterialTheme.colorScheme.outline,
-                                    fontSize = 10.sp
-                                )
+                    Column {
+                        Text(
+                            text = "Tipo de Acción",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.outline,
+                                fontSize = 10.sp
                             )
-                            Text(
-                                text = currentActionType.label,
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
-                            )
-                        }
-                        Icon(
-                            imageVector = Icons.Filled.ArrowDropDown,
-                            contentDescription = null
+                        )
+                        Text(
+                            text = currentActionType.label,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                         )
                     }
+                    Icon(
+                        imageVector = Icons.Filled.ArrowDropDown,
+                        contentDescription = null
+                    )
                 }
+            }
 
-                DropdownMenu(
-                    expanded = typeDropdownOpen,
-                    onDismissRequest = { typeDropdownOpen = false }
-                ) {
-                    ActionType.values().forEach { actionType ->
-                        DropdownMenuItem(
-                            text = {
-                                Column {
-                                    Text(
-                                        text = actionType.label,
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            fontWeight = if (actionType == currentActionType) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (actionType == currentActionType) blockColor else MaterialTheme.colorScheme.onSurface
-                                        )
-                                    )
-                                    Text(
-                                        text = actionType.paramLabel,
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontSize = 10.sp,
-                                            color = MaterialTheme.colorScheme.outline
-                                        ),
-                                        maxLines = 1
-                                    )
-                                }
-                            },
-                            onClick = {
-                                val newParam = if (actionType.defaultParam.isNotEmpty()) actionType.defaultParam else ""
-                                onBlockChange(
-                                    block.copy(
-                                        actionType = actionType.name,
-                                        parameter = newParam,
-                                        customLabel = actionType.label
-                                    )
-                                )
-                                typeDropdownOpen = false
-                            }
+            if (typeDropdownOpen) {
+                com.example.ui.components.dialogs.ActionTypePickerDialog(
+                    currentActionType = currentActionType,
+                    onSelectAction = { actionType ->
+                        val newParam = if (actionType.defaultParam.isNotEmpty()) actionType.defaultParam else ""
+                        onBlockChange(
+                            block.copy(
+                                actionType = actionType.name,
+                                parameter = newParam,
+                                customLabel = actionType.label
+                            )
                         )
-                    }
-                }
+                    },
+                    onDismiss = { typeDropdownOpen = false }
+                )
             }
 
             // Editores especializados según el tipo de acción
@@ -297,7 +272,6 @@ fun ActionBlockCard(
                     SpeakBlockEditor(
                         parameter = block.parameter,
                         blockColor = blockColor,
-                        context = context,
                         onParameterChange = { newParam ->
                             onBlockChange(block.copy(parameter = newParam))
                         }

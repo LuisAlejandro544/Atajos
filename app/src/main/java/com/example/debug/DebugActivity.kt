@@ -2,7 +2,6 @@ package com.example.debug
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -35,13 +34,10 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -72,15 +68,7 @@ import androidx.compose.ui.unit.sp
 import com.example.debug.telemetry.ExecutionTelemetry
 import com.example.debug.telemetry.StepTelemetry
 import com.example.debug.telemetry.TelemetryManager
-import com.example.executor.handlers.TtsManager
-import com.example.piper.PiperTtsManager
-import com.example.tts.TtsEngineType
-import com.example.tts.TtsPreferences
-import com.example.ui.components.TtsEngineSettingsDialog
 import com.example.ui.theme.MyApplicationTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -162,11 +150,6 @@ fun DebugTelemetryScreen(onBack: () -> Unit) {
             // Accesos directos a inspectores del sistema
             item {
                 QuickInspectorsRow()
-            }
-
-            // Diagnóstico y Benchmark de Piper TTS
-            item {
-                TtsDiagnosticsCard()
             }
 
             // Título de la sección del historial
@@ -294,41 +277,26 @@ fun QuickInspectorsRow() {
         OutlinedButton(
             onClick = {
                 try {
-                    val intent = com.chuckerteam.chucker.api.Chucker.getLaunchIntent(context).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
+                    val intent = Intent().setClassName(context.packageName, "com.chuckerteam.chucker.api.ChuckerActivity")
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     context.startActivity(intent)
-                } catch (e: Exception) {
-                    try {
-                        val fallback = Intent().apply {
-                            setClassName(context.packageName, "com.chuckerteam.chucker.internal.ui.MainActivity")
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        context.startActivity(fallback)
-                    } catch (ex: Exception) {
-                        Toast.makeText(context, "No se pudo abrir Chucker: ${ex.message}", Toast.LENGTH_SHORT).show()
-                    }
-                }
+                } catch (_: Exception) {}
             },
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(12.dp)
         ) {
             Icon(Icons.Filled.Wifi, contentDescription = null, modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Chucker", fontSize = 11.sp, maxLines = 1)
+            Text("Chucker Red", fontSize = 11.sp, maxLines = 1)
         }
 
         OutlinedButton(
             onClick = {
                 try {
-                    val intent = Intent().apply {
-                        setClassName(context.packageName, "com.infinum.dbinspector.ui.databases.DatabasesActivity")
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
+                    val intent = Intent().setClassName(context.packageName, "com.infinum.dbinspector.ui.DbInspectorActivity")
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     context.startActivity(intent)
-                } catch (e: Exception) {
-                    Toast.makeText(context, "No se pudo abrir DbInspector: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
+                } catch (_: Exception) {}
             },
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(12.dp)
@@ -337,163 +305,6 @@ fun QuickInspectorsRow() {
             Spacer(modifier = Modifier.width(4.dp))
             Text("DbInspector", fontSize = 11.sp, maxLines = 1)
         }
-
-        OutlinedButton(
-            onClick = {
-                try {
-                    val intent = Intent().apply {
-                        setClassName(context.packageName, "leakcanary.internal.activity.LeakActivity")
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    Toast.makeText(context, "No se pudo abrir LeakCanary: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            },
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Icon(Icons.Filled.BugReport, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text("Leaks", fontSize = 11.sp, maxLines = 1)
-        }
-    }
-}
-
-@Composable
-fun TtsDiagnosticsCard() {
-    val context = LocalContext.current
-    val currentEngine = remember { mutableStateOf(TtsPreferences.getSelectedEngine(context)) }
-    val currentVoice = remember { mutableStateOf(TtsPreferences.getSelectedPiperVoice(context)) }
-    var latencyInfo by remember { mutableStateOf("Sin pruebas recientes") }
-    var isRunningTest by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false) }
-
-    val ttsManager = remember { TtsManager(context) }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)),
-        shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.RecordVoiceOver,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Diagnóstico TTS: Piper Neuronal",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
-                    )
-                }
-
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = currentEngine.value.title,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            val isVoiceReady = remember(currentVoice.value) {
-                PiperTtsManager.isVoiceAvailable(context, currentVoice.value)
-            }
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(
-                    text = "Voz: ${currentVoice.value}",
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.outline)
-                )
-                Text(
-                    text = if (isVoiceReady) "Estado: Listo offline" else "Estado: Pendiente descarga",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = if (isVoiceReady) Color(0xFF34C759) else Color(0xFFFF9500)
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = "Telemetría: $latencyInfo",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = {
-                        isRunningTest = true
-                        latencyInfo = "Sintetizando en hilo de fondo..."
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val start = System.currentTimeMillis()
-                            val res = ttsManager.speak(
-                                textOrJson = "Prueba de diagnóstico: síntesis neuronal Piper TTS completada con éxito.",
-                                engineOverride = currentEngine.value,
-                                voiceOverride = currentVoice.value
-                            )
-                            val totalTime = System.currentTimeMillis() - start
-                            isRunningTest = false
-                            latencyInfo = "${res.message} (Tiempo total: ${totalTime}ms)"
-                        }
-                    },
-                    modifier = Modifier.weight(1f),
-                    enabled = !isRunningTest,
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.PlayArrow,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(if (isRunningTest) "Sintetizando..." else "Probar y Medir", fontSize = 11.sp)
-                }
-
-                OutlinedButton(
-                    onClick = { showDialog = true },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text("Configurar Voces", fontSize = 11.sp)
-                }
-            }
-        }
-    }
-
-    if (showDialog) {
-        TtsEngineSettingsDialog(
-            onDismissRequest = {
-                showDialog = false
-                currentEngine.value = TtsPreferences.getSelectedEngine(context)
-                currentVoice.value = TtsPreferences.getSelectedPiperVoice(context)
-            },
-            context = context
-        )
     }
 }
 
