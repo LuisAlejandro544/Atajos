@@ -80,7 +80,9 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 │   │   └── setup_leakcanary.sh               # Descarga y configuración de LeakCanary 2.14 para el APK Debug
 │   ├── emulator/
 │   │   ├── setup_emulator_32bit.sh           # Descarga de imagen de sistema x86 y creación de AVD Android 10 (32-bit)
+│   │   ├── setup_novnc.sh                    # Configuración de pantalla virtual Xvfb, fluxbox y cliente HTML5 noVNC
 │   │   ├── start_emulator.sh                 # Arranque con KVM y sincronización de arranque con sys.boot_completed
+│   │   ├── start_web_tunnel.sh               # Inicia servidor x11vnc y túnel HTTPS Cloudflare para control móvil
 │   │   └── test_32bit.sh                     # Instalación de APK, pruebas de heap RAM, librerías 32-bit y screenshot
 │   └── lua/
 │       ├── setup_lua.sh                      # Descarga y extracción de fuentes oficiales de Lua 5.4.7
@@ -224,8 +226,12 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 
 ## 📱 Entorno de Emulación y Verificación de 32 Bits (Android 10 x86)
 
-El repositorio incluye un flujo automatizado en GitHub Actions (`emulate_android10_32bit.yml`) activable bajo demanda (`workflow_dispatch`) para someter el APK Debug a pruebas en un entorno estricto de 32 bits:
+El repositorio incluye un flujo automatizado en GitHub Actions (`emulate_android10_32bit.yml`) activable bajo demanda (`workflow_dispatch`) para someter el APK Debug a pruebas en un entorno estricto de 32 bits y permitir control remoto interactivo:
 1. **Configuración de AVD**: Descarga de la imagen oficial del SDK `system-images;android-29;google_apis;x86` y aprovisionamiento con aceleración por hardware KVM.
 2. **Arranque y Detección**: Comprobación del estado `sys.boot_completed` y verificación de `ro.product.cpu.abi` confirmando arquitectura nativa `x86` de 32 bits.
 3. **Instalación y Verificación de Heap**: Instalación del APK Debug, arranque de `MainActivity` y `DebugActivity`, volcado de consumo de memoria RAM (`dumpsys meminfo`), inspección del logcat para descartar `UnsatisfiedLinkError` o fallos de JNI, y exportación de captura de pantalla como artefacto.
+4. **Navegación Interactiva en Tiempo Real vía Web (noVNC + Cloudflare Tunnel)**:
+   - Despliega un display virtual Xvfb con x11vnc y cliente HTML5 noVNC.
+   - Genera un enlace HTTPS temporal público (`https://...trycloudflare.com/vnc.html?autoconnect=true&resize=scale`) impreso en la consola de GitHub Actions.
+   - Permite navegar, deslizar y tocar directamente con el dedo desde la pantalla del teléfono móvil para probar la app e interactuar con Android 10 (32 bits) sin necesidad de PC. Parámetro configurable `interactive_minutes` (por defecto 15 minutos).
 

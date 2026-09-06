@@ -2,6 +2,12 @@ name: Emular Android 10 (32-bit x86) y Probar APK
 
 on:
   workflow_dispatch:
+    inputs:
+      interactive_minutes:
+        description: 'Minutos para mantener abierta la sesión interactiva web en tu móvil (0 = solo pruebas y captura)'
+        required: false
+        default: '15'
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -80,6 +86,9 @@ jobs:
           sudo udevadm trigger --name-match=kvm || true
           ls -l /dev/kvm || true
 
+      - name: 🖥️ Preparar entorno gráfico virtual y cliente noVNC
+        run: ./scripts/emulator/setup_novnc.sh
+
       - name: 📲 Instalar Imagen del Sistema y Crear AVD (Android 10 x86 32-bit)
         run: ./scripts/emulator/setup_emulator_32bit.sh
 
@@ -88,6 +97,22 @@ jobs:
 
       - name: 🧪 Ejecutar Pruebas de Instalación, Memoria y Rendimiento en 32 bits
         run: ./scripts/emulator/test_32bit.sh
+
+      - name: 🌐 Iniciar Streaming Web noVNC con Túnel Seguro Cloudflare
+        run: ./scripts/emulator/start_web_tunnel.sh
+
+      - name: ⏳ Mantener Sesión Interactiva Activa (Navegar en vivo desde móvil)
+        run: |
+          MINUTES="${{ github.event.inputs.interactive_minutes || '15' }}"
+          if [ "${MINUTES}" -gt 0 ]; then
+            echo "========================================================================="
+            echo "🕹️ Sesión interactiva en vivo activa por ${MINUTES} minutos."
+            echo "Usa el enlace https://...trycloudflare.com/vnc.html para controlar Android."
+            echo "========================================================================="
+            sleep $(( MINUTES * 60 ))
+          else
+            echo "Modo no interactivo seleccionado (0 minutos)."
+          fi
 
       - name: 📸 Guardar Captura de Pantalla del Emulador de 32 bits
         if: always()

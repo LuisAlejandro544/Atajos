@@ -1,56 +1,15 @@
-refactor: modularización arquitectónica de ShortcutEditSheet, ShortcutViewModel y ShortcutExecutor
+feat(ci): agregar emulación interactiva de Android 10 (32-bit) con streaming web noVNC y túnel Cloudflare
 
-- Modularización y descomposición de ShortcutEditSheet:
-  * Desacoplamiento del archivo monolítico original de más de 1600 líneas en componentes especializados de responsabilidad única.
-  * Creación del paquete 'com.example.ui.components.editors':
-    - VolumeBlockEditor: control deslizante interactivo con cálculo porcentual y preajustes rápidos de volumen.
-    - BrightnessBlockEditor: control táctil de brillo de pantalla y preajustes rápidos.
-    - NotificationBlockEditor: selector de tono de alerta (original vs Pop Vorbis Q7), botón de preescucha con NotificationHelper, campo de texto e inserción horizontal de variables dinámicas.
-    - SpeakBlockEditor: campo de texto para síntesis TextToSpeech con inserción dinámica de variables ({hora}, {bateria}, etc.).
-    - LuaScriptBlockEditor: editor monoespaciado multilínea especializado para scripts Lua.
-  * Creación de ActionBlockCard en 'com.example.ui.components': componente independiente para la representación de cada paso de acción, con badges de paso, reordenación vertical (subir/bajar), eliminación y menú desplegable de tipos de acción.
-  * Creación de AppPickerDialog en 'com.example.ui.components.dialogs': diálogo modal para selección de aplicaciones instaladas con buscador en tiempo real y soporte de carga reactiva.
-  * Refactorización de ShortcutEditSheet como orquestador limpio de la hoja modal de creación y edición.
+- Reorganización de scripts bash en subcarpetas temáticas especializadas:
+  * scripts/apk/: 'build_apk_debug.sh' para compilación limpia del APK Debug sin dependencias de caché.
+  * scripts/build/: 'generate_keystore.sh' y 'setup_cmake.sh' para entorno de construcción nativo.
+  * scripts/lua/: 'setup_lua.sh' y 'setup_lua_debug.sh' para fuentes de Lua puro 5.4.7 e introspección de debug.
+  * scripts/audio/: 'convert_audio.sh' para transcodificación Vorbis OGG de cero latencia.
+  * scripts/debug/: 'setup_leakcanary.sh', 'setup_chucker.sh', 'setup_dbinspector.sh', 'setup_hyperion.sh' y 'setup_anr_watchdog.sh'.
+  * scripts/emulator/: 'setup_emulator_32bit.sh', 'setup_novnc.sh', 'start_emulator.sh', 'start_web_tunnel.sh' y 'test_32bit.sh'.
 
-- Modularización de ShortcutViewModel:
-  * Extracción de la lista estática y curada de atajos predeterminados a 'com.example.data.DefaultShortcuts'.
-  * Creación de 'com.example.data.repository.InstalledAppsRepository' para delegar la consulta asíncrona de PackageManager en segundo plano (Dispatchers.IO).
-  * Reducción de responsabilidades en ShortcutViewModel, centralizando exclusivamente la gestión de estados reactivos (StateFlow), filtros de búsqueda/categoría y la orquestación secuencial de ejecución con cadencia fija de 1003 ms.
-
-- Modularización de ShortcutExecutor con patrón de manejadores de dominio:
-  * Creación del paquete 'com.example.executor.handlers':
-    - DeviceActionHandler: control de linterna (CameraManager), brillo del sistema y retroalimentación háptica.
-    - AudioActionHandler: control de flujo de volumen de audio y acceso a ajustes de sonido del sistema.
-    - NavigationActionHandler: lanzamiento de aplicaciones por paquete, navegación web por URL y rutas en mapas.
-    - CommunicationActionHandler: gestión de portapapeles, envío de mensajes rápidos, compartir texto y temporizadores.
-    - TtsManager: inicialización segura y thread-safe de TextToSpeech con cola de reproducción pendiente.
-  * Mantenimiento de la cadencia exacta de 1003 ms (ShortcutExecutor.STEP_DELAY_MS) y compatibilidad total con LuaShortcutEngine y la suite de pruebas unitarias.
-
-- Sincronización y actualización documental:
-  * Actualización integral de 'STRUCTURE.md' reflejando la nueva arquitectura modular de UI, repositorios y handlers de ejecución.
-  * Integración en la documentación de todos los archivos y módulos existentes en el repositorio previamente omitidos (ShortcutsApp, EspeakManager, ImageCompressor, SpeechSynthesis, recursos eSpeak en assets/jniLibs y suite completa de tests Robolectric y Roborazzi).
-
-- Implementación del Bloque de Interacción con el Usuario ("Preguntar antes de continuar"):
-  * Creación del modelo 'UserInteractionConfig' con soporte para 2 diseños:
-    1. Notificación: desplegada en la barra del sistema con soporte de respuesta de texto/palabras clave (e.g., 'Si', 'No') o acciones directas, pausando la ejecución de forma asíncrona.
-    2. Modal emergente: diálogo en pantalla ('UserPromptDialog') con identidad visual del atajo (icono, título, color), mensaje personalizado, campo de validación de palabra clave y dos botones configurables.
-  * Creación de 'UserInteractionBlockEditor' para la configuración del bloque interactivo en 'ShortcutEditSheet'.
-  * Integración de 'UserInteractionBridge' y 'UserInteractionReceiver' para la sincronización reactiva no bloqueante en la ejecución de atajos.
-
-- Implementación de la App complementaria de Debug y Telemetría:
-  * Creación de 'DebugActivity' con launcher propio en el sistema operativo ('Telemetría Atajos') para auditoría y depuración directa desde dispositivos móviles sin necesidad de PC.
-  * Creación de 'TelemetryManager' y modelos de datos 'TelemetryModels' para recopilar historial detallado de ejecuciones, desglose temporal por paso, tasa de éxito y cumplimiento de la cadencia de 1003 ms.
-  * Enlace y acceso directo a herramientas de inspección integradas: Chucker (inspección de red HTTP/REST) e Infinum DbInspector (inspección SQLite/Room).
-
-- Reorganización modular de scripts Bash y flujo de emulación 32-bit (Android 10):
-  * Reorganización de scripts bash en subcarpetas temáticas especializadas:
-    - scripts/apk/: 'build_apk_debug.sh' para compilación limpia y directa del APK Debug.
-    - scripts/build/: 'generate_keystore.sh' y 'setup_cmake.sh' para entorno base y herramientas nativas.
-    - scripts/lua/: 'setup_lua.sh' y 'setup_lua_debug.sh' para motor Lua puro 5.4.7 e introspección.
-    - scripts/audio/: 'convert_audio.sh' para transcodificación y pipeline de audio Vorbis de cero latencia.
-    - scripts/debug/: 'setup_leakcanary.sh', 'setup_chucker.sh', 'setup_dbinspector.sh', 'setup_hyperion.sh' y 'setup_anr_watchdog.sh'.
-    - scripts/emulator/: 'setup_emulator_32bit.sh', 'start_emulator.sh' y 'test_32bit.sh'.
-  * Creación del workflow de GitHub Actions 'emulate_android10_32bit.yml' con activación manual ('workflow_dispatch'):
-    - Descarga y creación automática de un AVD oficial con Android 10 (API 29) arquitectura pura de 32 bits (x86) y Google APIs con aceleración por hardware KVM.
-    - Compilación, instalación y validación del APK en entorno de 32 bits: verificación de heap de memoria RAM, carga de binarios nativos de 32 bits ('libnative-lua.so'), lanzamiento de MainActivity y DebugActivity, captura de screenshot y detección de excepciones en logcat.
-
+- Implementación del workflow interactivo de GitHub Actions ('emulate_android10_32bit.yml'):
+  * Activación manual ('workflow_dispatch') con parámetro configurable 'interactive_minutes' (por defecto 15 minutos).
+  * Creación y arranque acelerado con KVM de un dispositivo virtual Android 10 (API 29) arquitectura pura de 32 bits (x86).
+  * Pruebas de estrés y diagnóstico: instalación de APK Debug, comprobación de heap RAM (32-bit), carga de librerías JNI nativas ('libnative-lua.so'), lanzamiento de MainActivity y DebugActivity, y captura de pantalla.
+  * Streaming web interactivo en vivo: despliegue de pantalla virtual Xvfb, servidor x11vnc, cliente HTML5 noVNC y túnel seguro Cloudflare ('trycloudflare.com') para navegar y controlar la app en vivo con el dedo desde un teléfono móvil sin necesidad de PC ni ADB local.

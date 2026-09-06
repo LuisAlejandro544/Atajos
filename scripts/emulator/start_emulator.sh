@@ -16,9 +16,18 @@ else
     ACCEL_ARGS="-accel auto"
 fi
 
-# Iniciar emulador en segundo plano sin pantalla física (Headless) optimizado para CI
+# Exportar DISPLAY virtual para renderizado gráfico con noVNC si está disponible
+if [ -n "${DISPLAY:-}" ]; then
+    echo "🖥️ Renderizando interfaz gráfica del emulador en DISPLAY ${DISPLAY}."
+    WINDOW_ARG=""
+else
+    export DISPLAY=:99
+    WINDOW_ARG=""
+fi
+
+# Iniciar emulador en segundo plano conectado al display virtual para streaming interactivo
 emulator -avd "${AVD_NAME}" \
-    -no-window \
+    ${WINDOW_ARG} \
     -no-boot-anim \
     -no-audio \
     -gpu swiftshader_indirect \
