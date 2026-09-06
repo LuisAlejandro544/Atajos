@@ -21,6 +21,11 @@ Diseñada para ser ligera, ultra-rápida y 100% funcional en dispositivos móvil
   - **Pipeline Automatizado de Audio sin Delay (`scripts/convert_audio.sh`)**: script de optimización que convierte archivos de audio a formato Ogg Vorbis (`.ogg`) sin pérdida perceptible y con respuesta acústica instantánea (cero latencia) durante la compilación del APK.
   - **Motor de Variables Dinámicas en Tiempo Real**: tanto las notificaciones como los bloques de Texto a Voz admiten etiquetas evaluadas al momento de ejecución: `{hora}`, `{hora_segundos}`, `{fecha}`, `{dia}`, `{bateria}` y `{portapapeles}`. Incluye chips táctiles en el editor para insertarlas con un toque sin escribir llaves.
   - **Acceso Directo a Favoritos en Tarjeta (1-Click)**: botón de estrella interactivo sobre cada tarjeta para marcar o desmarcar favoritos inmediatamente sin necesidad de ingresar al menú de opciones.
+  - **Bloque de Interacción con el Usuario ("Preguntar antes de continuar", `USER_INTERACTION`)**:
+    - Permite condicionar o pausar la ejecución de cualquier atajo solicitando confirmación interactiva al usuario antes de proceder.
+    - Soporta dos diseños ergonómicos:
+      1. *Modal Emergente (`UserPromptDialog`)*: despliega una tarjeta con icono y paleta temática del atajo, mensaje personalizado, campo de entrada de palabra clave (ej. "Si", "No") o botones directos de confirmación/cancelación.
+      2. *Notificación en Barra del Sistema (`UserInteractionNotificationHelper`)*: lanza una notificación interactiva con respuesta de texto directo o botones para validar la palabra clave antes de continuar.
   - **Orden de cuadrícula estable**: los atajos conservan su posición exacta en pantalla tras ser ejecutados, evitando saltos molestos hacia la parte superior.
 - **Motor de Scripting Lua 5.4.7 Puro (Nativo en C)**:
   - Compilado nativamente para arquitecturas móviles (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`) mediante Android NDK y CMake (`libnative-lua.so`).
@@ -47,6 +52,7 @@ Diseñada para ser ligera, ultra-rápida y 100% funcional en dispositivos móvil
 - **Síntesis de Voz Nativa del Sistema (Text-to-Speech)**:
   - Bloque visual `SPEAK` ("Texto a Voz") que reproduce anuncios y confirmaciones habladas en español y según el motor configurado por el usuario (Google TTS, Samsung TTS, etc.).
 - **Herramientas de Depuración Integradas (Mobile-First Debugging)**:
+  - **App de Telemetría e Historial de Ejecuciones (`DebugActivity`)**: Aplicación complementaria autónoma con lanzador propio en el escritorio de Android (*"Telemetría Atajos"*) al estilo de LeakCanary. Registra el historial de ejecuciones, cronometraje milimétrico paso a paso, tasa global de éxito y verificación de la cadencia fija de 1003 ms, con accesos directos a Chucker y DbInspector.
   - **Infinum DbInspector (6.0.0)**: Interfaz gráfica autónoma en el dispositivo para inspeccionar y editar directamente los archivos de base de datos SQLite y Room (`.db`), ver tablas, columnas, registros y ejecutar consultas SQL en tiempo real.
   - **Hyperion-Android (0.9.38)**: Menú lateral de inspección de interfaz activable con gesto deslizante o agitación del teléfono, con plugins de medición dimensional en pantalla (*Measurement*) y capturador de fallos (*Crash*).
   - **ANR-WatchDog (1.4.0)**: Guardián de rendimiento del hilo principal (UI Thread) para detectar bloqueos antes de que congelen la app.

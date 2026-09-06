@@ -18,7 +18,8 @@ enum class ActionType(val label: String, val defaultParam: String, val paramLabe
     NOTIFICATION("Mostrar Notificación", "Atajo completado a las {hora} | Batería: {bateria}%", "Texto de la notificación (admite {hora}, {fecha}, {bateria}, {portapapeles})"),
     SET_BRIGHTNESS("Brillo de Pantalla", "80", "Nivel de brillo en porcentaje (0-100%)"),
     WAIT("Esperar (Pausa)", "1003", "Tiempo de espera en milisegundos (ej: 1003 o 2500)"),
-    LUA_SCRIPT("Script en Lua", "local hora = get_hour()\nif hora >= 20 then\n  flashlight()\n  return 'Hora nocturna: linterna'\nelse\n  copy('¡Hola desde Lua!')\n  return 'Hora diurna: texto copiado'\nend", "Código Lua a ejecutar")
+    LUA_SCRIPT("Script en Lua", "local hora = get_hour()\nif hora >= 20 then\n  flashlight()\n  return 'Hora nocturna: linterna'\nelse\n  copy('¡Hola desde Lua!')\n  return 'Hora diurna: texto copiado'\nend", "Código Lua a ejecutar"),
+    USER_INTERACTION("Preguntar al Usuario", "{\"designType\":\"MODAL\",\"promptTitle\":\"¿Deseas continuar?\",\"promptMessage\":\"Confirma para ejecutar los siguientes pasos del atajo.\",\"inputMode\":\"BUTTONS\",\"expectedKeyword\":\"Si\",\"buttonPositiveText\":\"Continuar\",\"buttonNegativeText\":\"Cancelar\"}", "Confirmación o palabra clave antes de continuar")
 }
 
 @Entity(tableName = "shortcuts")

@@ -5,7 +5,7 @@ echo "============================================="
 echo "🌐 Configurando y descargando Chucker"
 echo "============================================="
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Verificar que gradle y las dependencias de Chucker estén presentes en el proyecto
 echo "Verificando dependencias de Chucker en Gradle..."

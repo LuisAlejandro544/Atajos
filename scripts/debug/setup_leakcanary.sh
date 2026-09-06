@@ -5,7 +5,7 @@ echo "============================================="
 echo "🔍 Configurando y descargando LeakCanary"
 echo "============================================="
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Verificar que gradle y las dependencias de LeakCanary estén presentes en el proyecto
 echo "Verificando dependencias de LeakCanary en Gradle..."

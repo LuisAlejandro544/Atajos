@@ -5,7 +5,7 @@ echo "============================================="
 echo "🎛️ Configurando y descargando Hyperion-Android"
 echo "============================================="
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Verificar que gradle y las dependencias de Hyperion estén presentes en el proyecto
 echo "Verificando dependencias de Hyperion en Gradle..."

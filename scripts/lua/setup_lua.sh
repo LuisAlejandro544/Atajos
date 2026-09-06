@@ -5,7 +5,7 @@ echo "============================================="
 echo "📥 Configurando fuentes oficiales de Lua 5.4.7"
 echo "============================================="
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LUA_DIR="${PROJECT_ROOT}/app/src/main/cpp/lua"
 LUA_VERSION="5.4.7"
 LUA_TAR="lua-${LUA_VERSION}.tar.gz"

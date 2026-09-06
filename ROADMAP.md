@@ -28,6 +28,14 @@ Plan de evolución técnica y funcional para la aplicación de atajos y automati
 - [x] Bloque de acción **"Brillo de Pantalla" (`SET_BRIGHTNESS`)**: control táctil con slider manual (0-100%), visualización en tiempo real y presets rápidos.
 - [x] Conmutador directo de favoritos en tarjetas (1-click) sin requerir apertura de menús secundarios.
 - [x] Persistencia garantizada de atajos personalizados creados por el usuario con campo `isCustom` en Room Database.
+- [x] Bloque de acción **"Interacción con el Usuario" (`USER_INTERACTION`)**: pausar la ejecución de atajos para solicitar confirmación del usuario antes de continuar ("Preguntar antes de continuar"). Dispone de 2 diseños ergonómicos seleccionables:
+  * **Modal emergente (`UserPromptDialog`)**: ventana en pantalla con logotipo, título y color temático del atajo, mensaje personalizable, campo de validación de palabra clave (ej. "Si", "No") y 2 botones de acción configurables.
+  * **Notificación interactiva (`UserInteractionNotificationHelper`)**: notificación en la barra del sistema con acción de respuesta directa para ingresar la palabra clave requerida o continuar.
+- [x] App complementaria independiente de **"Telemetría y Depuración" (`DebugActivity`)**:
+  * Integrada dentro del mismo APK con icono y lanzador propio en el sistema operativo ("Telemetría Atajos") al estilo de LeakCanary.
+  * Historial detallado de ejecuciones con desglose de duración paso a paso, tasa global de éxito y verificación de la cadencia fija de 1003 ms.
+  * Accesos rápidos directos a los inspectores del sistema (Chucker para tráfico de red HTTP y DbInspector para SQLite/Room).
+- [x] Modularización arquitectónica completa: desacoplamiento de `ShortcutEditSheet`, `ShortcutViewModel` y `ShortcutExecutor` en componentes modulares y manejadores de dominio especializados (`com.example.executor.handlers` y `com.example.ui.components.editors`).
 - [x] Herramientas de depuración móvil integradas:
   * **Infinum DbInspector (6.0.0)**: explorador visual y editor interactivo de archivos de base de datos `.db` (Room/SQLite) en pantalla.
   * **Hyperion-Android (0.9.38)**: cajón lateral de depuración accesible por gesto táctil con módulos de medición de vistas y reporte de fallos.

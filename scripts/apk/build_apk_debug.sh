@@ -6,24 +6,24 @@ echo "🚀 Compilación de APK Debug de Atajos (Sin Caché)"
 echo "=========================================================="
 
 SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPTS_DIR}/.." && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPTS_DIR}/../.." && pwd)"
 cd "${PROJECT_ROOT}"
 
 echo ""
 echo ">> [1/4] Asegurando Keystore para compilación Debug..."
-bash "${SCRIPTS_DIR}/generate_keystore.sh"
+bash "${PROJECT_ROOT}/scripts/build/generate_keystore.sh"
 
 echo ""
 echo ">> [2/4] Verificando dependencias de CMake y NDK..."
-bash "${SCRIPTS_DIR}/setup_cmake.sh"
+bash "${PROJECT_ROOT}/scripts/build/setup_cmake.sh"
 
 echo ""
 echo ">> [3/5] Asegurando fuentes oficiales de Lua 5.4.7..."
-bash "${SCRIPTS_DIR}/setup_lua.sh"
+bash "${PROJECT_ROOT}/scripts/lua/setup_lua.sh"
 
 echo ""
 echo ">> [4/5] Convirtiendo y preparando recursos de audio (OGG sin delay)..."
-bash "${SCRIPTS_DIR}/convert_audio.sh"
+bash "${PROJECT_ROOT}/scripts/audio/convert_audio.sh"
 
 echo ""
 echo ">> [5/5] Compilando APK Debug (sin caché de compilación)..."

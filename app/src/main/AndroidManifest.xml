@@ -41,6 +41,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- App complementaria de Telemetría y Debug con acceso directo desde el Launcher -->
+        <activity
+            android:name=".debug.DebugActivity"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Telemetría Atajos"
+            android:theme="@style/Theme.MyApplication">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".executor.UserInteractionReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>

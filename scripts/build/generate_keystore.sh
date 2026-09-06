@@ -5,7 +5,7 @@ echo "============================================="
 echo "🔑 Configurando Android Debug Keystore"
 echo "============================================="
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 KEYSTORE_PATH="${PROJECT_ROOT}/debug.keystore"
 BASE64_PATH="${PROJECT_ROOT}/debug.keystore.base64"
 

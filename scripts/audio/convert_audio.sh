@@ -6,7 +6,7 @@ echo "🎵 Conversor de Audio a OGG (Cero Latencia / Sin Delay)"
 echo "=========================================================="
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 SOURCE_DIR="${PROJECT_ROOT}/audio_assets/raw"
 OUTPUT_DIR="${PROJECT_ROOT}/app/src/main/res/raw"

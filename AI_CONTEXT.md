@@ -48,9 +48,13 @@ Construir una aplicación nativa para Android en Kotlin y Jetpack Compose que em
    - **Pipeline de Audio sin Delay (`scripts/convert_audio.sh`)**: Conversión automática a OGG Vorbis con ffmpeg en el ciclo de compilación.
    - **Motor de Variables Dinámicas en Tiempo Real (`VariableResolver`)**: Sustitución dinámica de `{hora}`, `{hora_segundos}`, `{fecha}`, `{dia}`, `{bateria}` y `{portapapeles}` con chips táctiles en el editor.
    - **Control de Brillo de Pantalla (`SET_BRIGHTNESS`)**: Deslizador manual (0-100%) y presets rápidos (20%, 50%, 80%, 100%) con integración de `Settings.System`.
+   - **Interacción con el Usuario ("Preguntar antes de continuar", `USER_INTERACTION`)**: Permite pausar la ejecución secuencial del atajo para solicitar confirmación interactiva al usuario con dos diseños configurables:
+     1. *Modal Emergente (`UserPromptDialog`)*: Muestra tarjeta con icono y color del atajo, mensaje personalizable, campo de texto para palabras clave (ej. "Si", "No") o 2 botones de acción rápida.
+     2. *Notificación en Barra del Sistema (`UserInteractionNotificationHelper`)*: Despliega notificación interactiva con soporte de respuesta de texto directo o botones para validar palabras clave de continuación.
    - **Conmutador Directo de Favoritos en Tarjeta (1-Click)**: Botón interactivo de estrella en cada tarjeta de atajo.
 
 5. **Herramientas de Depuración Integradas (Mobile-First Debugging)**:
+   - **App de Telemetría e Historial de Ejecuciones (`DebugActivity`)**: Actividad complementaria con icono y lanzador propio en el escritorio del teléfono ("Telemetría Atajos") que registra cada ejecución, desglose milimétrico por paso, estado de salida, tasa de éxito y cumplimiento de la cadencia de 1003 ms, con enlaces directos hacia Chucker y DbInspector.
    - **Infinum DbInspector (6.0.0)**: Explorador visual de bases de datos SQLite/Room (`.db`) en pantalla con vista de tablas, estructura de claves, edición de filas y consola interactiva de consultas SQL.
    - **Hyperion-Android (0.9.38)**: Menú de desarrollo deslizable desde el borde de la pantalla o por agitación, incluyendo módulos de inspección dimensional (*Measurement*) y capturador de fallos de aplicación (*Crash*).
    - **ANR-WatchDog (1.4.0)**: Vigilante en segundo plano del hilo principal (UI Thread) para capturar y registrar trazas de pila ante bloqueos que superen el umbral crítico (4000 ms).

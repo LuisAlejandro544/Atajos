@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Timer
@@ -40,7 +41,8 @@ object ShortcutIconHelper {
         ShortcutIconItem("SHARE", "Compartir", Icons.Filled.Share),
         ShortcutIconItem("SPEAK", "Texto a Voz", Icons.Filled.RecordVoiceOver),
         ShortcutIconItem("WAIT", "Pausa", Icons.Filled.HourglassTop),
-        ShortcutIconItem("CODE", "Código Lua", Icons.Filled.Code)
+        ShortcutIconItem("CODE", "Código Lua", Icons.Filled.Code),
+        ShortcutIconItem("PROMPT", "Preguntar", Icons.Filled.QuestionAnswer)
     )
 
     fun getIcon(key: String): ImageVector {

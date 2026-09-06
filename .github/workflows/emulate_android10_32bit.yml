@@ -1,4 +1,4 @@
-name: Build Debug APK (Sin Caché)
+name: Emular Android 10 (32-bit x86) y Probar APK
 
 on:
   workflow_dispatch:
@@ -8,8 +8,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-debug:
-    name: Compilar APK Debug
+  emulate-and-test-32bit:
+    name: Emular Android 10 (32-bit) y Probar APK Debug
     runs-on: ubuntu-latest
 
     steps:
@@ -65,10 +65,35 @@ jobs:
       - name: 🚀 Compilar APK Debug (Sin Caché)
         run: ./scripts/apk/build_apk_debug.sh
 
-      - name: 📦 Subir APK Debug como Artefacto
+      - name: 📦 Subir APK Debug compilado
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
+          name: app-debug-apk-32bit-test
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 7
+
+      - name: ⚡ Habilitar Aceleración KVM por Hardware
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm || true
+          ls -l /dev/kvm || true
+
+      - name: 📲 Instalar Imagen del Sistema y Crear AVD (Android 10 x86 32-bit)
+        run: ./scripts/emulator/setup_emulator_32bit.sh
+
+      - name: 🚀 Arrancar Emulador de 32 bits y Esperar Inicio
+        run: ./scripts/emulator/start_emulator.sh
+
+      - name: 🧪 Ejecutar Pruebas de Instalación, Memoria y Rendimiento en 32 bits
+        run: ./scripts/emulator/test_32bit.sh
+
+      - name: 📸 Guardar Captura de Pantalla del Emulador de 32 bits
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-android10-32bit
+          path: emulator_32bit_screenshot.png
+          if-no-files-found: ignore
+          retention-days: 7

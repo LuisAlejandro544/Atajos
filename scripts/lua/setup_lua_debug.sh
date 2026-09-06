@@ -5,13 +5,13 @@ echo "============================================="
 echo "🐞 Configurando y descargando Lua Debug Library"
 echo "============================================="
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LUA_DIR="${PROJECT_ROOT}/app/src/main/cpp/lua"
 
 # Asegurar que los fuentes de Lua 5.4.7 estén disponibles
 if [ ! -f "${LUA_DIR}/lua.h" ]; then
     echo "Fuentes de Lua no encontrados, ejecutando setup_lua.sh primero..."
-    bash "${PROJECT_ROOT}/scripts/setup_lua.sh"
+    bash "${PROJECT_ROOT}/scripts/lua/setup_lua.sh"
 fi
 
 # Verificar específicamente los archivos de la librería de debug de Lua 5.4.7

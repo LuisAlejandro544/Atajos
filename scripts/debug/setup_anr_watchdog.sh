@@ -5,7 +5,7 @@ echo "============================================="
 echo "🛡️ Configurando y descargando ANR-WatchDog"
 echo "============================================="
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Verificar que gradle y las dependencias de ANR-WatchDog estén presentes en el proyecto
 echo "Verificando dependencias de ANR-WatchDog en Gradle..."

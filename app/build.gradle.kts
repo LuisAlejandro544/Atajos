@@ -94,6 +94,7 @@ dependencies {
   implementation(libs.androidx.compose.ui.graphics)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.exifinterface)
   // implementation(libs.androidx.datastore.preferences)
   implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -141,7 +142,7 @@ dependencies {
 
 val convertAudioTask = tasks.register<Exec>("convertAudio") {
   workingDir = rootDir
-  commandLine("bash", "${rootDir}/scripts/convert_audio.sh")
+  commandLine("bash", "${rootDir}/scripts/audio/convert_audio.sh")
 }
 
 tasks.named("preBuild") {

@@ -1,5 +1,6 @@
 package com.example.ui
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -59,9 +61,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import com.example.debug.DebugActivity
 import com.example.ui.components.ExecutionBanner
 import com.example.ui.components.ShortcutCard
 import com.example.ui.components.ShortcutEditSheet
+import com.example.ui.components.dialogs.UserPromptDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -172,6 +176,17 @@ fun ShortcutScreen(
                                 expanded = showTopMenu,
                                 onDismissRequest = { showTopMenu = false }
                             ) {
+                                DropdownMenuItem(
+                                    text = { Text("Telemetría & Historial Debug") },
+                                    leadingIcon = {
+                                        Icon(Icons.Filled.Timeline, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                    },
+                                    onClick = {
+                                        showTopMenu = false
+                                        val intent = Intent(context, DebugActivity::class.java)
+                                        context.startActivity(intent)
+                                    }
+                                )
                                 DropdownMenuItem(
                                     text = { Text("Restaurar atajos iniciales") },
                                     leadingIcon = {
@@ -406,6 +421,18 @@ fun ShortcutScreen(
                 onDelete = { shortcut ->
                     viewModel.deleteShortcut(shortcut)
                 }
+            )
+        }
+
+        // Modal de Interacción con el Usuario ("Preguntar antes de continuar")
+        uiState.activePrompt?.let { prompt ->
+            UserPromptDialog(
+                shortcutTitle = prompt.shortcutTitle,
+                iconKey = prompt.iconKey,
+                colorHex = prompt.colorHex,
+                config = prompt.config,
+                onConfirm = { prompt.onResponse(true) },
+                onCancel = { prompt.onResponse(false) }
             )
         }
     }
