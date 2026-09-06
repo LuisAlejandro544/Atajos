@@ -59,6 +59,9 @@ jobs:
       - name: 🛡️ Descargar y preparar ANR-WatchDog para APK Debug
         run: ./scripts/setup_anr_watchdog.sh
 
+      - name: 🎵 Convertir y optimizar recursos de audio a OGG (Cero Latencia)
+        run: ./scripts/convert_audio.sh
+
       - name: 🚀 Compilar APK Debug (Sin Caché)
         run: ./scripts/build_apk_debug.sh
 

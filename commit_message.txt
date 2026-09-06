@@ -1,27 +1,18 @@
-fix: persistencia de atajos de usuario, selector completo de apps/juegos, UX superior en editor y eliminación de dependencias de Google
+feat: unificación de fuente de audio, conversión universal a OGG sin delay y pipeline de compilación Debug
 
-- Persistencia de atajos personalizados: incorporación del campo 'isCustom' en ShortcutEntity y actualización de ShortcutRepository para preservar los atajos creados por el usuario al reiniciar valores predeterminados (Room versión 5 con MIGRATION_4_5 y deleteDefaults).
-- Selector completo de aplicaciones y juegos: declaración de QUERY_ALL_PACKAGES y bloque <queries> en AndroidManifest.xml, integrando queryIntentActivities y getInstalledApplications con deduplicación por paquete para listar todas las aplicaciones y juegos del dispositivo sin omitir ninguno.
-- Rediseño de ergonomía y disposición en el editor de atajos (ShortcutEditSheet):
-  * Reubicación de Nombre, Descripción, Color de tarjeta, Ícono, Categoría y Favoritos a la parte superior de la pantalla para edición inmediata.
-  * Eliminación del gesto de cierre accidental por deslizamiento vertical (swipe-to-dismiss); el menú ahora solo se cierra mediante el botón 'X'.
-  * Modernización estética de controles eliminando círculos desalineados y reemplazándolos por esquinas redondeadas armoniosas (RoundedCornerShape / squircle) en badges, botones de orden y paleta de colores.
-- Limpieza de dependencias: eliminación completa de plugins y librerías de Google Services y Firebase del proyecto.
-
-feat: notificaciones nativas prioritarias con bypass DND, variables dinámicas ({hora}, {fecha}, {bateria}), control táctil de brillo de pantalla y favoritos con 1 click
-
-- Notificaciones nativas prioritarias con bypass de No Molestar (DND): nuevo bloque de acción NOTIFICATION que genera notificaciones en canales de máxima importancia (IMPORTANCE_HIGH, PRIORITY_MAX, CATEGORY_ALARM y setBypassDnd(true)), asegurando que las alertas de atajos se muestren en pantalla aunque el usuario tenga el modo No Molestar activado.
-- Motor de variables dinámicas en tiempo real (VariableResolver): resolución de etiquetas dinámicas {hora}, {hora_segundos}, {fecha}, {dia}, {bateria} y {portapapeles} tanto en notificaciones como en el bloque de Texto a Voz (SPEAK).
-- Chips táctiles de variables dinámicas: botones en el editor (ShortcutEditSheet) para insertar variables dinámicas en un solo toque sin teclear llaves.
-- Control de brillo de pantalla (SET_BRIGHTNESS): nuevo bloque con deslizador continuo (0-100%), indicador en tiempo real, presets de acceso rápido táctil (20%, 50%, 80%, 100%) y gestión de permisos con Settings.System (WRITE_SETTINGS).
-- Conmutador directo de favoritos en tarjetas (1 click): botón de estrella táctil integrado en la tarjeta de cada atajo para alternar el estado de favorito de forma inmediata sin desplegar menús.
-- Actualización de atajos por defecto: integración de 'Notificación de Estado' y 'Brillo Óptimo' en la base de datos Room.
-
-feat: soporte para sonidos de notificaciones personalizados (Pop Audio CC0 y original), preescucha interactiva y script de conversión a OGG sin delay
-
-- Selector de sonido en el bloque de notificación: incorporación de selector interactivo en ShortcutEditSheet para alternar entre el sonido original del sistema y el nuevo sonido 'Pop Notification' (CC0 de GabrielAraujo).
-- Preescucha interactiva de sonido: botón de reproducción directa (Play) en el editor de atajos para probar el audio elegido antes de guardar o ejecutar la acción.
-- Canales de notificación duales con bypass DND: canales independientes en NotificationHelper (shortcuts_priority_channel y shortcuts_priority_channel_pop) con configuración de AudioAttributes (USAGE_ALARM/IMPORTANCE_HIGH) para asegurar que el sonido se emita incluso bajo modo No Molestar.
-- Script de procesamiento y conversión de audio sin delay (scripts/convert_audio.sh): script automatizado con ffmpeg que convierte archivos WAV a formato Ogg Vorbis de ultra baja latencia (.ogg) sin pérdida perceptible y con respuesta instantánea para notificaciones, integrado en el ciclo de compilación de Gradle (tarea convertAudio / preBuild) y en el script de compilación scripts/build_apk_debug.sh.
-- Gestión de licencias de recursos: inclusión de atribución y licencia Creative Commons 0 (audio_assets/LICENSE.txt) para el sonido de notificación Pop de GabrielAraujo (https://freesound.org/s/242502/).
-
+- Limpieza de recursos de audio duplicados: eliminación de archivos duplicados en la raíz y en assets raw, conservando como única fuente de audio el archivo original '242502__gabrielaraujo__pop-upnotification.wav' en 'audio_assets/raw/'.
+- Conversor universal de audio a OGG de cero latencia (scripts/convert_audio.sh): automatización con ffmpeg para convertir cualquier formato de entrada (WAV, MP3, M4A, FLAC, AAC, OPUS) a Ogg Vorbis (.ogg) con calidad Q7 y nombres normalizados para recursos de Android (app/src/main/res/raw/), eliminando retrasos de decodificación en notificaciones.
+- Integración en flujos de compilación APK Debug:
+  * Inclusión del paso de conversión de audios en el script de compilación manual scripts/build_apk_debug.sh.
+  * Inclusión del paso de conversión en el workflow de GitHub Actions (.github/workflows/build_debug.yml).
+  * Vinculación automática en Gradle mediante la tarea convertAudio ligada a preBuild en app/build.gradle.kts.
+- Selector y reproducción de sonidos en notificaciones: interfaz táctil con preescucha interactiva en ShortcutEditSheet y canales duales con bypass No Molestar (DND) en NotificationHelper.
+- Atribución de licencia: documentación de autoría Creative Commons 0 (CC0) para el sonido de GabrielAraujo en audio_assets/LICENSE.txt.
+- Corrección de ANR (Application Not Responding) al crear/editar atajos:
+  * Migración de la consulta pesada de PackageManager (queryIntentActivities) a segundo plano con Dispatchers.IO en ShortcutViewModel y carga reactiva con StateFlow.
+  * Eliminación del bloqueo síncrono en el hilo principal dentro de ShortcutEditSheet, garantizando apertura instantánea a 60/120 FPS sin disparar ANR-WatchDog.
+  * Indicador de carga asíncrono en el diálogo de selección de aplicaciones.
+- Rediseño estético Ultra HD de las tarjetas de atajos:
+  * Eliminación de cuadros opacos en los botones de acción superior (favoritos y menú de tres puntos) y en el botón de reproducción.
+  * Implementación de micro-botones circulares de cristal translúcido con efecto glassmorphism y bordes especulares de alta definición (0.75dp).
+  * Refinamiento del estado visual de favoritos con brillo dorado sutil y contraste optimizado sobre gradientes vivos.

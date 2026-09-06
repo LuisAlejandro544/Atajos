@@ -71,6 +71,7 @@ fun ShortcutScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val installedApps by viewModel.installedApps.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
         confirmValueChange = { false }
@@ -389,6 +390,7 @@ fun ShortcutScreen(
             ShortcutEditSheet(
                 sheetState = sheetState,
                 initialShortcut = uiState.editingShortcut,
+                installedApps = installedApps,
                 onDismiss = { viewModel.closeSheet() },
                 onSave = { title, description, colorHex, iconKey, actions, category, isFavorite ->
                     viewModel.saveShortcut(

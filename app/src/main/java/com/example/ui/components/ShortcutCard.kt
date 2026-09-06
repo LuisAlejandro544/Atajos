@@ -144,15 +144,15 @@ fun ShortcutCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Icon Badge con efecto Glassmorphism y micro-borde
+                    // Icon Badge con efecto Glassmorphism y micro-borde Ultra HD
                     Box(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.24f))
+                            .background(Color.White.copy(alpha = 0.15f))
                             .border(
-                                width = 1.dp,
-                                color = Color.White.copy(alpha = 0.35f),
+                                width = 0.75.dp,
+                                color = Color.White.copy(alpha = 0.28f),
                                 shape = RoundedCornerShape(14.dp)
                             ),
                         contentAlignment = Alignment.Center
@@ -169,39 +169,64 @@ fun ShortcutCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        IconButton(
-                            onClick = onToggleFavorite,
+                        // Botón de Favorito: Cristal circular translúcido Ultra HD (sin cuadros opacos)
+                        Box(
                             modifier = Modifier
-                                .size(34.dp)
-                                .clip(RoundedCornerShape(10.dp))
+                                .size(32.dp)
+                                .clip(CircleShape)
                                 .background(
-                                    if (shortcut.isFavorite) Color(0xFFFFD60A).copy(alpha = 0.28f)
-                                    else Color.White.copy(alpha = 0.16f)
+                                    if (shortcut.isFavorite) Color(0xFFFFD60A).copy(alpha = 0.16f)
+                                    else Color.White.copy(alpha = 0.08f)
                                 )
-                                .testTag("toggle_favorite_${shortcut.id}")
+                                .border(
+                                    width = 0.75.dp,
+                                    color = if (shortcut.isFavorite) Color(0xFFFFD60A).copy(alpha = 0.40f)
+                                    else Color.White.copy(alpha = 0.22f),
+                                    shape = CircleShape
+                                )
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                    onClick = onToggleFavorite
+                                )
+                                .testTag("toggle_favorite_${shortcut.id}"),
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = if (shortcut.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
                                 contentDescription = if (shortcut.isFavorite) "Quitar de favoritos" else "Marcar como favorito",
-                                tint = if (shortcut.isFavorite) Color(0xFFFFD60A) else Color.White,
-                                modifier = Modifier.size(20.dp)
+                                tint = if (shortcut.isFavorite) Color(0xFFFFD60A) else Color.White.copy(alpha = 0.90f),
+                                modifier = Modifier.size(17.dp)
                             )
                         }
 
-                        Box {
-                            IconButton(
-                                onClick = { showMenu = true },
+                        // Botón de Opciones: Cristal circular translúcido Ultra HD
+                        Box(
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
                                 modifier = Modifier
-                                    .size(34.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(Color.White.copy(alpha = 0.18f))
-                                    .testTag("shortcut_options_${shortcut.id}")
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.08f))
+                                    .border(
+                                        width = 0.75.dp,
+                                        color = Color.White.copy(alpha = 0.22f),
+                                        shape = CircleShape
+                                    )
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null,
+                                        onClick = { showMenu = true }
+                                    )
+                                    .testTag("shortcut_options_${shortcut.id}"),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.MoreVert,
                                     contentDescription = "Opciones",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(19.dp)
+                                    tint = Color.White.copy(alpha = 0.90f),
+                                    modifier = Modifier.size(17.dp)
                                 )
                             }
 
@@ -291,14 +316,18 @@ fun ShortcutCard(
                         )
                     }
 
-                    // Play Button / Indicator con botón translúcido cristal y micro-borde
+                    // Play Button / Indicator con botón circular translúcido cristal y micro-borde Ultra HD
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(RoundedCornerShape(11.dp))
-                            .background(Color.White.copy(alpha = 0.28f))
-                            .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(11.dp))
-                            .clickable { onExecute() }
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.16f))
+                            .border(0.75.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { onExecute() }
+                            )
                             .testTag("run_shortcut_${shortcut.id}"),
                         contentAlignment = Alignment.Center
                     ) {

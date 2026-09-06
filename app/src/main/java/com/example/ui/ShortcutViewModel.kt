@@ -1,22 +1,27 @@
 package com.example.ui
 
 import android.app.Application
+import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.db.AppDatabase
 import com.example.data.model.ActionBlock
 import com.example.data.model.ActionType
+import com.example.data.model.InstalledAppItem
 import com.example.data.model.ShortcutEntity
 import com.example.data.repository.ShortcutRepository
 import com.example.executor.ShortcutExecutor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class BannerInfo(
     val message: String,
@@ -50,11 +55,17 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
     private val _editingShortcut = MutableStateFlow<ShortcutEntity?>(null)
     private val _isSheetOpen = MutableStateFlow(false)
 
+    private val _installedApps = MutableStateFlow<List<InstalledAppItem>>(emptyList())
+    val installedApps: StateFlow<List<InstalledAppItem>> = _installedApps.asStateFlow()
+
     private var executionJob: Job? = null
 
     init {
         val database = AppDatabase.getDatabase(application, viewModelScope)
         repository = ShortcutRepository(database.shortcutDao())
+        viewModelScope.launch(Dispatchers.IO) {
+            loadInstalledApps()
+        }
     }
 
     private data class FilterState(
@@ -464,6 +475,30 @@ class ShortcutViewModel(application: Application) : AndroidViewModel(application
                 )
             )
             repository.resetDefaults(defaults)
+        }
+    }
+
+    private suspend fun loadInstalledApps() {
+        withContext(Dispatchers.IO) {
+            try {
+                val pm = getApplication<Application>().packageManager
+                val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
+                    addCategory(Intent.CATEGORY_LAUNCHER)
+                }
+                val launcherApps = pm.queryIntentActivities(mainIntent, 0)
+                val list = launcherApps.mapNotNull { resolveInfo ->
+                    try {
+                        val pkg = resolveInfo.activityInfo.packageName
+                        val label = resolveInfo.loadLabel(pm).toString().trim()
+                        if (label.isNotBlank()) InstalledAppItem(name = label, packageName = pkg) else null
+                    } catch (_: Exception) {
+                        null
+                    }
+                }.distinctBy { it.packageName }.sortedBy { it.name.lowercase() }
+                _installedApps.value = list
+            } catch (_: Exception) {
+                _installedApps.value = emptyList()
+            }
         }
     }
 }

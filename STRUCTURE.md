@@ -36,11 +36,10 @@ La aplicación sigue los principios de **MVVM (Model-View-ViewModel)** y **Clean
 ├── audio_assets/
 │   ├── LICENSE.txt                           # Atribución y licencia Creative Commons 0 (CC0)
 │   └── raw/
-│       ├── 242502__gabrielaraujo__pop-upnotification.wav # Audio original
-│       └── pop_notification.wav              # Audio de referencia
+│       └── 242502__gabrielaraujo__pop-upnotification.wav # Audio original (único archivo fuente WAV)
 ├── scripts/
 │   ├── build_apk_debug.sh                    # Compilación limpia del APK Debug sin caché
-│   ├── convert_audio.sh                      # Conversión automatizada de audio a OGG sin delay
+│   ├── convert_audio.sh                      # Conversión universal de audio (cualquier formato) a OGG sin delay
 │   ├── generate_keystore.sh                  # Generación y verificación del keystore de depuración
 │   ├── setup_cmake.sh                        # Configuración de CMake 3.22.1 y NDK 27
 │   ├── setup_lua.sh                          # Descarga y extracción de fuentes oficiales de Lua 5.4.7

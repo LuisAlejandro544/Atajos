@@ -46,6 +46,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,6 +66,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -82,17 +84,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import kotlin.math.roundToInt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.example.data.model.ActionBlock
 import com.example.data.model.ActionType
+import com.example.data.model.InstalledAppItem
 import com.example.data.model.ShortcutEntity
 import com.example.executor.NotificationHelper
 import com.example.executor.VariableResolver
 import java.util.UUID
-
-data class InstalledAppItem(
-    val name: String,
-    val packageName: String
-)
 
 @Composable
 fun AppPickerDialog(
@@ -174,10 +174,27 @@ fun AppPickerDialog(
                             .weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "No se encontraron aplicaciones instaladas",
-                            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.outline)
-                        )
+                        if (apps.isEmpty()) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(28.dp),
+                                    strokeWidth = 2.5.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Cargando aplicaciones instaladas...",
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.outline)
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = "No se encontraron aplicaciones instaladas",
+                                style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.outline)
+                            )
+                        }
                     }
                 } else {
                     LazyColumn(
@@ -255,7 +272,8 @@ fun ShortcutEditSheet(
         category: String,
         isFavorite: Boolean
     ) -> Unit,
-    onDelete: ((ShortcutEntity) -> Unit)? = null
+    onDelete: ((ShortcutEntity) -> Unit)? = null,
+    installedApps: List<InstalledAppItem> = emptyList()
 ) {
     var title by remember(initialShortcut) {
         mutableStateOf(initialShortcut?.title ?: "")
@@ -302,37 +320,44 @@ fun ShortcutEditSheet(
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
-    val installedApps = remember(context) {
-        try {
-            val pm = context.packageManager
-            val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
-                addCategory(Intent.CATEGORY_LAUNCHER)
+
+    var currentInstalledApps by remember(installedApps) { mutableStateOf(installedApps) }
+    LaunchedEffect(installedApps) {
+        if (installedApps.isNotEmpty()) {
+            currentInstalledApps = installedApps
+        } else {
+            withContext(Dispatchers.IO) {
+                try {
+                    val pm = context.packageManager
+                    val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
+                        addCategory(Intent.CATEGORY_LAUNCHER)
+                    }
+                    val launcherApps = pm.queryIntentActivities(mainIntent, 0)
+                    val list = launcherApps.mapNotNull { resolveInfo ->
+                        try {
+                            val pkg = resolveInfo.activityInfo.packageName
+                            val label = resolveInfo.loadLabel(pm).toString().trim()
+                            if (label.isNotBlank()) InstalledAppItem(name = label, packageName = pkg) else null
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }.distinctBy { it.packageName }.sortedBy { it.name.lowercase() }
+                    withContext(Dispatchers.Main) {
+                        currentInstalledApps = list
+                    }
+                } catch (_: Exception) {
+                    // Fallback silencioso
+                }
             }
-            val launcherApps = pm.queryIntentActivities(mainIntent, 0).mapNotNull { resolveInfo ->
-                val pkg = resolveInfo.activityInfo.packageName
-                val label = resolveInfo.loadLabel(pm).toString().trim()
-                if (label.isNotBlank()) InstalledAppItem(name = label, packageName = pkg) else null
-            }
-            val allPackages = pm.getInstalledApplications(0).mapNotNull { appInfo ->
-                val launchIntent = pm.getLaunchIntentForPackage(appInfo.packageName)
-                if (launchIntent != null) {
-                    val label = pm.getApplicationLabel(appInfo).toString().trim()
-                    if (label.isNotBlank()) InstalledAppItem(name = label, packageName = appInfo.packageName) else null
-                } else null
-            }
-            (launcherApps + allPackages)
-                .distinctBy { it.packageName }
-                .sortedBy { it.name.lowercase() }
-        } catch (_: Exception) {
-            emptyList<InstalledAppItem>()
         }
     }
+
     var appPickerTargetIndex by remember { mutableStateOf<Int?>(null) }
 
     if (appPickerTargetIndex != null) {
         val targetIdx = appPickerTargetIndex!!
         AppPickerDialog(
-            apps = installedApps,
+            apps = currentInstalledApps,
             onSelectApp = { selectedApp ->
                 if (targetIdx in actionBlocks.indices) {
                     val current = actionBlocks[targetIdx]
